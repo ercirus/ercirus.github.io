@@ -12,9 +12,9 @@
             --cc-dark-blue: #050c18;
             --cc-red: #c0392b;
             --cc-gold: #d4af37;
-            --card-bg: rgba(11, 25, 44, 0.95);
-            --card-inner-bg: #071322;
-            --input-bg: #040912;
+            --card-bg: rgba(7, 19, 34, 0.88);
+            --card-inner-bg: rgba(4, 9, 18, 0.92);
+            --input-bg: rgba(4, 9, 18, 0.95);
             --border-color: #1e3e62;
             --discord-blue: #5865F2;
             --discord-hover: #4752C4;
@@ -25,27 +25,30 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--cc-dark-blue);
             color: var(--text-color);
             margin: 0;
             padding: 0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(180deg, #050c18 0%, #0b192c 100%);
+            /* SFONDO MASERATI CARABINIERI */
+            background: linear-gradient(180deg, rgba(5, 12, 24, 0.75) 0%, rgba(5, 12, 24, 0.88) 100%), 
+                        url('maserati_mcpura_carabinieri_2025_8k-1920x1080.jpg') no-repeat center center fixed;
+            background-size: cover;
         }
 
-        /* Navbar centrata */
+        /* Navbar centrata con Logo */
         nav {
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 15px 20px;
-            background: rgba(5, 12, 24, 0.98);
+            padding: 12px 20px;
+            background: rgba(5, 12, 24, 0.95);
             border-bottom: 2px solid var(--cc-red);
             position: sticky;
             top: 0;
             z-index: 100;
+            backdrop-filter: blur(8px);
         }
 
         .nav-menu {
@@ -54,6 +57,11 @@
             align-items: center;
             gap: 15px;
             width: 100%;
+        }
+
+        .nav-logo {
+            height: 40px;
+            margin-right: 15px;
         }
 
         .nav-btn {
@@ -105,21 +113,15 @@
             justify-content: center;
         }
 
-        .header-icon {
-            width: 65px;
-            height: 65px;
-            background: var(--cc-gold);
-            color: #000;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            margin: 0 auto 15px auto;
+        .header-logo {
+            width: 110px;
+            height: auto;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
         }
 
         .badge-season {
-            background: rgba(192, 57, 43, 0.35);
+            background: rgba(192, 57, 43, 0.4);
             border: 1px solid var(--cc-red);
             color: #ff8585;
             padding: 6px 20px;
@@ -139,16 +141,18 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             text-align: center;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.9);
         }
 
         .hero-quote {
             font-style: italic;
-            color: #d1d5db;
+            color: #e5e7eb;
             max-width: 650px;
             margin: 0 auto 35px auto;
             font-size: 1.15rem;
             line-height: 1.6;
             text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
         .cta-buttons {
@@ -186,7 +190,7 @@
         }
 
         .btn-outline {
-            background: rgba(11, 25, 44, 0.6);
+            background: rgba(11, 25, 44, 0.8);
             border: 1px solid var(--border-color);
             color: #fff;
         }
@@ -206,7 +210,8 @@
             overflow: hidden;
             text-align: left;
             width: 100%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
         }
 
         .bando-card-left {
@@ -302,6 +307,7 @@
             margin-top: 20px;
             text-align: left;
             width: 100%;
+            backdrop-filter: blur(10px);
         }
 
         .form-grid {
@@ -352,8 +358,9 @@
         footer {
             text-align: center;
             padding: 20px;
-            color: #6b7280;
+            color: #9ca3af;
             font-size: 0.85rem;
+            background: rgba(5, 12, 24, 0.95);
             border-top: 1px solid rgba(255,255,255,0.05);
         }
 
@@ -369,9 +376,10 @@
 </head>
 <body>
 
-    <!-- NAVBAR CENTRATA -->
+    <!-- NAVBAR CENTRATA CON LOGO -->
     <nav>
         <div class="nav-menu">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Coat_of_arms_of_the_Arma_dei_Carabinieri.svg" alt="Logo Carabinieri" class="nav-logo">
             <button class="nav-btn active" onclick="showTab('home')"><i class="fa-solid fa-house"></i> Home</button>
             <button class="nav-btn" onclick="showTab('bando')"><i class="fa-solid fa-id-card"></i> Scheda / Bando</button>
             <button class="nav-btn" onclick="showTab('storia')"><i class="fa-solid fa-book"></i> Storia & Regolamento</button>
@@ -383,7 +391,7 @@
 
         <!-- HOME -->
         <div id="home" class="content-section active">
-            <div class="header-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Coat_of_arms_of_the_Arma_dei_Carabinieri.svg" alt="Logo Carabinieri" class="header-logo">
             <div class="badge-season">PORTALE UFFICIALE CANDIDATURE</div>
             <h1>NE NEI SECOLI FEDELE</h1>
             <p class="hero-quote">
@@ -402,9 +410,9 @@
 
         <!-- SCHEDA / BANDO -->
         <div id="bando" class="content-section">
-            <div class="header-icon"><i class="fa-solid fa-user"></i></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Coat_of_arms_of_the_Arma_dei_Carabinieri.svg" alt="Logo Carabinieri" class="header-logo">
             <h1 style="font-family: 'Teko'; font-size: 3.5rem; margin: 0; text-transform: uppercase;">SCHEDA PERSONAGGIO</h1>
-            <p style="color: #9ca3af; margin-bottom: 30px;">Autenticati con il tuo account Discord per sbloccare la scheda di candidatura.</p>
+            <p style="color: #d1d5db; margin-bottom: 30px;">Autenticati con il tuo account Discord per sbloccare la scheda di candidatura.</p>
 
             <!-- Card di Accesso Discord -->
             <div id="accessCard" class="bando-card">
@@ -456,6 +464,11 @@
                             <label>ACCOUNT DISCORD VERIFICATO</label>
                             <input type="text" id="discordUser" readonly style="opacity: 0.7; cursor: not-allowed; background: #081a2e;">
                         </div>
+                        <!-- CAMPO FOTO PERSONAGGIO AGGIUNTO -->
+                        <div class="form-group full-width">
+                            <label><i class="fa-solid fa-image"></i> LINK FOTO PERSONAGGIO (URL)</label>
+                            <input type="url" id="fotoUrl" placeholder="Es. https://i.imgur.com/vostra_foto.png">
+                        </div>
                         <div class="form-group full-width">
                             <label>ESPERIENZE PRECEDENTI IN ALTRE FAZIONI</label>
                             <textarea id="esperienze" rows="3" placeholder="Descrivi le tue precedenti esperienze..."></textarea>
@@ -476,9 +489,9 @@
 
         <!-- STORIA & REGOLAMENTO -->
         <div id="storia" class="content-section">
-            <div class="header-icon"><i class="fa-solid fa-book"></i></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Coat_of_arms_of_the_Arma_dei_Carabinieri.svg" alt="Logo Carabinieri" class="header-logo">
             <h1 style="font-family: 'Teko'; font-size: 3.5rem; margin: 0; text-transform: uppercase;">REGOLAMENTO</h1>
-            <p style="color: #9ca3af; margin-bottom: 30px;">Direttive ufficiali dell'Arma dei Carabinieri.</p>
+            <p style="color: #d1d5db; margin-bottom: 30px;">Direttive ufficiali dell'Arma dei Carabinieri.</p>
             <div class="bando-card" style="padding: 30px; display: block;">
                 <ul style="text-align: left; line-height: 1.8; color: #ddd; margin: 0; padding-left: 20px;">
                     <li><strong>Condotta Onorevole:</strong> Mantenere sempre un comportamento consono ed esemplare.</li>
@@ -495,7 +508,6 @@
     </footer>
 
     <script>
-        // CONFIGURAZIONE DISCORD OAUTH2 CON IL TUO ID
         const CLIENT_ID = "1536336646507601920"; 
         const REDIRECT_URI = window.location.origin + window.location.pathname;
 
@@ -555,12 +567,17 @@
             e.preventDefault();
             
             const webhookURL = "https://discord.com/api/webhooks/1536332594369789963/0wMCcPiw8z_ogXsDg04O3W4sYxVygG30tWbpNFM_WNJ_iNzWJTTc6z9qX4DcXw-L0Laz";
+            const fotoUrl = document.getElementById('fotoUrl').value;
+
+            // Se l'utente inserisce la foto, la usiamo come immagine principale nel webhook
+            const imagePayload = fotoUrl ? { url: fotoUrl } : null;
 
             const payload = {
                 embeds: [{
                     title: "🚨 Nuova Candidatura Bando - Arma dei Carabinieri",
                     color: 1391907,
                     thumbnail: (currentUser && currentUser.avatar) ? { url: `https://cdn.discordapp.com/avatars/${currentUser.id}/${currentUser.avatar}.png` } : null,
+                    image: imagePayload,
                     fields: [
                         { name: "👤 Nome & Cognome IC", value: document.getElementById('nome').value || "N/A", inline: true },
                         { name: "🏷️ Soprannome", value: document.getElementById('soprannome').value || "N/A", inline: true },
