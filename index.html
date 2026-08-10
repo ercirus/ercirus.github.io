@@ -495,8 +495,8 @@
     </footer>
 
     <script>
-        // CONFIGURAZIONE DISCORD OAUTH2 (Sostituisci se usi l'accesso Discord)
-        const CLIENT_ID = "INSERISCI_QUI_IL_TUO_CLIENT_ID"; 
+        // CONFIGURAZIONE DISCORD OAUTH2 CON IL TUO ID
+        const CLIENT_ID = "1536336646507601920"; 
         const REDIRECT_URI = window.location.origin + window.location.pathname;
 
         let currentUser = null;
@@ -512,11 +512,6 @@
         }
 
         function loginWithDiscord() {
-            if(CLIENT_ID === "INSERISCI_QUI_IL_TUO_CLIENT_ID") {
-                // In mancanza del Client ID, apre direttamente il modulo per comodità
-                unlockForm({ username: "Utente non autenticato", id: "N/A" });
-                return;
-            }
             const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
             window.location.href = authUrl;
         }
