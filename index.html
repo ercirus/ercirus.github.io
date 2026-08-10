@@ -5,117 +5,215 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arma dei Carabinieri - FiveM</title>
     <link href="https://fonts.googleapis.com/css2?family=Teko:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-main: #061512;
-            --card-bg: #0b221e;
-            --accent: #dca842;
-            --accent-hover: #f3be58;
-            --input-bg: #081a17;
-            --border-color: #1a3c35;
-            --text-color: #e0e0e0;
+            --cc-blue: #0b192c;
+            --cc-dark-blue: #050c18;
+            --cc-red: #c0392b;
+            --cc-gold: #d4af37;
+            --cc-gold-hover: #f1c40f;
+            --card-bg: rgba(11, 25, 44, 0.85);
+            --input-bg: #07101d;
+            --border-color: #1e3e62;
+            --text-color: #ffffff;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
+            background-color: var(--cc-dark-blue);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        header img {
-            max-width: 150px;
-            height: auto;
-            margin-bottom: 10px;
-        }
-
-        h1, h2, h3, .section-btn {
-            font-family: 'Teko', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        header h1 {
-            color: var(--accent);
-            font-size: 2.8rem;
-            margin: 0;
-        }
-
-        /* Layout principale stile Dashboard */
-        .layout {
+            padding: 0;
+            min-height: 100vh;
             display: flex;
-            max-width: 1200px;
-            margin: 0 auto;
-            gap: 20px;
+            flex-direction: column;
+            background: linear-gradient(rgba(5, 12, 24, 0.85), rgba(5, 12, 24, 0.95)), 
+                        url('https://images.unsplash.com/photo-1541872703-74c5e44368f9?q=80&w=1920') center/cover no-repeat fixed;
         }
 
-        /* Sidebar Navigazione */
-        .sidebar {
-            flex: 1;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            height: fit-content;
+        /* Navbar In Alto */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 50px;
+            background: rgba(5, 12, 24, 0.9);
+            border-bottom: 2px solid var(--cc-red);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .sidebar h3 {
-            color: var(--accent);
-            margin-top: 0;
-            font-size: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 5px;
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Teko', sans-serif;
+            font-size: 1.8rem;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 15px;
         }
 
         .nav-btn {
-            display: block;
-            width: 100%;
-            padding: 12px 15px;
-            margin-bottom: 8px;
             background: transparent;
-            border: 1px solid transparent;
-            color: var(--text-color);
-            text-align: left;
-            font-size: 1.1rem;
-            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-family: 'Teko', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: 0.3s;
+            text-transform: uppercase;
         }
 
         .nav-btn:hover, .nav-btn.active {
-            background-color: var(--accent);
+            background: var(--cc-gold);
+            color: #000;
+            border-color: var(--cc-gold);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            font-size: 1.2rem;
+        }
+
+        .social-links a {
+            color: #fff;
+            transition: 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--cc-gold);
+        }
+
+        /* Hero Section principale */
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .main-logo {
+            max-width: 180px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.4));
+        }
+
+        .hero h1 {
+            font-family: 'Teko', sans-serif;
+            font-size: 4rem;
+            margin: 0;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+        }
+
+        .badge-season {
+            background: rgba(192, 57, 43, 0.3);
+            border: 1px solid var(--cc-red);
+            color: #ff6b6b;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-family: 'Teko', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .hero-quote {
+            font-style: italic;
+            color: #ccc;
+            max-width: 600px;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        /* Bottone Azioni Centrali */
+        .cta-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .cta-btn {
+            padding: 12px 28px;
+            border-radius: 25px;
+            font-family: 'Teko', sans-serif;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-gold {
+            background: var(--cc-gold);
             color: #000;
             font-weight: bold;
         }
 
-        /* Contenuto Principale */
-        .main-content {
-            flex: 3;
+        .btn-gold:hover {
+            background: var(--cc-gold-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: rgba(11, 25, 44, 0.6);
+            border: 1px solid var(--border-color);
+            color: #fff;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--cc-gold);
+            color: var(--cc-gold);
+            transform: translateY(-2px);
+        }
+
+        /* Sezione Modulo Bando / Scheda Personaggio */
+        .content-section {
+            display: none;
+            width: 100%;
+            max-width: 1000px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-top: 3px solid var(--cc-red);
+            border-radius: 12px;
             padding: 30px;
+            margin: 20px auto;
+            backdrop-filter: blur(10px);
         }
 
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
+        .content-section.active {
             display: block;
         }
 
-        /* Form styling */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
+            text-align: left;
         }
 
         .form-group {
@@ -129,9 +227,10 @@
 
         label {
             font-family: 'Teko', sans-serif;
-            color: var(--accent);
-            font-size: 1.2rem;
+            color: var(--cc-gold);
+            font-size: 1.3rem;
             margin-bottom: 5px;
+            letter-spacing: 1px;
         }
 
         input, select, textarea {
@@ -139,34 +238,37 @@
             border: 1px solid var(--border-color);
             color: #fff;
             padding: 12px;
-            border-radius: 5px;
+            border-radius: 6px;
             font-size: 0.95rem;
             outline: none;
         }
 
         input:focus, select:focus, textarea:focus {
-            border-color: var(--accent);
+            border-color: var(--cc-gold);
         }
 
         .submit-btn {
             grid-column: span 2;
-            background-color: var(--accent);
-            color: #000;
+            background-color: var(--cc-red);
+            color: #fff;
             font-family: 'Teko', sans-serif;
-            font-size: 1.5rem;
-            padding: 10px;
+            font-size: 1.6rem;
+            padding: 12px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             margin-top: 15px;
+            transition: 0.3s;
+            letter-spacing: 1px;
         }
 
         .submit-btn:hover {
-            background-color: var(--accent-hover);
+            background-color: #e74c3c;
         }
 
         @media (max-width: 768px) {
-            .layout { flex-direction: column; }
+            nav { padding: 15px 20px; flex-direction: column; gap: 15px; }
+            .hero h1 { font-size: 2.8rem; }
             .form-grid { grid-template-columns: 1fr; }
             .form-group.full-width { grid-column: span 1; }
             .submit-btn { grid-column: span 1; }
@@ -175,113 +277,127 @@
 </head>
 <body>
 
-    <header>
-        <!-- Cambia 'logo.png' con il nome esatto del vostro file logo se ne carichi uno su GitHub -->
-        <img src="https://via.placeholder.com/150/dca842/000000?text=LOGO+CC" id="logoImg" alt="Logo Carabinieri">
-        <h1>Arma dei Carabinieri</h1>
-        <p>Portale Ufficiale & Modulo Reclutamento Bando</p>
-    </header>
+    <!-- NAVIGAZIONE SUPERIORE -->
+    <nav>
+        <div class="nav-logo">
+            <i class="fa-solid => fa-shield-halved" style="color: var(--cc-gold);"></i>
+            <span>CARABINIERI FIVEM</span>
+        </div>
+        <div class="nav-menu">
+            <button class="nav-btn active" onclick="showTab('home')"><i class="fa-solid fa-house"></i> Home</button>
+            <button class="nav-btn" onclick="showTab('bando')"><i class="fa-solid fa-id-card"></i> Scheda / Bando</button>
+            <button class="nav-btn" onclick="showTab('storia')"><i class="fa-solid fa-book"></i> Storia & Regolamento</button>
+        </div>
+        <div class="social-links">
+            <a href="#" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+            <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+            <a href="#" title="Discord"><i class="fa-brands fa-discord"></i></a>
+        </div>
+    </nav>
 
-    <div class="layout">
-        <!-- Menu Laterale -->
-        <div class="sidebar">
-            <h3>SEZIONI</h3>
-            <button class="nav-btn active" onclick="openTab(event, 'storia')">01. STORIA & REQUISITI</button>
-            <button class="nav-btn" onclick="openTab(event, 'anagrafica')">02. ANAGRAFICA IC</button>
-            <button class="nav-btn" onclick="openTab(event, 'esperienza')">03. ESPERIENZE & ROLES</button>
-            <button class="nav-btn" onclick="openTab(event, 'background')">04. BACKGROUND NARRATIVO</button>
+    <!-- CONTENUTO PRINCIPALE -->
+    <div class="hero">
+
+        <!-- VISTA HOME -->
+        <div id="home" class="content-section active" style="background: transparent; border: none; backdrop-filter: none;">
+            <!-- Sostituisci la stringa 'logo_cc.png' con la tua immagine logo caricata su GitHub -->
+            <img src="https://via.placeholder.com/180/0b192c/d4af37?text=ARMA+CC" class="main-logo" alt="Logo Arma Carabinieri">
+            <div class="badge-season">ARMA DEI CARABINIERI — FIVEM</div>
+            <h1>NE NEI SECOLI FEDELE</h1>
+            <p class="hero-quote">"Servizio, Onore e Difesa della Comunità. Compila la tua scheda per accedere al Bando Ufficiale."</p>
+
+            <div class="cta-buttons">
+                <button class="cta-btn btn-gold" onclick="showTab('bando')">
+                    <i class="fa-solid fa-file-pen"></i> Scheda Personaggio / Bando
+                </button>
+                <button class="cta-btn btn-outline" onclick="showTab('storia')">
+                    <i class="fa-solid fa-scroll"></i> Regolamento
+                </button>
+            </div>
+
+            <div class="social-links" style="font-size: 1.8rem; justify-content: center; margin-top: 20px;">
+                <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="#"><i class="fa-brands fa-discord"></i></a>
+            </div>
         </div>
 
-        <!-- Contenuto della Scheda / Form -->
-        <div class="main-content">
+        <!-- VISTA BANDO / SCHEDA PERSONAGGIO -->
+        <div id="bando" class="content-section">
+            <h2 style="font-family: 'Teko'; font-size: 2.5rem; color: var(--cc-gold); margin-top: 0;">MODULO SCHEDA PERSONAGGIO & BANDO</h2>
             <form id="bandoForm">
-                
-                <!-- SEZIONE 1: Storia -->
-                <div id="storia" class="tab-content active">
-                    <h2>Storia dell'Arma</h2>
-                    <p>L'Arma dei Carabinieri opera sul territorio per garantire la sicurezza e la legalità dei cittadini.</p>
-                    <p>Usa il menu a sinistra per scorrere tra le sezioni e compilare tutti i campi richiesti per il bando di arruolamento.</p>
-                </div>
-
-                <!-- SEZIONE 2: Anagrafica -->
-                <div id="anagrafica" class="tab-content">
-                    <h2>02. Anagrafica Personaggio</h2>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>NOME E COGNOME (IC)</label>
-                            <input type="text" id="nome" placeholder="Es. Marco Rossi" required>
-                        </div>
-                        <div class="form-group">
-                            <label>SOPRANNOME / ALIAS</label>
-                            <input type="text" id="soprannome" placeholder="Es. Il Lupo">
-                        </div>
-                        <div class="form-group">
-                            <label>DATA DI NASCITA</label>
-                            <input type="date" id="dataNascita" required>
-                        </div>
-                        <div class="form-group">
-                            <label>LUOGO DI NASCITA</label>
-                            <input type="text" id="luogoNascita" placeholder="Es. Roma">
-                        </div>
-                        <div class="form-group">
-                            <label>GENERE</label>
-                            <select id="genere" required>
-                                <option value="">Seleziona...</option>
-                                <option value="Maschio">Maschio</option>
-                                <option value="Femmina">Femmina</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>NICKNAME DISCORD / STEAM</label>
-                            <input type="text" id="discordUser" placeholder="Es. utente#1234" required>
-                        </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>NOME E COGNOME (IC)</label>
+                        <input type="text" id="nome" placeholder="Es. Marco Rossi" required>
                     </div>
-                </div>
-
-                <!-- SEZIONE 3: Esperienze -->
-                <div id="esperienza" class="tab-content">
-                    <h2>03. Formazione & Lavoro</h2>
-                    <div class="form-grid">
-                        <div class="form-group full-width">
-                            <label>ESPERIENZE PRECEDENTI IN ALTRE FAZIONI</label>
-                            <textarea id="esperienze" rows="4" placeholder="Descrivi le tue precedenti esperienze RP nelle forze dell'ordine..."></textarea>
-                        </div>
-                        <div class="form-group full-width">
-                            <label>DISPONIBILITÀ ORARIA (OOB)</label>
-                            <input type="text" id="disponibilita" placeholder="Es. Pomeriggio e Sera (20:00 - 23:00)">
-                        </div>
+                    <div class="form-group">
+                        <label>SOPRANNOME / ALIAS</label>
+                        <input type="text" id="soprannome" placeholder="Es. Il Lupo">
                     </div>
-                </div>
-
-                <!-- SEZIONE 4: Background -->
-                <div id="background" class="tab-content">
-                    <h2>04. Background Narrativo</h2>
-                    <div class="form-grid">
-                        <div class="form-group full-width">
-                            <label>STORIA DEL PERSONAGGIO (IC STORY)</label>
-                            <textarea id="storiaPersonaggio" rows="6" placeholder="Racconta la storia del tuo personaggio e la motivazione per cui vuole arruolarsi..." required></textarea>
-                        </div>
-                        <button type="submit" class="submit-btn">INVIA CANDIDATURA</button>
+                    <div class="form-group">
+                        <label>DATA DI NASCITA</label>
+                        <input type="date" id="dataNascita" required>
                     </div>
+                    <div class="form-group">
+                        <label>LUOGO DI NASCITA</label>
+                        <input type="text" id="luogoNascita" placeholder="Es. Roma">
+                    </div>
+                    <div class="form-group">
+                        <label>GENERE</label>
+                        <select id="genere" required>
+                            <option value="">Seleziona...</option>
+                            <option value="Maschio">Maschio</option>
+                            <option value="Femmina">Femmina</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>NICKNAME DISCORD / STEAM</label>
+                        <input type="text" id="discordUser" placeholder="Es. utente#1234" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>ESPERIENZE PRECEDENTI IN ALTRE FAZIONI</label>
+                        <textarea id="esperienze" rows="3" placeholder="Descrivi le tue precedenti esperienze RP..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>DISPONIBILITÀ ORARIA (OOB)</label>
+                        <input type="text" id="disponibilita" placeholder="Es. Pomeriggio e Sera (20:00 - 23:00)">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>BACKGROUND NARRATIVO (IC STORY)</label>
+                        <textarea id="storiaPersonaggio" rows="5" placeholder="Racconta la storia del tuo personaggio e la motivazione per cui vuole arruolarsi..." required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn"><i class="fa-solid fa-paper-plane"></i> INVIA CANDIDATURA</button>
                 </div>
-
             </form>
         </div>
+
+        <!-- VISTA STORIA / REGOLAMENTO -->
+        <div id="storia" class="content-section">
+            <h2 style="font-family: 'Teko'; font-size: 2.5rem; color: var(--cc-gold); margin-top: 0;">STORIA & REGOLAMENTO</h2>
+            <p style="text-align: left; line-height: 1.6;">
+                L'Arma dei Carabinieri costituisce un presidio fondamentale sul territorio. Tutti gli agenti arruolati sono tenuti al rispetto del regolamento interno e della linea di comando IC.
+            </p>
+            <ul style="text-align: left; line-height: 1.8; color: #ddd;">
+                <li><strong>Mantenimento del Roleplay:</strong> Comportamento consono al ruolo delle forze dell'ordine in ogni situazione.</li>
+                <li><strong>Catena di Comando:</strong> Rispetto delle direttive impartite dagli ufficiali superiori.</li>
+                <li><strong>Presenza e Attività:</strong> Garantire la presenza richiesta nella scheda bando.</li>
+            </ul>
+        </div>
+
     </div>
 
     <script>
-        function openTab(evt, tabName) {
-            let i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].classList.remove("active");
-            }
-            tablinks = document.getElementsByClassName("nav-btn");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].classList.remove("active");
-            }
-            document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
+        function showTab(tabId) {
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            
+            const btnIndex = tabId === 'home' ? 0 : (tabId === 'bando' ? 1 : 2);
+            document.querySelectorAll('.nav-btn')[btnIndex].classList.add('active');
         }
 
         document.getElementById('bandoForm').addEventListener('submit', function(e) {
@@ -302,7 +418,7 @@
             const payload = {
                 embeds: [{
                     title: "🚨 Nuova Candidatura Bando - Arma dei Carabinieri",
-                    color: 14461010, // Oro
+                    color: 1391907, // Blu scuro Carabinieri
                     fields: [
                         { name: "👤 Nome & Cognome IC", value: nome || "N/A", inline: true },
                         { name: "🏷️ Soprannome", value: soprannome || "N/A", inline: true },
@@ -325,10 +441,11 @@
                 body: JSON.stringify(payload)
             }).then(response => {
                 if (response.ok) {
-                    alert('Candidatura inviata con successo! Verrai contattato al più presto.');
+                    alert('Candidatura inviata con successo! Inoltrata direttamente su Discord.');
                     document.getElementById('bandoForm').reset();
+                    showTab('home');
                 } else {
-                    alert('Errore durante l\'invio della candidatura. Controlla che i campi siano corretti.');
+                    alert('Errore durante l\'invio della candidatura.');
                 }
             }).catch(error => {
                 console.error('Errore:', error);
