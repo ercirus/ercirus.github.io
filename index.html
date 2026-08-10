@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arma dei Carabinieri - FiveM</title>
+    <title>Arma dei Carabinieri</title>
     <link href="https://fonts.googleapis.com/css2?family=Teko:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -13,7 +13,7 @@
             --cc-red: #c0392b;
             --cc-gold: #d4af37;
             --cc-gold-hover: #f1c40f;
-            --card-bg: rgba(11, 25, 44, 0.85);
+            --card-bg: rgba(11, 25, 44, 0.88);
             --input-bg: #07101d;
             --border-color: #1e3e62;
             --text-color: #ffffff;
@@ -30,7 +30,8 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(rgba(5, 12, 24, 0.85), rgba(5, 12, 24, 0.95)), 
+            /* Sfondo a tema Carabinieri */
+            background: linear-gradient(rgba(5, 12, 24, 0.82), rgba(5, 12, 24, 0.92)), 
                         url('https://images.unsplash.com/photo-1541872703-74c5e44368f9?q=80&w=1920') center/cover no-repeat fixed;
         }
 
@@ -40,7 +41,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 15px 50px;
-            background: rgba(5, 12, 24, 0.9);
+            background: rgba(5, 12, 24, 0.95);
             border-bottom: 2px solid var(--cc-red);
             position: sticky;
             top: 0;
@@ -50,11 +51,12 @@
         .nav-logo {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             font-family: 'Teko', sans-serif;
             font-size: 1.8rem;
             color: #fff;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .nav-menu {
@@ -66,7 +68,7 @@
             background: transparent;
             border: 1px solid var(--border-color);
             color: #fff;
-            padding: 8px 18px;
+            padding: 8px 22px;
             border-radius: 20px;
             font-family: 'Teko', sans-serif;
             font-size: 1.2rem;
@@ -82,21 +84,6 @@
             border-color: var(--cc-gold);
         }
 
-        .social-links {
-            display: flex;
-            gap: 15px;
-            font-size: 1.2rem;
-        }
-
-        .social-links a {
-            color: #fff;
-            transition: 0.3s;
-        }
-
-        .social-links a:hover {
-            color: var(--cc-gold);
-        }
-
         /* Hero Section principale */
         .hero {
             flex: 1;
@@ -109,14 +96,14 @@
         }
 
         .main-logo {
-            max-width: 180px;
+            max-width: 170px;
             margin-bottom: 15px;
-            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.4));
+            filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.5));
         }
 
         .hero h1 {
             font-family: 'Teko', sans-serif;
-            font-size: 4rem;
+            font-size: 4.2rem;
             margin: 0;
             color: #fff;
             text-transform: uppercase;
@@ -125,23 +112,23 @@
         }
 
         .badge-season {
-            background: rgba(192, 57, 43, 0.3);
+            background: rgba(192, 57, 43, 0.35);
             border: 1px solid var(--cc-red);
-            color: #ff6b6b;
-            padding: 5px 15px;
+            color: #ff8585;
+            padding: 5px 18px;
             border-radius: 4px;
             font-family: 'Teko', sans-serif;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             letter-spacing: 2px;
             margin-bottom: 15px;
         }
 
         .hero-quote {
             font-style: italic;
-            color: #ccc;
+            color: #d1d5db;
             max-width: 600px;
             margin-bottom: 30px;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
         }
 
         /* Bottone Azioni Centrali */
@@ -150,11 +137,10 @@
             gap: 15px;
             flex-wrap: wrap;
             justify-content: center;
-            margin-bottom: 30px;
         }
 
         .cta-btn {
-            padding: 12px 28px;
+            padding: 12px 30px;
             border-radius: 25px;
             font-family: 'Teko', sans-serif;
             font-size: 1.4rem;
@@ -195,7 +181,7 @@
         .content-section {
             display: none;
             width: 100%;
-            max-width: 1000px;
+            max-width: 950px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-top: 3px solid var(--cc-red);
@@ -280,19 +266,13 @@
     <!-- NAVIGAZIONE SUPERIORE -->
     <nav>
         <div class="nav-logo">
-            <i class="fa-solid => fa-shield-halved" style="color: var(--cc-gold);"></i>
-            <span>CARABINIERI FIVEM</span>
+            <i class="fa-solid fa-shield-halved" style="color: var(--cc-gold);"></i>
+            <span>ARMA DEI CARABINIERI</span>
         </div>
         <div class="nav-menu">
             <button class="nav-btn active" onclick="showTab('home')"><i class="fa-solid fa-house"></i> Home</button>
             <button class="nav-btn" onclick="showTab('bando')"><i class="fa-solid fa-id-card"></i> Scheda / Bando</button>
             <button class="nav-btn" onclick="showTab('storia')"><i class="fa-solid fa-book"></i> Storia & Regolamento</button>
-        </div>
-        <div class="social-links">
-            <a href="#" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
-            <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
-            <a href="#" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-            <a href="#" title="Discord"><i class="fa-brands fa-discord"></i></a>
         </div>
     </nav>
 
@@ -301,11 +281,10 @@
 
         <!-- VISTA HOME -->
         <div id="home" class="content-section active" style="background: transparent; border: none; backdrop-filter: none;">
-            <!-- Sostituisci la stringa 'logo_cc.png' con la tua immagine logo caricata su GitHub -->
             <img src="https://via.placeholder.com/180/0b192c/d4af37?text=ARMA+CC" class="main-logo" alt="Logo Arma Carabinieri">
-            <div class="badge-season">ARMA DEI CARABINIERI — FIVEM</div>
+            <div class="badge-season">PORTALE UFFICIALE CANDIDATURE</div>
             <h1>NE NEI SECOLI FEDELE</h1>
-            <p class="hero-quote">"Servizio, Onore e Difesa della Comunità. Compila la tua scheda per accedere al Bando Ufficiale."</p>
+            <p class="hero-quote">"Ne nei secoli fedele. Compila la scheda anagrafica per accedere e inoltrare la richiesta di arruolamento."</p>
 
             <div class="cta-buttons">
                 <button class="cta-btn btn-gold" onclick="showTab('bando')">
@@ -315,18 +294,11 @@
                     <i class="fa-solid fa-scroll"></i> Regolamento
                 </button>
             </div>
-
-            <div class="social-links" style="font-size: 1.8rem; justify-content: center; margin-top: 20px;">
-                <a href="#"><i class="fa-brands fa-youtube"></i></a>
-                <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#"><i class="fa-brands fa-tiktok"></i></a>
-                <a href="#"><i class="fa-brands fa-discord"></i></a>
-            </div>
         </div>
 
         <!-- VISTA BANDO / SCHEDA PERSONAGGIO -->
         <div id="bando" class="content-section">
-            <h2 style="font-family: 'Teko'; font-size: 2.5rem; color: var(--cc-gold); margin-top: 0;">MODULO SCHEDA PERSONAGGIO & BANDO</h2>
+            <h2 style="font-family: 'Teko'; font-size: 2.5rem; color: var(--cc-gold); margin-top: 0;">MODULO BANDO DI ARRUOLAMENTO</h2>
             <form id="bandoForm">
                 <div class="form-grid">
                     <div class="form-group">
@@ -359,7 +331,7 @@
                     </div>
                     <div class="form-group full-width">
                         <label>ESPERIENZE PRECEDENTI IN ALTRE FAZIONI</label>
-                        <textarea id="esperienze" rows="3" placeholder="Descrivi le tue precedenti esperienze RP..."></textarea>
+                        <textarea id="esperienze" rows="3" placeholder="Descrivi le tue precedenti esperienze..."></textarea>
                     </div>
                     <div class="form-group full-width">
                         <label>DISPONIBILITÀ ORARIA (OOB)</label>
@@ -378,12 +350,12 @@
         <div id="storia" class="content-section">
             <h2 style="font-family: 'Teko'; font-size: 2.5rem; color: var(--cc-gold); margin-top: 0;">STORIA & REGOLAMENTO</h2>
             <p style="text-align: left; line-height: 1.6;">
-                L'Arma dei Carabinieri costituisce un presidio fondamentale sul territorio. Tutti gli agenti arruolati sono tenuti al rispetto del regolamento interno e della linea di comando IC.
+                L'Arma dei Carabinieri opera sul territorio per garantire la sicurezza e il rispetto della legalità. Tutti gli agenti arruolati sono tenuti al rispetto del regolamento e della catena di comando.
             </p>
             <ul style="text-align: left; line-height: 1.8; color: #ddd;">
-                <li><strong>Mantenimento del Roleplay:</strong> Comportamento consono al ruolo delle forze dell'ordine in ogni situazione.</li>
-                <li><strong>Catena di Comando:</strong> Rispetto delle direttive impartite dagli ufficiali superiori.</li>
-                <li><strong>Presenza e Attività:</strong> Garantire la presenza richiesta nella scheda bando.</li>
+                <li><strong>Condotta Onorevole:</strong> Mantenere un comportamento impeccabile in ogni situazione.</li>
+                <li><strong>Gerarchia:</strong> Rispetto rigoroso delle direttive impartite dai superiori.</li>
+                <li><strong>Disponibilità:</strong> Rispetto degli orari pattuiti nella scheda di arruolamento.</li>
             </ul>
         </div>
 
@@ -403,6 +375,7 @@
         document.getElementById('bandoForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Il tuo Webhook di Discord già inserito
             const webhookURL = "https://discord.com/api/webhooks/1536332594369789963/0wMCcPiw8z_ogXsDg04O3W4sYxVygG30tWbpNFM_WNJ_iNzWJTTc6z9qX4DcXw-L0Laz";
 
             const nome = document.getElementById('nome').value;
@@ -418,7 +391,7 @@
             const payload = {
                 embeds: [{
                     title: "🚨 Nuova Candidatura Bando - Arma dei Carabinieri",
-                    color: 1391907, // Blu scuro Carabinieri
+                    color: 1391907, // Blu Notte Carabinieri
                     fields: [
                         { name: "👤 Nome & Cognome IC", value: nome || "N/A", inline: true },
                         { name: "🏷️ Soprannome", value: soprannome || "N/A", inline: true },
@@ -441,7 +414,7 @@
                 body: JSON.stringify(payload)
             }).then(response => {
                 if (response.ok) {
-                    alert('Candidatura inviata con successo! Inoltrata direttamente su Discord.');
+                    alert('Candidatura inviata con successo! È stata inoltrata direttamente su Discord.');
                     document.getElementById('bandoForm').reset();
                     showTab('home');
                 } else {
