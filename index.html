@@ -3758,7 +3758,7 @@
       document.getElementById('user-collection-modal').classList.remove('hidden');
     }
 
-    function renderUserCollectionModalContent(userId) {
+function renderUserCollectionModalContent(userId) {
       if (!currentUserState) return;
       const targetProfile = userId === currentUserState.discord.id
         ? buildPublicSummary(currentUserState)
@@ -3770,27 +3770,30 @@
       }
 
       const isMe = userId === currentUserState.discord.id;
-      const targetOwnedMap = targetProfile.owned || {};
+      const targetOwnedMap = targetProfile.owned || (targetProfile.fullState && targetProfile.fullState.owned) || {};
       const teamFilter = document.getElementById('viewer-team-filter').value;
       const rarityFilter = document.getElementById('viewer-rarity-filter').value;
       const copiesFilter = document.getElementById('viewer-copies-filter').value;
+
+      const actualUniqueCount = ALL_CARDS.filter(c => Number(targetOwnedMap[c.id] || 0) > 0).length;
+      const actualPct = Math.round((actualUniqueCount / TOTAL_CARDS_COUNT) * 100);
 
       document.getElementById('viewer-user-avatar').src = targetProfile.discord.avatarUrl;
       document.getElementById('viewer-user-name').textContent = isMe
         ? `La Tua Collezione (${targetProfile.discord.username})`
         : `Carte di ${targetProfile.discord.username}`;
-      document.getElementById('viewer-user-badge').textContent = `${targetProfile.uniqueOwned} / ${TOTAL_CARDS_COUNT} (${targetProfile.pct}%)`;
+      document.getElementById('viewer-user-badge').textContent = `${actualUniqueCount} / ${TOTAL_CARDS_COUNT} (${actualPct}%)`;
       document.getElementById('viewer-user-subtitle').textContent = isMe
         ? 'Stai visualizzando il tuo inventario completo.'
         : 'Le figurine che non hai ancora sono evidenziate in verde: clicca "Proponi Scambio" per richiederle!';
 
       const userCards = ALL_CARDS.filter(card => {
-        const theirCopies = targetOwnedMap[card.id] || 0;
+        const theirCopies = Number(targetOwnedMap[card.id] || 0);
         if (theirCopies <= 0) return false;
         if (teamFilter !== 'ALL' && card.teamId !== teamFilter) return false;
         if (rarityFilter !== 'ALL' && card.rarity !== rarityFilter) return false;
         if (copiesFilter === 'DUPS_ONLY' && theirCopies < 2) return false;
-        if (copiesFilter === 'MISSING_FOR_ME' && (currentUserState.owned[card.id] || 0) > 0) return false;
+        if (copiesFilter === 'MISSING_FOR_ME' && Number(currentUserState.owned[card.id] || 0) > 0) return false;
         return true;
       });
 
@@ -3805,8 +3808,8 @@
       }
 
       grid.innerHTML = userCards.map(card => {
-        const theirCopies = targetOwnedMap[card.id] || 0;
-        const iOwnIt = (currentUserState.owned[card.id] || 0) > 0;
+        const theirCopies = Number(targetOwnedMap[card.id] || 0);
+        const iOwnIt = Number(currentUserState.owned[card.id] || 0) > 0;
         const badgeType = (!isMe && !iOwnIt) ? 'NEEDED' : null;
 
         return `
