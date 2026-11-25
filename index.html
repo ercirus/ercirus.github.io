@@ -1631,7 +1631,7 @@
       measurementId: "G-3K2R1PHLS8"
     };
 
-    const RESET_FLAG_KEY = 'lnp_a2_reset_done_v5_clean';
+    const RESET_FLAG_KEY = 'lnp_a2_reset_done_v6_clean';
     const ACCOUNTS_INDEX_KEY = 'lnp_a2_discord_accounts_v5';
     const ACTIVE_ACCOUNT_KEY = 'lnp_a2_active_discord_user_v5';
     const CUSTOM_PHOTOS_KEY = 'lnp_a2_custom_card_photos_v5';
@@ -1667,7 +1667,7 @@
 
       if (firebaseDb && firebaseUser) {
         try {
-          const resetDocRef = doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'system_meta', 'v5_clean_reset');
+          const resetDocRef = doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'system_meta', 'v6_clean_reset');
           const resetSnap = await getDoc(resetDocRef);
           if (!resetSnap.exists()) {
             const oldProfiles = await getDocs(collection(firebaseDb, 'artifacts', appId, 'public', 'data', 'public_profiles'));
