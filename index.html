@@ -994,7 +994,7 @@
     import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     /**
-     * 1. DATABASE UFFICIALE DELLE 20 SQUADRE SERIE A2 2026/27 (IDENTICO A v2_3_3)
+     * 1. DATABASE UFFICIALE DELLE 20 SQUADRE SERIE A2 2026/27
      */
     const TEAMS_DATA = [
       {
@@ -1594,8 +1594,18 @@
     const TOTAL_CARDS_COUNT = ALL_CARDS.length;
 
     /**
-     * 2. FIREBASE CLOUD REAL-TIME (ONSNAPSHOT) & RESET GLOBALE v5_clean_reset
+     * 2. CONFIGURAZIONE FIREBASE CLOUD REAL-TIME (PROGETTO: lnp-serie-a2)
      */
+    const FIREBASE_WEB_CONFIG = {
+      apiKey: "AIzaSyDW3OBxGiNTDEMJMr4JdVfPJ25ExrzoUdo",
+      authDomain: "lnp-serie-a2.firebaseapp.com",
+      projectId: "lnp-serie-a2",
+      storageBucket: "lnp-serie-a2.firebasestorage.app",
+      messagingSenderId: "231344365306",
+      appId: "1:231344365306:web:506c419ff30559e74df343",
+      measurementId: "G-3K2R1PHLS8"
+    };
+
     const RESET_FLAG_KEY = 'lnp_a2_reset_done_v5_clean';
     const ACCOUNTS_INDEX_KEY = 'lnp_a2_discord_accounts_v5';
     const ACTIVE_ACCOUNT_KEY = 'lnp_a2_active_discord_user_v5';
@@ -1803,32 +1813,33 @@
     async function initCloudBackend() {
       const badge = document.getElementById('cloud-sync-badge');
       try {
-        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-          const firebaseConfig = JSON.parse(__firebase_config);
-          const app = initializeApp(firebaseConfig);
-          firebaseAuth = getAuth(app);
-          firebaseDb = getFirestore(app);
+        const firebaseConfig = (typeof __firebase_config !== 'undefined' && __firebase_config)
+          ? JSON.parse(__firebase_config)
+          : FIREBASE_WEB_CONFIG;
 
-          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            const cred = await signInWithCustomToken(firebaseAuth, __initial_auth_token);
-            firebaseUser = cred.user;
-          } else {
-            const cred = await signInAnonymously(firebaseAuth);
-            firebaseUser = cred.user;
-          }
+        const app = initializeApp(firebaseConfig);
+        firebaseAuth = getAuth(app);
+        firebaseDb = getFirestore(app);
 
-          if (firebaseUser) {
-            await executeCleanResetIfNeeded();
-            setupRealtimeListeners();
-            if (badge) {
-              badge.className = 'inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30';
-              badge.innerHTML = '<i class="fa-solid fa-cloud-check"></i> Cloud Live (Sync Attivo)';
-            }
-            return;
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          const cred = await signInWithCustomToken(firebaseAuth, __initial_auth_token);
+          firebaseUser = cred.user;
+        } else {
+          const cred = await signInAnonymously(firebaseAuth);
+          firebaseUser = cred.user;
+        }
+
+        if (firebaseUser) {
+          await executeCleanResetIfNeeded();
+          setupRealtimeListeners();
+          if (badge) {
+            badge.className = 'inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30';
+            badge.innerHTML = '<i class="fa-solid fa-cloud-check"></i> Cloud Live (Sync Attivo)';
           }
+          return;
         }
       } catch (e) {
-        console.warn('Errore inizializzazione Cloud:', e);
+        console.warn('Errore inizializzazione Cloud Firebase:', e);
       }
 
       await executeCleanResetIfNeeded();
@@ -3435,106 +3446,114 @@
       }
     }
 
-    function simulateMatch() {
+    function startTacticalMatch() {
       if (!currentUserState) return;
+      const { count, effectiveAvg, chemBonus, cardsByRole } = computeLineupMetrics();
+
+      if (count < 5) {
+        showToast('Schiera tutti i 5 ruoli (PG, SG, SF, PF, C) per scendere sul parquet!', 'error');
+        return;
+      }
+
       const usedToday = getTodayMatchesCount();
       if (usedToday >= 10) {
         showToast('Hai raggiunto il limite massimo di 10 partite giornaliere! Torna domani.', 'error');
         return;
       }
 
-      const { count, effectiveAvg, chemBonus, cardsByRole } = computeLineupMetrics();
-      if (count < 5) {
-        showToast('Devi schierare tutti e 5 i ruoli (PG, SG, SF, PF, C) per scendere in campo!', 'error');
-        return;
-      }
+      currentUserState.dailyMatches.count = usedToday + 1;
+      saveCurrentUserState();
+      updateDailyMatchesBadge();
 
-      const myPlayers = LINEUP_ROLES.map(r => cardsByRole[r]);
-      const cpuTeam = TEAMS_DATA[Math.floor(Math.random() * TEAMS_DATA.length)];
-      const cpuRating = cpuTeam.roster.reduce((sum, p) => sum + p.ovr, 0) / cpuTeam.roster.length;
+      const opponentTeam = TEAMS_DATA[Math.floor(Math.random() * TEAMS_DATA.length)];
+      const oppOvr = 79 + Math.floor(Math.random() * 8);
 
       const tactic = currentUserState.tactic || 'pace';
-      let tacticBonus = 0;
-      if (tactic === 'pace') {
-        const avgAttTir = myPlayers.reduce((s, p) => s + (p.stats.att + p.stats.tir) / 2, 0) / 5;
-        tacticBonus = (avgAttTir - 80) * 0.25;
-      } else if (tactic === 'defense') {
-        const avgDifReg = myPlayers.reduce((s, p) => s + (p.stats.dif + p.stats.reg) / 2, 0) / 5;
-        tacticBonus = (avgDifReg - 80) * 0.25;
-      } else {
-        const pgReg = cardsByRole.PG.stats.reg;
-        const cAtt = cardsByRole.C.stats.att;
-        tacticBonus = ((pgReg + cAtt) / 2 - 80) * 0.25;
-      }
+      const lineupList = Object.values(cardsByRole);
+      const avgTir = lineupList.reduce((a, c) => a + c.stats.tir, 0) / 5;
+      const avgDif = lineupList.reduce((a, c) => a + c.stats.dif, 0) / 5;
+      const avgReg = lineupList.reduce((a, c) => a + c.stats.reg, 0) / 5;
 
-      const halfMy = Math.round((effectiveAvg * 0.5) + tacticBonus + (Math.random() * 10 - 3));
-      const halfCpu = Math.round((cpuRating * 0.5) + (Math.random() * 10 - 3));
+      let tacticBonus = 0;
+      if (tactic === 'pace' && avgTir >= 82) tacticBonus = 2;
+      if (tactic === 'defense' && avgDif >= 81) tacticBonus = 2;
+      if (tactic === 'pickroll' && avgReg >= 82) tacticBonus = 2;
+
+      const myHalftime = Math.round((effectiveAvg * 0.48) + tacticBonus + (Math.random() * 10 - 3));
+      const oppHalftime = Math.round((oppOvr * 0.48) + (Math.random() * 10 - 3));
 
       activeTacticalMatchState = {
-        myPlayers,
-        cpuTeam,
+        opponentTeam,
+        oppOvr,
         effectiveAvg,
         chemBonus,
-        cpuRating,
-        halfMy,
-        halfCpu
+        tacticBonus,
+        myHalftime,
+        oppHalftime,
+        lineupList
       };
 
-      const resBox = document.getElementById('match-result-box');
-      resBox.classList.remove('hidden');
-      resBox.innerHTML = `
-        <span class="inline-block px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-400/40">
-          INTERVALLO • FINE 1° TEMPO (2° QUARTO)
-        </span>
-        <div class="flex items-center justify-center gap-6 py-2">
-          <div class="text-right">
-            <span class="block text-xs text-slate-400 font-bold">${currentUserState.discord.username.toUpperCase()}</span>
-            <span class="font-display text-4xl font-bold text-white">${halfMy}</span>
+      playSound('flip');
+      const box = document.getElementById('match-result-box');
+      box.classList.remove('hidden');
+      box.innerHTML = `
+        <div class="text-xs font-extrabold uppercase tracking-widest text-amber-400">
+          Intervallo • Fine 2° Quarto (Partita ${currentUserState.dailyMatches.count}/10 di oggi)
+        </div>
+        <div class="flex items-center justify-center gap-6 py-1">
+          <div class="text-center">
+            <span class="block text-xs text-slate-400">${currentUserState.discord.username} (OVR ${effectiveAvg})</span>
+            <span class="font-display text-4xl font-bold text-white">${myHalftime}</span>
           </div>
-          <span class="font-display text-xl text-slate-500">VS</span>
-          <div class="text-left">
-            <span class="block text-xs text-slate-400 font-bold">${cpuTeam.shortName.toUpperCase()}</span>
-            <span class="font-display text-4xl font-bold text-white">${halfCpu}</span>
+          <span class="font-display text-2xl text-slate-500">VS</span>
+          <div class="text-center">
+            <span class="block text-xs text-slate-400">${opponentTeam.shortName} (OVR ${oppOvr})</span>
+            <span class="font-display text-4xl font-bold text-white">${oppHalftime}</span>
           </div>
         </div>
-        <p class="text-xs text-slate-300">Chiama il Timeout tattico all'intervallo per decidere il piano del 2° tempo:</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-          <button type="button" data-action="finish-halftime" data-adj="push" class="py-2.5 px-3 rounded-xl bg-[#ff6b00] hover:bg-orange-500 text-white font-extrabold text-xs transition active:scale-95">
-            <i class="fa-solid fa-fire mr-1 pointer-events-none"></i> Spingi sull'Acceleratore (Tiro da 3)
+        <p class="text-xs text-slate-300">
+          Chiama il <strong>Timeout Tattico</strong> per impostare il finale di gara (Vittoria: <strong class="text-emerald-400">+50 Crediti</strong> • Sconfitta: <strong class="text-rose-400">0 Crediti</strong>):
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+          <button type="button" data-action="finish-tactical-match" data-choice="three" class="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
+            <i class="fa-solid fa-fire mr-1 pointer-events-none"></i> Tiro Pesante da 3
           </button>
-          <button type="button" data-action="finish-halftime" data-adj="lock" class="py-2.5 px-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-xs transition active:scale-95">
-            <i class="fa-solid fa-lock mr-1 pointer-events-none"></i> Blindare l'Area (Difesa Aggressiva)
+          <button type="button" data-action="finish-tactical-match" data-choice="press" class="py-2.5 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
+            <i class="fa-solid fa-shield mr-1 pointer-events-none"></i> Pressing a Tutto Campo
+          </button>
+          <button type="button" data-action="finish-tactical-match" data-choice="paint" class="py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
+            <i class="fa-solid fa-basketball mr-1 pointer-events-none"></i> Palla Sotto Canestro
           </button>
         </div>
       `;
     }
 
-    function finishTacticalMatch(adj) {
-      if (!currentUserState || !activeTacticalMatchState) return;
-      const st = activeTacticalMatchState;
-      activeTacticalMatchState = null;
+    function finishTacticalMatch(timeoutChoice) {
+      if (!activeTacticalMatchState || !currentUserState) return;
+      const m = activeTacticalMatchState;
 
-      const adjBonus = adj === 'push' ? (Math.random() * 8 - 1) : (Math.random() * 6 + 0.5);
-      const secondHalfMy = Math.round((st.effectiveAvg * 0.5) + adjBonus + (Math.random() * 8 - 2));
-      const secondHalfCpu = Math.round((st.cpuRating * 0.5) + (Math.random() * 8 - 2));
+      let choiceBonus = 0;
+      if (timeoutChoice === 'three') choiceBonus = (Math.random() < 0.65) ? 4 : -1;
+      if (timeoutChoice === 'press') choiceBonus = (m.chemBonus >= 1) ? 3 : 1;
+      if (timeoutChoice === 'paint') choiceBonus = 2;
 
-      const myScore = st.halfMy + secondHalfMy;
-      let cpuScore = st.halfCpu + secondHalfCpu;
-      if (myScore === cpuScore) cpuScore -= 1;
+      let myFinal = m.myHalftime + Math.round((m.effectiveAvg * 0.48) + choiceBonus + (Math.random() * 11 - 3));
+      let oppFinal = m.oppHalftime + Math.round((m.oppOvr * 0.48) + (Math.random() * 11 - 3));
+      if (myFinal === oppFinal) myFinal += 2;
 
-      const won = myScore > cpuScore;
-      // Vittoria = +50 Crediti, Sconfitta = 0 Crediti
-      const prize = won ? 50 : 0;
+      const won = myFinal > oppFinal;
+      const rewardCredits = won ? 50 : 0;
 
-      currentUserState.dailyMatches.dayNum = getCurrentDayNumber();
-      currentUserState.dailyMatches.count += 1;
-      currentUserState.credits += prize;
-      if (won) currentUserState.matchWins = (currentUserState.matchWins || 0) + 1;
+      if (won) {
+        currentUserState.credits += rewardCredits;
+        currentUserState.matchWins = (currentUserState.matchWins || 0) + 1;
+      }
 
       saveCurrentUserState();
       updateCreditsUI();
-      updateDailyMatchesBadge();
       renderLeaderboard();
+
+      const mvpPlayer = [...m.lineupList].sort((a, b) => b.ovr - a.ovr)[0];
 
       if (won) {
         playSound('legend');
@@ -3543,287 +3562,116 @@
         playSound('flip');
       }
 
-      const mvp = [...st.myPlayers].sort((a, b) => b.ovr - a.ovr)[0];
-      const mvpPts = 17 + Math.floor(Math.random() * 14);
-
-      const resBox = document.getElementById('match-result-box');
-      resBox.innerHTML = `
-        <div class="inline-block px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider ${won ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'}">
-          ${won ? 'FINALE • VITTORIA SUL PARQUET!' : 'FINALE • SCONFITTA DI MISURA'}
+      const box = document.getElementById('match-result-box');
+      box.innerHTML = `
+        <div class="text-xs font-extrabold uppercase tracking-widest ${won ? 'text-emerald-400' : 'text-rose-400'}">
+          ${won ? 'FINALE • VITTORIA SUL PARQUET LNP!' : 'FINALE • SCONFITTA DI MISURA'}
         </div>
-        <div class="flex items-center justify-center gap-6 py-2">
-          <div class="text-right">
-            <span class="block text-xs text-slate-400 font-bold">${currentUserState.discord.username.toUpperCase()}</span>
-            <span class="font-display text-4xl sm:text-5xl font-bold ${won ? 'text-emerald-400' : 'text-white'}">${myScore}</span>
+        <div class="flex items-center justify-center gap-6 py-1">
+          <div class="text-center">
+            <span class="block text-xs text-slate-400">${currentUserState.discord.username}</span>
+            <span class="font-display text-4xl font-bold text-white">${myFinal}</span>
           </div>
           <span class="font-display text-2xl text-slate-500">VS</span>
-          <div class="text-left">
-            <span class="block text-xs text-slate-400 font-bold">${st.cpuTeam.shortName.toUpperCase()}</span>
-            <span class="font-display text-4xl sm:text-5xl font-bold ${!won ? 'text-rose-400' : 'text-white'}">${cpuScore}</span>
+          <div class="text-center">
+            <span class="block text-xs text-slate-400">${m.opponentTeam.shortName}</span>
+            <span class="font-display text-4xl font-bold text-white">${oppFinal}</span>
           </div>
         </div>
         <p class="text-xs text-slate-300">
-          MVP: <strong class="text-amber-300">${mvp.name}</strong> (${mvpPts} punti) • Premio: <strong class="${won ? 'text-emerald-400' : 'text-rose-400'}">+${prize} Crediti</strong> • Partite oggi: <strong>${currentUserState.dailyMatches.count}/10</strong>
+          MVP del Match: <strong class="text-amber-300">${mvpPlayer.name}</strong> (${Math.round(mvpPlayer.ovr * 0.31)} PTS) •
+          Premio Partita: <strong class="${won ? 'text-emerald-400' : 'text-rose-400'}">${won ? '+50 Crediti' : '0 Crediti (Nessun premio per sconfitta)'}</strong>
         </p>
       `;
+
+      activeTacticalMatchState = null;
     }
 
     /**
-     * 9B. CLASSIFICA LIVE COLLEZIONISTI DISCORD (SINCRONIZZATA REAL-TIME)
+     * 10. CLASSIFICA LIVE COLLEZIONISTI DISCORD (SYNC CLOUD REAL-TIME)
      */
     function renderLeaderboard() {
+      const sortBy = document.getElementById('leaderboard-sort-select')?.value || 'album';
       const tbody = document.getElementById('leaderboard-tbody');
       if (!tbody) return;
 
-      const sortMode = document.getElementById('leaderboard-sort-select')?.value || 'album';
-      const mergedMap = { ...livePublicProfilesMap };
-
-      // Fallback locale se offline
-      try {
-        const idxRaw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
-        const accounts = idxRaw ? JSON.parse(idxRaw) : {};
-        Object.keys(accounts).forEach(dId => {
-          if (!mergedMap[dId]) {
-            const uRaw = localStorage.getItem(getUserStorageKey(dId));
-            if (uRaw) mergedMap[dId] = buildPublicSummary(JSON.parse(uRaw));
-          }
-        });
-      } catch (e) {}
-
+      const entriesMap = { ...livePublicProfilesMap };
       if (currentUserState && currentUserState.discord) {
-        mergedMap[currentUserState.discord.id] = buildPublicSummary(currentUserState);
+        entriesMap[currentUserState.discord.id] = buildPublicSummary(currentUserState);
       }
 
-      const rows = Object.values(mergedMap).map(u => ({
-        id: u.discord.id,
-        username: u.discord.username,
-        avatar: u.discord.avatarUrl,
-        uniqueOwned: u.uniqueOwned || 0,
-        pct: u.pct || 0,
-        clubs100: u.clubs100 || 0,
-        lineupAvg: u.lineupAvg || 0,
-        wins: u.wins || 0
-      })).sort((a, b) => {
-        if (sortMode === 'clubs') {
-          if (b.clubs100 !== a.clubs100) return b.clubs100 - a.clubs100;
-          return b.uniqueOwned - a.uniqueOwned;
-        }
-        if (sortMode === 'ovr') {
-          if (b.lineupAvg !== a.lineupAvg) return b.lineupAvg - a.lineupAvg;
-          return b.uniqueOwned - a.uniqueOwned;
-        }
-        if (sortMode === 'wins') {
-          if (b.wins !== a.wins) return b.wins - a.wins;
-          return b.uniqueOwned - a.uniqueOwned;
-        }
-        if (b.uniqueOwned !== a.uniqueOwned) return b.uniqueOwned - a.uniqueOwned;
-        if (b.clubs100 !== a.clubs100) return b.clubs100 - a.clubs100;
-        return b.wins - a.wins;
+      const entries = Object.values(entriesMap);
+
+      entries.sort((a, b) => {
+        if (sortBy === 'clubs') return (b.clubs100 - a.clubs100) || (b.uniqueOwned - a.uniqueOwned);
+        if (sortBy === 'ovr') return (b.lineupAvg - a.lineupAvg) || (b.uniqueOwned - a.uniqueOwned);
+        if (sortBy === 'wins') return (b.wins - a.wins) || (b.uniqueOwned - a.uniqueOwned);
+        return (b.uniqueOwned - a.uniqueOwned) || (b.clubs100 - a.clubs100);
       });
 
-      if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">Nessun collezionista registrato.</td></tr>`;
+      if (entries.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-8 text-center text-slate-400">
+              Nessun giocatore registrato in classifica.
+            </td>
+          </tr>
+        `;
         return;
       }
 
-      tbody.innerHTML = rows.map((r, idx) => {
-        const isMe = currentUserState && currentUserState.discord.id === r.id;
-        const rankBadge = idx === 0
-          ? `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-400 text-slate-950 font-black">1</span>`
-          : idx === 1
-            ? `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-300 text-slate-950 font-black">2</span>`
-            : idx === 2
-              ? `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-600 text-white font-black">3</span>`
-              : `<span class="font-mono font-bold text-slate-400">${idx + 1}</span>`;
+      tbody.innerHTML = entries.map((entry, index) => {
+        const rank = index + 1;
+        const isMe = currentUserState && currentUserState.discord && entry.discord.id === currentUserState.discord.id;
+        let rankBadge = `<span class="font-bold text-slate-400">#${rank}</span>`;
+        if (rank === 1) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-400 text-slate-950 font-black text-xs shadow">1°</span>`;
+        if (rank === 2) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-300 text-slate-950 font-black text-xs shadow">2°</span>`;
+        if (rank === 3) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600 text-white font-black text-xs shadow">3°</span>`;
 
         return `
-          <tr class="${isMe ? 'bg-[#ff6b00]/15' : 'hover:bg-slate-900/50'} transition">
+          <tr class="${isMe ? 'bg-[#ff6b00]/15' : 'hover:bg-slate-900/60'} transition">
             <td class="py-3 px-4">${rankBadge}</td>
             <td class="py-3 px-4">
               <div class="flex items-center gap-2.5">
-                <img src="${r.avatar}" alt="" class="w-7 h-7 rounded-full border border-indigo-400" />
+                <img src="${entry.discord.avatarUrl}" alt="" class="w-8 h-8 rounded-full border ${isMe ? 'border-[#ff6b00]' : 'border-indigo-400/60'}" />
                 <div>
-                  <span class="font-extrabold text-white block">${r.username} ${isMe ? '(Tu)' : ''}</span>
+                  <div class="font-extrabold text-white flex items-center gap-1.5">
+                    <span>${entry.discord.username}</span>
+                    ${isMe ? `<span class="text-[9px] font-black uppercase bg-[#ff6b00] text-white px-1.5 py-0.5 rounded">TU</span>` : ''}
+                  </div>
+                  <div class="text-[10px] text-slate-400">${entry.discord.favTeamShort || 'LNP Fan'}</div>
                 </div>
               </div>
             </td>
             <td class="py-3 px-4">
               <div class="flex items-center gap-2">
-                <div class="w-24 h-2 bg-slate-800 rounded-full overflow-hidden">
-                  <div class="h-full bg-gradient-to-r from-[#ff6b00] to-amber-400" style="width: ${r.pct}%"></div>
-                </div>
-                <span class="font-bold text-amber-300 text-xs">${r.uniqueOwned}/${TOTAL_CARDS_COUNT} (${r.pct}%)</span>
+                <span class="font-extrabold text-amber-300">${entry.uniqueOwned}/${TOTAL_CARDS_COUNT}</span>
+                <span class="text-[11px] text-slate-400">(${entry.pct}%)</span>
+              </div>
+              <div class="w-28 h-1.5 bg-slate-900 rounded-full overflow-hidden mt-1">
+                <div class="h-full bg-gradient-to-r from-[#ff6b00] to-amber-400" style="width: ${entry.pct}%"></div>
               </div>
             </td>
-            <td class="py-3 px-4 text-center font-extrabold text-emerald-400">${r.clubs100}/20</td>
-            <td class="py-3 px-4 text-center font-extrabold text-cyan-300">${r.lineupAvg || '-'}</td>
-            <td class="py-3 px-4 text-center font-extrabold text-white">${r.wins}</td>
+            <td class="py-3 px-4 text-center font-extrabold text-emerald-400">${entry.clubs100}/20</td>
+            <td class="py-3 px-4 text-center font-display text-xl font-bold text-cyan-300">${entry.lineupAvg || '-'}</td>
+            <td class="py-3 px-4 text-center font-extrabold text-white">${entry.wins}</td>
           </tr>
         `;
       }).join('');
     }
 
     /**
-     * 10. MODAL ISPEZIONE FIGURINA + CARICAMENTO FOTO ADMIN
-     */
-    function openInspectModal(cardId) {
-      const card = ALL_CARDS.find(c => c.id === cardId);
-      if (!card) return;
-
-      const modal = document.getElementById('card-inspect-modal');
-      const container = document.getElementById('inspect-card-container');
-      const detailsBox = document.getElementById('inspect-details-box');
-
-      container.innerHTML = renderCardHTML(card, { clickable: false });
-
-      if (card.type === 'player') {
-        const ownedCopies = currentUserState ? (currentUserState.owned[card.id] || 0) : 0;
-        const isWished = currentUserState ? (currentUserState.wishlist || []).includes(card.id) : false;
-        detailsBox.innerHTML = `
-          <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-            <div>
-              <span class="text-[10px] font-bold uppercase text-[#ff6b00] block">${card.teamName}</span>
-              <h4 class="text-base font-extrabold text-white">#${card.jerseyNum} ${card.name}</h4>
-            </div>
-            <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 font-mono text-xs font-bold text-amber-400">
-              Fig. #${card.num}
-            </span>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-left">
-            <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-              <span class="block text-[10px] text-slate-400">Maglia / Ruolo</span>
-              <span class="font-bold text-white">#${card.jerseyNum} • ${card.role}</span>
-            </div>
-            <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-              <span class="block text-[10px] text-slate-400">Data di Nascita</span>
-              <span class="font-bold text-white">${card.dob}</span>
-            </div>
-            <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-              <span class="block text-[10px] text-slate-400">Nazionalità</span>
-              <span class="font-bold text-white">${card.nat}</span>
-            </div>
-            <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-              <span class="block text-[10px] text-slate-400">Altezza</span>
-              <span class="font-bold text-white">${card.height} cm</span>
-            </div>
-            <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-              <span class="block text-[10px] text-slate-400">Peso</span>
-              <span class="font-bold text-white">${card.weight} kg</span>
-            </div>
-            <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-              <span class="block text-[10px] text-slate-400">Possedute</span>
-              <span class="font-bold text-emerald-400">${ownedCopies} copie</span>
-            </div>
-          </div>
-          ${ownedCopies === 0 ? `
-            <button type="button" data-action="toggle-wishlist" data-card-id="${card.id}" class="w-full py-2 rounded-xl ${isWished ? 'bg-rose-500 text-white' : 'bg-slate-800 text-rose-300 border border-rose-400/40'} font-extrabold text-xs transition active:scale-95">
-              <i class="fa-solid fa-heart mr-1 pointer-events-none"></i> ${isWished ? 'Presente nella Wishlist (Rimuovi)' : 'Aggiungi alla Wishlist per gli Scambi'}
-            </button>
-          ` : ''}
-          ${adminUnlocked ? `
-            <div class="bg-slate-950/90 border border-cyan-500/40 rounded-xl p-2.5 space-y-2">
-              <span class="block text-[10px] font-extrabold uppercase text-cyan-300">Admin: Carica Foto Reale Giocatore</span>
-              <label class="block cursor-pointer py-1.5 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-center font-bold text-xs transition">
-                <i class="fa-solid fa-camera mr-1"></i> Scegli Foto da Caricare
-                <input type="file" accept="image/*" data-inspect-photo-card-id="${card.id}" class="hidden" />
-              </label>
-            </div>
-          ` : ''}
-        `;
-      } else {
-        detailsBox.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="text-[10px] font-bold uppercase text-amber-400 block">Stemma Ufficiale Club</span>
-              <h4 class="text-base font-extrabold text-white">${card.fullName}</h4>
-              <p class="text-[11px] text-slate-400 mt-0.5">Lega Nazionale Pallacanestro • Serie A2 2026/27</p>
-            </div>
-            <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 font-mono text-xs font-bold text-amber-400">
-              Fig. #${card.num}
-            </span>
-          </div>
-        `;
-      }
-
-      modal.classList.remove('hidden');
-    }
-
-    function closeInspectModal() {
-      document.getElementById('card-inspect-modal').classList.add('hidden');
-    }
-
-    /**
-     * 11. CONSOLE SEGRETA ADMIN (CTRL + SHIFT + A -> "bananabella")
-     */
-    function openAdminModal() {
-      const modal = document.getElementById('admin-secret-modal');
-      modal.classList.remove('hidden');
-      if (adminUnlocked) {
-        document.getElementById('admin-login-box').classList.add('hidden');
-        document.getElementById('admin-controls-box').classList.remove('hidden');
-      } else {
-        document.getElementById('admin-login-box').classList.remove('hidden');
-        document.getElementById('admin-controls-box').classList.add('hidden');
-        const pwdInput = document.getElementById('admin-password-input');
-        pwdInput.value = '';
-        setTimeout(() => pwdInput.focus(), 50);
-      }
-    }
-
-    function closeAdminModal() {
-      document.getElementById('admin-secret-modal').classList.add('hidden');
-    }
-
-    function verifyAdminPassword() {
-      const val = (document.getElementById('admin-password-input').value || '').trim();
-      if (val === 'bananabella') {
-        adminUnlocked = true;
-        document.getElementById('admin-login-box').classList.add('hidden');
-        document.getElementById('admin-controls-box').classList.remove('hidden');
-        playSound('coin');
-        showToast('Accesso Admin sbloccato!', 'success');
-      } else {
-        showToast('Password Admin errata.', 'error');
-      }
-    }
-
-    function toggleTemporaryInfiniteCredits() {
-      if (!adminUnlocked) return;
-      tempInfiniteCredits = !tempInfiniteCredits;
-      const btn = document.getElementById('btn-toggle-inf-credits');
-
-      if (tempInfiniteCredits) {
-        btn.textContent = 'DISATTIVA ∞';
-        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-rose-600 text-white';
-        showToast('Crediti Infiniti Temporanei ATTIVI (∞)!', 'success');
-      } else {
-        btn.textContent = 'ATTIVA ∞';
-        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-emerald-600 text-white';
-        showToast('Ripristinato saldo normale salvato.', 'info');
-      }
-      updateCreditsUI();
-    }
-
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
-        e.preventDefault();
-        openAdminModal();
-      }
-    });
-
-    /**
-     * 12. STATISTICHE ALBUM & NAVIGAZIONE
+     * 11. STATISTICHE ALBUM, ISPEZIONE FIGURINA (CON CARICAMENTO FOTO ADMIN), CONSOLE ADMIN
      */
     function updateAlbumStatsUI() {
       if (!currentUserState) return;
-      const uniqueOwnedCount = ALL_CARDS.filter(c => (currentUserState.owned[c.id] || 0) > 0).length;
-      const pct = Math.round((uniqueOwnedCount / TOTAL_CARDS_COUNT) * 100);
+      const uniqueOwned = ALL_CARDS.filter(c => (currentUserState.owned[c.id] || 0) > 0).length;
+      const pct = Math.round((uniqueOwned / TOTAL_CARDS_COUNT) * 100);
 
-      document.getElementById('header-progress-text').textContent = `${uniqueOwnedCount}/${TOTAL_CARDS_COUNT} (${pct}%)`;
+      document.getElementById('header-progress-text').textContent = `${uniqueOwned}/${TOTAL_CARDS_COUNT} (${pct}%)`;
       document.getElementById('header-progress-bar').style.width = `${pct}%`;
-      document.getElementById('nav-album-badge').textContent = `${uniqueOwnedCount}/${TOTAL_CARDS_COUNT}`;
-
-      document.getElementById('album-stats-label').textContent = `${uniqueOwnedCount} / ${TOTAL_CARDS_COUNT} (${pct}%)`;
+      document.getElementById('nav-album-badge').textContent = `${uniqueOwned}/${TOTAL_CARDS_COUNT}`;
+      document.getElementById('album-stats-label').textContent = `${uniqueOwned} / ${TOTAL_CARDS_COUNT} (${pct}%)`;
       document.getElementById('album-stats-bar').style.width = `${pct}%`;
 
       const badgeCounter = document.getElementById('header-badges-count');
@@ -3832,16 +3680,297 @@
       }
     }
 
+    function openCardInspectModal(cardId) {
+      const card = ALL_CARDS.find(c => c.id === cardId);
+      if (!card || !currentUserState) return;
+
+      const count = currentUserState.owned[card.id] || 0;
+      const isWished = (currentUserState.wishlist || []).includes(card.id);
+      const hasCustomPhoto = Boolean(getCustomPhotoForCard(card));
+
+      document.getElementById('inspect-card-container').innerHTML = renderCardHTML(card, { clickable: false });
+
+      const bioDetails = card.type === 'player'
+        ? `
+          <div class="grid grid-cols-2 gap-2 text-left bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+            <div><span class="text-slate-400">Ruolo:</span> <strong class="text-white">${card.role}</strong></div>
+            <div><span class="text-slate-400">Nazionalità:</span> <strong class="text-white">${card.nat}</strong></div>
+            <div><span class="text-slate-400">Nascita:</span> <strong class="text-white">${card.dob}</strong></div>
+            <div><span class="text-slate-400">Fisico:</span> <strong class="text-white">${card.height} cm • ${card.weight} kg</strong></div>
+          </div>
+        `
+        : `<p class="text-slate-300 text-center">Stemma Ufficiale <strong>${card.fullName}</strong> • Stagione LNP Serie A2 2026/27.</p>`;
+
+      const adminQuickPhotoSection = adminUnlocked ? `
+        <div class="bg-cyan-950/40 border border-cyan-500/40 rounded-xl p-2.5 space-y-2 text-left">
+          <div class="text-[10px] font-extrabold uppercase text-cyan-300">
+            <i class="fa-solid fa-camera mr-1"></i> Controllo Admin: Foto Ufficiale Figurina
+          </div>
+          <div class="flex gap-1.5">
+            <label class="flex-1 cursor-pointer py-1.5 px-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[11px] text-center transition">
+              <i class="fa-solid fa-upload mr-1"></i> Carica Foto da PC/Telefono
+              <input type="file" accept="image/*" data-admin-inspect-file="${card.id}" class="hidden" />
+            </label>
+            ${hasCustomPhoto ? `
+              <button type="button" data-action="admin-remove-inspect-photo" data-card-id="${card.id}" class="py-1.5 px-2.5 rounded-lg bg-rose-700 hover:bg-rose-600 text-white font-bold text-[11px] transition">
+                Rimuovi
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      ` : '';
+
+      document.getElementById('inspect-details-box').innerHTML = `
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span class="font-bold text-white text-sm">${card.teamName}</span>
+          <span class="bg-slate-800 text-amber-300 font-extrabold px-2.5 py-0.5 rounded-full">
+            Copie: ${count}
+          </span>
+        </div>
+        ${bioDetails}
+        ${adminQuickPhotoSection}
+        <button type="button" data-action="toggle-wishlist-inspect" data-card-id="${card.id}" class="w-full py-2.5 rounded-xl font-extrabold text-xs transition active:scale-95 ${isWished ? 'bg-rose-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-rose-300 border border-rose-500/40'}">
+          <i class="fa-solid fa-heart mr-1.5 pointer-events-none"></i>
+          <span class="pointer-events-none">${isWished ? 'Rimuovi dalla Lista Desideri (Wishlist)' : 'Aggiungi alla Lista Desideri (Wishlist)'}</span>
+        </button>
+      `;
+
+      document.getElementById('card-inspect-modal').classList.remove('hidden');
+    }
+
+    function closeCardInspectModal() {
+      document.getElementById('card-inspect-modal').classList.add('hidden');
+    }
+
+    function openAdminSecretModal() {
+      const modal = document.getElementById('admin-secret-modal');
+      modal.classList.remove('hidden');
+      if (adminUnlocked) {
+        document.getElementById('admin-login-box').classList.add('hidden');
+        document.getElementById('admin-controls-box').classList.remove('hidden');
+        updateAdminToggleBtnUI();
+      } else {
+        document.getElementById('admin-login-box').classList.remove('hidden');
+        document.getElementById('admin-controls-box').classList.add('hidden');
+        const input = document.getElementById('admin-password-input');
+        input.value = '';
+        setTimeout(() => input.focus(), 50);
+      }
+    }
+
+    function closeAdminSecretModal() {
+      document.getElementById('admin-secret-modal').classList.add('hidden');
+    }
+
+    function verifyAdminPassword() {
+      const val = document.getElementById('admin-password-input').value.trim();
+      if (val === 'bananabella') {
+        adminUnlocked = true;
+        document.getElementById('admin-login-box').classList.add('hidden');
+        document.getElementById('admin-controls-box').classList.remove('hidden');
+        updateAdminToggleBtnUI();
+        playSound('legend');
+        showToast('Accesso Admin sbloccato! Ora puoi anche caricare foto sui giocatori.', 'success');
+      } else {
+        showToast('Password segreta errata!', 'error');
+      }
+    }
+
+    function toggleInfiniteCredits() {
+      if (!adminUnlocked) return;
+      tempInfiniteCredits = !tempInfiniteCredits;
+      updateCreditsUI();
+      updateAdminToggleBtnUI();
+      playSound('coin');
+      showToast(
+        tempInfiniteCredits
+          ? 'Crediti infiniti temporanei ATTIVATI (∞)!'
+          : 'Crediti infiniti disattivati: ripristinato il tuo saldo reale.',
+        'info'
+      );
+    }
+
+    function updateAdminToggleBtnUI() {
+      const btn = document.getElementById('btn-toggle-inf-credits');
+      if (!btn) return;
+      if (tempInfiniteCredits) {
+        btn.textContent = 'DISATTIVA ∞';
+        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-rose-600 text-white';
+      } else {
+        btn.textContent = 'ATTIVA ∞';
+        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-emerald-600 text-white';
+      }
+    }
+
+    // Ridimensiona e comprime la foto caricata dall'Admin in JPEG ad alta nitidezza per salvarla rapidamente su Cloud/LocalStorage
+    function compressAndSaveAdminPhoto(cardId, file) {
+      if (!file || !cardId) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 420;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          await saveCustomCardPhoto(cardId, dataUrl);
+          renderAlbum();
+          renderLineupSection();
+          if (!document.getElementById('card-inspect-modal').classList.contains('hidden')) {
+            openCardInspectModal(cardId);
+          }
+          showToast('Foto ufficiale salvata e sincronizzata su tutti i dispositivi!', 'success');
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /**
+     * 12. AUDIO SINTETICO & EFFETTI VISIVI
+     */
+    let audioCtx = null;
+
+    function playSound(type) {
+      if (currentUserState && !currentUserState.audioEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if (type === 'tear') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(170, now);
+          osc.frequency.exponentialRampToValueAtTime(520, now + 0.16);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+          osc.start(now);
+          osc.stop(now + 0.18);
+        } else if (type === 'flip') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(420, now);
+          osc.frequency.exponentialRampToValueAtTime(680, now + 0.08);
+          gain.gain.setValueAtTime(0.09, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
+          osc.start(now);
+          osc.stop(now + 0.09);
+        } else if (type === 'coin') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(980, now);
+          osc.frequency.setValueAtTime(1310, now + 0.06);
+          gain.gain.setValueAtTime(0.11, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        } else if (type === 'legend') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.08);
+          osc.frequency.setValueAtTime(783.99, now + 0.16);
+          osc.frequency.setValueAtTime(1046.50, now + 0.24);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+          osc.start(now);
+          osc.stop(now + 0.45);
+        }
+      } catch (e) {}
+    }
+
+    function toggleAudio() {
+      if (!currentUserState) return;
+      currentUserState.audioEnabled = !currentUserState.audioEnabled;
+      saveCurrentUserState();
+      updateAudioIcon();
+      showToast(currentUserState.audioEnabled ? 'Effetti sonori attivati' : 'Effetti sonori disattivati', 'info');
+    }
+
+    function updateAudioIcon() {
+      const icon = document.getElementById('audio-icon');
+      if (!currentUserState || currentUserState.audioEnabled) {
+        icon.className = 'fa-solid fa-volume-high text-sm text-amber-400 pointer-events-none';
+      } else {
+        icon.className = 'fa-solid fa-volume-xmark text-sm text-slate-500 pointer-events-none';
+      }
+    }
+
+    function spawnConfettiBurst() {
+      const colors = ['#ff6b00', '#ffd700', '#38bdf8', '#10b981', '#a855f7'];
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2.2;
+
+      for (let i = 0; i < 24; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.backgroundColor = colors[i % colors.length];
+        el.style.left = `${cx}px`;
+        el.style.top = `${cy}px`;
+        const angle = (Math.PI * 2 * i) / 24;
+        const dist = 80 + Math.random() * 140;
+        el.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+        el.style.setProperty('--ty', `${Math.sin(angle) * dist + 40}px`);
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1450);
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+
+      const colors = {
+        success: 'bg-emerald-950/95 border-emerald-500 text-emerald-200',
+        error: 'bg-rose-950/95 border-rose-500 text-rose-200',
+        info: 'bg-slate-900/95 border-amber-500/70 text-amber-200'
+      };
+      const icons = {
+        success: 'fa-circle-check text-emerald-400',
+        error: 'fa-circle-exclamation text-rose-400',
+        info: 'fa-basketball text-amber-400'
+      };
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-2xl text-xs sm:text-sm font-bold transition-all duration-300 ${colors[type] || colors.info}`;
+      toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span>${message}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    /**
+     * 13. NAVIGAZIONE & EVENT DELEGATION GLOBALE
+     */
     function switchTab(tabName) {
-      ['shop', 'pass', 'album', 'trades', 'arena', 'leaderboard'].forEach(t => {
+      const tabs = ['shop', 'pass', 'album', 'trades', 'arena', 'leaderboard'];
+      tabs.forEach(t => {
         const sec = document.getElementById(`section-${t}`);
         const btn = document.getElementById(`tab-btn-${t}`);
-        if (t === tabName) {
-          sec.classList.remove('hidden');
-          btn.className = 'shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition active:scale-95 bg-[#ff6b00] text-white shadow-lg shadow-orange-600/25';
-        } else {
-          sec.classList.add('hidden');
-          btn.className = 'shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition active:scale-95 bg-slate-800/90 text-slate-300 hover:bg-slate-700';
+        if (sec) sec.classList.toggle('hidden', t !== tabName);
+        if (btn) {
+          btn.className = t === tabName
+            ? 'shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition active:scale-95 bg-[#ff6b00] text-white shadow-lg shadow-orange-600/25'
+            : 'shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition active:scale-95 bg-slate-800/90 text-slate-300 hover:bg-slate-700';
         }
       });
 
@@ -3852,147 +3981,14 @@
       if (tabName === 'leaderboard') renderLeaderboard();
     }
 
-    /**
-     * 13. EFFETTI SONORI (WEB AUDIO API) & CONFETTI
-     */
-    let audioCtx = null;
-
-    function getAudioContext() {
-      if (!audioCtx) {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass) audioCtx = new AudioContextClass();
-      }
-      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-      return audioCtx;
-    }
-
-    function playSound(type) {
-      if (currentUserState && currentUserState.audioEnabled === false) return;
-      try {
-        const ctx = getAudioContext();
-        if (!ctx) return;
-        const now = ctx.currentTime;
-
-        if (type === 'flip') {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(320, now);
-          osc.frequency.exponentialRampToValueAtTime(640, now + 0.08);
-          gain.gain.setValueAtTime(0.14, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(now);
-          osc.stop(now + 0.09);
-        } else if (type === 'coin') {
-          [880, 1320].forEach((freq, i) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, now + i * 0.06);
-            gain.gain.setValueAtTime(0.14, now + i * 0.06);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.16);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(now + i * 0.06);
-            osc.stop(now + i * 0.06 + 0.16);
-          });
-        } else if (type === 'tear') {
-          const bufferSize = ctx.sampleRate * 0.22;
-          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-          const data = buffer.getChannelData(0);
-          for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.4));
-          const noise = ctx.createBufferSource();
-          noise.buffer = buffer;
-          const gain = ctx.createGain();
-          gain.gain.setValueAtTime(0.22, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
-          noise.connect(gain);
-          gain.connect(ctx.destination);
-          noise.start(now);
-        } else if (type === 'legend') {
-          [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq, now + idx * 0.07);
-            gain.gain.setValueAtTime(0.18, now + idx * 0.07);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.35);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(now + idx * 0.07);
-            osc.stop(now + idx * 0.07 + 0.35);
-          });
-        }
-      } catch (e) {}
-    }
-
-    function updateAudioIcon() {
-      const icon = document.getElementById('audio-icon');
-      const enabled = currentUserState ? currentUserState.audioEnabled !== false : true;
-      icon.className = enabled
-        ? 'fa-solid fa-volume-high text-sm text-amber-400 pointer-events-none'
-        : 'fa-solid fa-volume-xmark text-sm text-slate-500 pointer-events-none';
-    }
-
-    function toggleAudio() {
-      if (!currentUserState) return;
-      currentUserState.audioEnabled = !(currentUserState.audioEnabled !== false);
-      updateAudioIcon();
-      saveCurrentUserState();
-    }
-
-    function spawnConfettiBurst() {
-      const colors = ['#ff6b00', '#ffd700', '#38bdf8', '#10b981', '#f43f5e', '#ffffff'];
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2.2;
-      for (let i = 0; i < 34; i++) {
-        const el = document.createElement('div');
-        el.className = 'confetti-piece';
-        el.style.left = `${cx}px`;
-        el.style.top = `${cy}px`;
-        el.style.backgroundColor = colors[i % colors.length];
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 70 + Math.random() * 220;
-        el.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
-        el.style.setProperty('--ty', `${Math.sin(angle) * dist - 40}px`);
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 1450);
-      }
-    }
-
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      const styles = {
-        success: 'bg-emerald-950/95 border-emerald-500 text-emerald-200',
-        error: 'bg-rose-950/95 border-rose-500 text-rose-200',
-        info: 'bg-slate-900/95 border-amber-500 text-amber-200'
-      };
-      const icons = {
-        success: 'fa-circle-check text-emerald-400',
-        error: 'fa-circle-exclamation text-rose-400',
-        info: 'fa-circle-info text-amber-400'
-      };
-      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-2xl text-xs sm:text-sm font-bold max-w-sm ${styles[type] || styles.info}`;
-      toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info} text-base"></i><span>${message}</span>`;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.25s';
-        setTimeout(() => toast.remove(), 250);
-      }, 3200);
-    }
-
-    /**
-     * 14. DELEGAZIONE EVENTI CENTRALIZZATA
-     */
     document.addEventListener('click', (e) => {
       const target = e.target.closest('[data-action]');
       if (!target) return;
 
       const action = target.dataset.action;
+
+      if (action === 'close-inspect' && target.id === 'card-inspect-modal' && e.target !== target) return;
+      if (action === 'close-admin' && target.id === 'admin-secret-modal' && e.target !== target) return;
 
       switch (action) {
         case 'discord-bot-oauth':
@@ -4039,17 +4035,15 @@
           setAlbumStatusFilter(target.dataset.status);
           break;
         case 'toggle-wishlist':
+          e.stopPropagation();
           toggleWishlistCard(target.dataset.cardId);
-          if (!document.getElementById('card-inspect-modal').classList.contains('hidden')) {
-            openInspectModal(target.dataset.cardId);
-          }
+          break;
+        case 'toggle-wishlist-inspect':
+          toggleWishlistCard(target.dataset.cardId);
+          openCardInspectModal(target.dataset.cardId);
           break;
         case 'create-trade-offer':
           createTradeOffer();
-          break;
-        case 'refresh-trades':
-          renderTradesTab();
-          showToast('Bacheca scambi aggiornata!', 'info');
           break;
         case 'cancel-trade-offer':
           cancelTradeOffer(target.dataset.tradeId);
@@ -4057,11 +4051,15 @@
         case 'accept-trade-offer':
           acceptTradeOffer(target.dataset.tradeId);
           break;
+        case 'refresh-trades':
+          renderTradesTab();
+          showToast('Bacheca scambi sincronizzata.', 'info');
+          break;
         case 'inspect-card':
-          openInspectModal(target.dataset.cardId);
+          openCardInspectModal(target.dataset.cardId);
           break;
         case 'close-inspect':
-          if (e.target === target || target.tagName === 'BUTTON') closeInspectModal();
+          closeCardInspectModal();
           break;
         case 'discard-single-dup':
           discardSingleDuplicate(target.dataset.cardId);
@@ -4070,7 +4068,7 @@
           discardAllDuplicates();
           break;
         case 'focus-role-slot':
-          activeSlotRole = activeSlotRole === target.dataset.role ? null : target.dataset.role;
+          activeSlotRole = (activeSlotRole === target.dataset.role) ? null : target.dataset.role;
           renderLineupSection();
           break;
         case 'clear-role-slot':
@@ -4083,6 +4081,12 @@
         case 'assign-player-slot':
           assignPlayerToRoleSlot(target.dataset.cardId);
           break;
+        case 'auto-lineup':
+          autoFillBestLineup();
+          break;
+        case 'clear-lineup':
+          clearLineup();
+          break;
         case 'select-tactic':
           if (currentUserState) {
             currentUserState.tactic = target.dataset.tactic;
@@ -4090,138 +4094,144 @@
             renderLineupSection();
           }
           break;
-        case 'auto-lineup':
-          autoFillBestLineup();
-          break;
-        case 'clear-lineup':
-          clearLineup();
-          break;
         case 'play-match':
-          simulateMatch();
+          startTacticalMatch();
           break;
-        case 'finish-halftime':
-          finishTacticalMatch(target.dataset.adj);
+        case 'finish-tactical-match':
+          finishTacticalMatch(target.dataset.choice);
           break;
         case 'refresh-leaderboard':
           renderLeaderboard();
-          showToast('Classifica Live aggiornata!', 'info');
+          showToast('Classifica Live aggiornata.', 'info');
           break;
         case 'close-admin':
-          if (e.target === target || target.tagName === 'BUTTON') closeAdminModal();
+          closeAdminSecretModal();
           break;
         case 'verify-admin-password':
           verifyAdminPassword();
           break;
         case 'toggle-infinite-credits':
-          toggleTemporaryInfiniteCredits();
+          toggleInfiniteCredits();
           break;
-        case 'admin-save-photo-url': {
-          if (!adminUnlocked) return;
-          const cardId = document.getElementById('admin-photo-card-select').value;
-          const url = (document.getElementById('admin-photo-url-input').value || '').trim();
-          if (!cardId || !url) {
-            showToast('Seleziona una figurina e incolla un URL valido!', 'error');
-            return;
-          }
-          saveCustomCardPhoto(cardId, url).then(() => {
-            renderAlbum();
-            renderLineupSection();
-            showToast('Foto giocatore salvata in formato full-bleed!', 'success');
-          });
-          break;
-        }
-        case 'admin-remove-photo': {
-          if (!adminUnlocked) return;
-          const cardId = document.getElementById('admin-photo-card-select').value;
-          if (!cardId) {
-            showToast('Seleziona la figurina da ripristinare!', 'error');
-            return;
-          }
-          saveCustomCardPhoto(cardId, null).then(() => {
-            renderAlbum();
-            renderLineupSection();
-            showToast('Foto personalizzata rimossa.', 'info');
-          });
-          break;
-        }
         case 'admin-sim-next-day':
-          if (!adminUnlocked) return;
           dayOffsetForTesting += 1;
-          evaluatePassStreakIntegrity(true);
           renderWeeklyPass();
-          showToast('Simulato +1 giorno consecutivo!', 'info');
+          showToast(`Simulato avanzamento di +1 giorno consecutivo (Offset: +${dayOffsetForTesting}g).`, 'info');
           break;
         case 'admin-sim-skip-day':
-          if (!adminUnlocked) return;
           dayOffsetForTesting += 2;
           evaluatePassStreakIntegrity(true);
           renderWeeklyPass();
           break;
+        case 'admin-save-photo-url': {
+          const cid = document.getElementById('admin-photo-card-select').value;
+          const url = document.getElementById('admin-photo-url-input').value.trim();
+          if (!cid || !url) {
+            showToast('Seleziona un giocatore e incolla un URL valido!', 'error');
+            break;
+          }
+          saveCustomCardPhoto(cid, url);
+          renderAlbum();
+          renderLineupSection();
+          showToast('URL foto ufficiale salvato e sincronizzato!', 'success');
+          break;
+        }
+        case 'admin-remove-photo': {
+          const cid = document.getElementById('admin-photo-card-select').value;
+          if (!cid) {
+            showToast('Seleziona prima un giocatore!', 'error');
+            break;
+          }
+          saveCustomCardPhoto(cid, null);
+          renderAlbum();
+          renderLineupSection();
+          showToast('Foto personalizzata rimossa.', 'info');
+          break;
+        }
+        case 'admin-remove-inspect-photo': {
+          const cid = target.dataset.cardId;
+          saveCustomCardPhoto(cid, null);
+          renderAlbum();
+          renderLineupSection();
+          openCardInspectModal(cid);
+          showToast('Foto personalizzata rimossa.', 'info');
+          break;
+        }
         case 'admin-global-reset':
-          if (!adminUnlocked) return;
           forceGlobalResetFromAdmin();
           break;
       }
     });
 
-    // Listener upload file foto locale da Admin
     document.addEventListener('change', (e) => {
-      if (!adminUnlocked) return;
-      const input = e.target;
-      if (input.id === 'admin-photo-file-input' || input.dataset.inspectPhotoCardId) {
-        const cardId = input.dataset.inspectPhotoCardId || document.getElementById('admin-photo-card-select').value;
-        const file = input.files && input.files[0];
-        if (!cardId || !file) {
-          showToast('Seleziona prima la figurina a cui associare la foto!', 'error');
+      if (e.target && e.target.id === 'admin-photo-file-input') {
+        const cid = document.getElementById('admin-photo-card-select').value;
+        const file = e.target.files && e.target.files[0];
+        if (!cid) {
+          showToast('Seleziona prima la figurina dal menu sopra!', 'error');
+          e.target.value = '';
           return;
         }
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-          await saveCustomCardPhoto(cardId, ev.target.result);
-          renderAlbum();
-          renderLineupSection();
-          if (!document.getElementById('card-inspect-modal').classList.contains('hidden')) {
-            openInspectModal(cardId);
-          }
-          showToast('Foto reale caricata e salvata a schermo intero sulla figurina!', 'success');
-        };
-        reader.readAsDataURL(file);
+        compressAndSaveAdminPhoto(cid, file);
+        e.target.value = '';
+      } else if (e.target && e.target.dataset && e.target.dataset.adminInspectFile) {
+        const cid = e.target.dataset.adminInspectFile;
+        const file = e.target.files && e.target.files[0];
+        compressAndSaveAdminPhoto(cid, file);
+        e.target.value = '';
       }
     });
 
     document.getElementById('team-filter').addEventListener('change', renderAlbum);
     document.getElementById('rarity-filter').addEventListener('change', renderAlbum);
     document.getElementById('leaderboard-sort-select').addEventListener('change', renderLeaderboard);
-    document.getElementById('admin-password-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') verifyAdminPassword();
+
+    // Scorciatoia Segreta Admin: Ctrl + Shift + A
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        openAdminSecretModal();
+      }
     });
 
-    // Inizializzazione Avvio App
-    (async function bootstrapApp() {
+    document.getElementById('admin-password-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        verifyAdminPassword();
+      }
+    });
+
+    /**
+     * 14. AVVIO APPLICAZIONE
+     */
+    async function bootstrapApp() {
       populateTeamDropdowns();
       await initCloudBackend();
 
       try {
-        const savedPhotos = localStorage.getItem(CUSTOM_PHOTOS_KEY);
-        if (savedPhotos) customCardPhotos = { ...customCardPhotos, ...JSON.parse(savedPhotos) };
+        const photosRaw = localStorage.getItem(CUSTOM_PHOTOS_KEY);
+        if (photosRaw) customCardPhotos = { ...JSON.parse(photosRaw), ...customCardPhotos };
       } catch (e) {}
 
-      const loggedViaHash = await checkDiscordOAuthHashCallback();
-      if (loggedViaHash) return;
+      const oauthLoggedIn = await checkDiscordOAuthHashCallback();
+      if (!oauthLoggedIn) {
+        renderSavedAccountsList();
 
-      renderSavedAccountsList();
-
-      try {
-        const lastActiveId = localStorage.getItem(ACTIVE_ACCOUNT_KEY);
-        const idxRaw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
-        if (lastActiveId && idxRaw) {
-          const map = JSON.parse(idxRaw);
-          if (map[lastActiveId]) {
-            await loginWithDiscordProfile(map[lastActiveId]);
+        try {
+          const activeId = localStorage.getItem(ACTIVE_ACCOUNT_KEY);
+          const idxRaw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
+          if (activeId && idxRaw) {
+            const map = JSON.parse(idxRaw);
+            if (map[activeId]) {
+              await loginWithDiscordProfile(map[activeId]);
+              return;
+            }
           }
-        }
-      } catch (e) {}
-    })();
+        } catch (e) {}
+      }
+    }
+
+    bootstrapApp();
   </script>
 </body>
 </html>
