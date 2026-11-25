@@ -3377,4 +3377,1631 @@
 
     async function cancelTradeOffer(tradeId) {
       if (!currentUserState) return;
-      const trade = liveTrades
+      const trade = liveTradesList.find(t => t.id === tradeId);
+      if (!trade || trade.creatorId !== currentUserState.discord.id) return;
+
+      currentUserState.owned[trade.offeredCardId] = (currentUserState.owned[trade.offeredCardId] || 0) + 1;
+      saveCurrentUserState();
+      updateAlbumStatsUI();
+      renderAlbum();
+
+      if (firebaseDb && firebaseUser) {
+        try {
+          await deleteDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'trades', tradeId));
+        } catch (e) {}
+      } else {
+        liveTradesList = liveTradesList.filter(t => t.id !== tradeId);
+      }
+
+      showToast('Offerta annullata e figurina restituita.', 'info');
+      renderTradesTab();
+    }
+
+    async function acceptTradeOffer(tradeId) {
+      if (!currentUserState) return;
+      const trade = liveTradesList.find(t => t.id === tradeId);
+      if (!trade) {
+        showToast('Questa offerta non è più disponibile.', 'error');
+        renderTradesTab();
+        return;
+      }
+
+      if ((currentUserState.owned[trade.requestedCardId] || 0) <= 0) {
+        showToast('Non possiedi la figurina richiesta dal creatore dello scambio!', 'error');
+        return;
+      }
+
+      currentUserState.owned[trade.requestedCardId] -= 1;
+      if (currentUserState.owned[trade.requestedCardId] <= 0) {
+        delete currentUserState.owned[trade.requestedCardId];
+      }
+      currentUserState.owned[trade.offeredCardId] = (currentUserState.owned[trade.offeredCardId] || 0) + 1;
+      currentUserState.wishlist = (currentUserState.wishlist || []).filter(id => id !== trade.offeredCardId);
+      currentUserState.tradesCompleted = (currentUserState.tradesCompleted || 0) + 1;
+
+      if (firebaseDb && firebaseUser) {
+        try {
+          await deleteDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'trades', tradeId));
+          const delivId = `deliv_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+          await setDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'trade_deliveries', delivId), {
+            recipientId: trade.creatorId,
+            cardId: trade.requestedCardId,
+            fromUser: currentUserState.discord.username,
+            createdAt: Date.now()
+          });
+        } catch (e) {}
+      } else {
+        liveTradesList = liveTradesList.filter(t => t.id !== tradeId);
+      }
+
+      checkTeamCompletions(true);
+      saveCurrentUserState();
+      renderWheelAndMissionsTab();
+      updateAlbumStatsUI();
+      renderAlbum();
+      renderTradesTab();
+      renderArenaAndDuplicates();
+
+      playSound('legend');
+      spawnConfettiBurst();
+      showToast('Scambio completato! Nuova figurina aggiunta al tuo album!', 'success');
+    }
+
+    /**
+     * 9. GESTIONE DOPPIONI (0 CREDITI ALLO SCARTO) & PARTITE TATTICHE
+     */
+    const LINEUP_ROLE_KEYS = ['PG', 'SG', 'SF', 'PF', 'C'];
+    const LINEUP_ROLE_LABELS = {
+      PG: 'Playmaker (PG)',
+      SG: 'Guardia (SG)',
+      SF: 'Ala Piccola (SF)',
+      PF: 'Ala Grande (PF)',
+      C: 'Centro (C)'
+    };
+
+    let selectedLineupSlotKey = null;
+
+    function getNaturalRolesForPlayer(roleStr) {
+      const r = roleStr.toLowerCase();
+      const valid = [];
+      if (r.includes('play')) valid.push('PG');
+      if (r.includes('guardia')) valid.push('SG');
+      if (r.includes('ala')) {
+        valid.push('SF');
+        if (r.includes('centro')) valid.push('PF');
+      }
+      if (r.includes('centro')) valid.push('C', 'PF');
+      if (valid.length === 0) valid.push('SF');
+      return [...new Set(valid)];
+    }
+
+    function getEffectivePlayerOvr(card, slotKey) {
+      const natural = getNaturalRolesForPlayer(card.role);
+      const isNatural = natural.includes(slotKey);
+      return {
+        effectiveOvr: isNatural ? card.ovr : Math.max(60, card.ovr - 5),
+        isNatural
+      };
+    }
+
+    function renderArenaAndDuplicates() {
+      if (!currentUserState) return;
+      renderDuplicatesSection();
+      renderLineupSection();
+      updateDailyMatchesUI();
+    }
+
+    function updateDailyMatchesUI() {
+      if (!currentUserState) return;
+      const todayNum = getCurrentDayNumber();
+      if (!currentUserState.dailyMatches || currentUserState.dailyMatches.dayNum !== todayNum) {
+        currentUserState.dailyMatches = { dayNum: todayNum, count: 0 };
+      }
+      const played = currentUserState.dailyMatches.count;
+      const badge = document.getElementById('daily-matches-badge');
+      if (badge) {
+        badge.textContent = `Partite oggi: ${played} / 10`;
+      }
+      const btn = document.getElementById('btn-start-tactical-match');
+      if (btn) {
+        if (played >= 10) {
+          btn.disabled = true;
+          btn.classList.add('opacity-50', 'cursor-not-allowed');
+          btn.innerHTML = `<i class="fa-solid fa-lock mr-2 pointer-events-none"></i> Limite Giornaliero Raggiunto (10/10)`;
+        } else {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+          btn.innerHTML = `<i class="fa-solid fa-basketball mr-2 pointer-events-none"></i> Gioca Partita Tattica (+50 Vittoria / 0 Sconfitta)`;
+        }
+      }
+    }
+
+    function renderDuplicatesSection() {
+      const dupContainer = document.getElementById('duplicates-list');
+      const discardAllBtn = document.getElementById('btn-discard-all-dups');
+
+      const duplicateEntries = [];
+      let totalDupCopies = 0;
+
+      ALL_CARDS.forEach(card => {
+        const count = currentUserState.owned[card.id] || 0;
+        if (count > 1) {
+          const extra = count - 1;
+          totalDupCopies += extra;
+          duplicateEntries.push({ card, extra });
+        }
+      });
+
+      document.getElementById('nav-dups-badge').textContent = totalDupCopies;
+
+      if (duplicateEntries.length === 0) {
+        discardAllBtn.disabled = true;
+        discardAllBtn.innerHTML = `<i class="fa-solid fa-trash-can mr-1 pointer-events-none"></i> Scarta Tutti i Doppioni (0 Crediti)`;
+        dupContainer.innerHTML = `
+          <div class="col-span-full py-8 text-center text-xs text-slate-400">
+            Non hai doppioni al momento. Apri nuove bustine nel Negozio per trovarne!
+          </div>
+        `;
+        return;
+      }
+
+      discardAllBtn.disabled = false;
+      discardAllBtn.innerHTML = `<i class="fa-solid fa-trash-can mr-1 pointer-events-none"></i> Scarta Tutti (${totalDupCopies}x • 0 Crediti)`;
+
+      dupContainer.innerHTML = duplicateEntries.map(({ card, extra }) => `
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex flex-col justify-between text-center">
+          <div>
+            <div class="flex justify-between items-center text-[10px] font-bold mb-1">
+              <span class="text-slate-400">#${card.num}</span>
+              <span class="bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded">x${extra} doppi</span>
+            </div>
+            <div class="font-bold text-xs text-white truncate" title="${card.name}">${card.name}</div>
+            <div class="text-[10px] text-slate-400 truncate mb-2">${card.teamShort} • OVR ${card.ovr}</div>
+          </div>
+          <button type="button" data-action="discard-single-dup" data-card-id="${card.id}"
+                  class="w-full py-1.5 rounded-lg bg-rose-800/80 hover:bg-rose-700 text-rose-100 font-extrabold text-[11px] transition active:scale-95">
+            Scarta 1 (0 Cr)
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function discardSingleDuplicate(cardId) {
+      if (!currentUserState) return;
+      const count = currentUserState.owned[cardId] || 0;
+      if (count <= 1) return;
+
+      currentUserState.owned[cardId] = count - 1;
+      saveCurrentUserState();
+      updateAlbumStatsUI();
+      renderArenaAndDuplicates();
+      renderAlbum();
+      showToast('Doppione scartato dall\'album (0 crediti).', 'info');
+    }
+
+    function discardAllDuplicates() {
+      if (!currentUserState) return;
+      let discarded = 0;
+
+      ALL_CARDS.forEach(card => {
+        const count = currentUserState.owned[card.id] || 0;
+        if (count > 1) {
+          const extra = count - 1;
+          discarded += extra;
+          currentUserState.owned[card.id] = 1;
+        }
+      });
+
+      if (discarded === 0) return;
+
+      saveCurrentUserState();
+      updateAlbumStatsUI();
+      renderArenaAndDuplicates();
+      renderAlbum();
+      showToast(`Scartati ${discarded} doppioni dall'album (0 crediti).`, 'info');
+    }
+
+    function calculateLineupMetrics() {
+      const slots = currentUserState.lineupSlots || { PG: null, SG: null, SF: null, PF: null, C: null };
+      const assigned = [];
+      LINEUP_ROLE_KEYS.forEach(roleKey => {
+        const cid = slots[roleKey];
+        if (cid) {
+          const card = ALL_CARDS.find(c => c.id === cid);
+          if (card) {
+            const { effectiveOvr, isNatural } = getEffectivePlayerOvr(card, roleKey);
+            assigned.push({ roleKey, card, effectiveOvr, isNatural });
+          }
+        }
+      });
+
+      const teamCounts = {};
+      assigned.forEach(item => {
+        teamCounts[item.card.teamId] = (teamCounts[item.card.teamId] || 0) + 1;
+      });
+      let chemistryBonus = 0;
+      Object.values(teamCounts).forEach(cnt => {
+        if (cnt >= 2) chemistryBonus += (cnt - 1) * 1.5;
+      });
+      chemistryBonus = Math.round(chemistryBonus);
+
+      const baseAvg = assigned.length > 0
+        ? assigned.reduce((acc, it) => acc + it.effectiveOvr, 0) / assigned.length
+        : 0;
+      const totalEffectiveAvg = assigned.length > 0 ? Math.round(baseAvg + chemistryBonus) : 0;
+
+      return { assigned, chemistryBonus, totalEffectiveAvg };
+    }
+
+    function renderLineupSection() {
+      if (!currentUserState) return;
+      const slots = currentUserState.lineupSlots || { PG: null, SG: null, SF: null, PF: null, C: null };
+      const { assigned, chemistryBonus, totalEffectiveAvg } = calculateLineupMetrics();
+
+      document.getElementById('lineup-count').textContent = assigned.length;
+      document.getElementById('lineup-chemistry-bonus').textContent = `+${chemistryBonus} OVR`;
+      document.getElementById('lineup-avg-ovr').textContent = totalEffectiveAvg;
+
+      const tactic = currentUserState.tactic || 'pace';
+      ['pace', 'defense', 'pickroll'].forEach(tk => {
+        const btn = document.getElementById(`tactic-btn-${tk}`);
+        if (btn) {
+          btn.className = tk === tactic
+            ? 'p-3 rounded-xl border-2 border-[#ff6b00] bg-[#ff6b00]/15 text-left transition active:scale-95'
+            : 'p-3 rounded-xl border border-slate-700 bg-slate-900/90 text-left transition active:scale-95';
+        }
+      });
+
+      const hintEl = document.getElementById('selected-slot-hint');
+      hintEl.textContent = selectedLineupSlotKey
+        ? `Slot attivo: ${LINEUP_ROLE_LABELS[selectedLineupSlotKey]} (clicca un giocatore per inserirlo qui)`
+        : 'Assegnazione automatica al ruolo naturale (oppure clicca uno slot ruolo sopra)';
+
+      const slotsEl = document.getElementById('lineup-slots');
+      slotsEl.innerHTML = LINEUP_ROLE_KEYS.map(roleKey => {
+        const cid = slots[roleKey];
+        const card = cid ? ALL_CARDS.find(c => c.id === cid) : null;
+        const isSelected = selectedLineupSlotKey === roleKey;
+
+        if (!card) {
+          return `
+            <button type="button" data-action="select-lineup-slot" data-slot="${roleKey}"
+                    class="h-28 rounded-xl border-2 ${isSelected ? 'border-amber-400 bg-amber-500/15' : 'border-dashed border-slate-700 bg-slate-900/50'} flex flex-col items-center justify-center p-2 text-center transition active:scale-95">
+              <span class="text-[10px] font-black uppercase tracking-wider ${isSelected ? 'text-amber-300' : 'text-slate-400'} pointer-events-none">
+                ${LINEUP_ROLE_LABELS[roleKey]}
+              </span>
+              <i class="fa-solid fa-plus text-slate-600 text-lg my-1 pointer-events-none"></i>
+              <span class="text-[10px] text-slate-500 pointer-events-none">${isSelected ? 'Selezionato' : 'Clicca per scegliere'}</span>
+            </button>
+          `;
+        }
+
+        const { effectiveOvr, isNatural } = getEffectivePlayerOvr(card, roleKey);
+        return `
+          <div class="relative h-28 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border-2 ${isSelected ? 'border-amber-400' : isNatural ? 'border-emerald-500/60' : 'border-rose-500/70'} p-2.5 flex flex-col justify-between">
+            <div class="flex justify-between items-center">
+              <span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${isNatural ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">
+                ${roleKey} ${isNatural ? 'OK' : '-5'}
+              </span>
+              <button type="button" data-action="remove-lineup-slot" data-slot="${roleKey}" class="w-5 h-5 rounded-full bg-rose-600/80 hover:bg-rose-500 text-white text-[10px] flex items-center justify-center active:scale-95">
+                <i class="fa-solid fa-xmark pointer-events-none"></i>
+              </button>
+            </div>
+            <div data-action="select-lineup-slot" data-slot="${roleKey}" class="cursor-pointer my-auto">
+              <div class="font-display text-2xl font-bold text-amber-400 leading-none pointer-events-none">${effectiveOvr} <span class="text-[10px] text-slate-400 font-sans">OVR</span></div>
+              <div class="font-bold text-xs text-white truncate mt-0.5 pointer-events-none">${card.name}</div>
+              <div class="text-[9px] text-slate-400 truncate pointer-events-none">${card.teamShort}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const pickerEl = document.getElementById('owned-players-picker');
+      const ownedPlayers = ALL_CARDS
+        .filter(c => c.type === 'player' && (currentUserState.owned[c.id] || 0) > 0)
+        .sort((a, b) => b.ovr - a.ovr);
+
+      if (ownedPlayers.length === 0) {
+        pickerEl.innerHTML = `<div class="col-span-full text-center text-xs text-slate-500 py-4">Non possiedi ancora giocatori. Apri una bustina!</div>`;
+        return;
+      }
+
+      const usedIds = new Set(Object.values(slots).filter(Boolean));
+
+      pickerEl.innerHTML = ownedPlayers.map(player => {
+        const isSelected = usedIds.has(player.id);
+        const natRoles = getNaturalRolesForPlayer(player.role).join('/');
+        return `
+          <button type="button" data-action="assign-player-slot" data-card-id="${player.id}"
+                  class="p-2 rounded-xl border text-left transition active:scale-95 ${isSelected ? 'bg-amber-500/20 border-amber-400 text-white' : 'bg-slate-900/90 border-slate-700/80 hover:border-slate-500 text-slate-200'}">
+            <div class="flex justify-between items-center text-[10px] font-extrabold pointer-events-none">
+              <span class="text-amber-400">OVR ${player.ovr}</span>
+              <span class="text-cyan-300">${natRoles}</span>
+            </div>
+            <div class="font-bold text-xs truncate mt-0.5 pointer-events-none">${player.name}</div>
+            <div class="text-[9px] text-slate-400 truncate pointer-events-none">${player.teamShort}</div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function assignPlayerToLineupSlot(cardId) {
+      if (!currentUserState) return;
+      const card = ALL_CARDS.find(c => c.id === cardId);
+      if (!card) return;
+
+      const slots = currentUserState.lineupSlots || { PG: null, SG: null, SF: null, PF: null, C: null };
+
+      for (const rk of LINEUP_ROLE_KEYS) {
+        if (slots[rk] === cardId) {
+          slots[rk] = null;
+          selectedLineupSlotKey = null;
+          saveCurrentUserState();
+          renderLineupSection();
+          return;
+        }
+      }
+
+      let targetSlot = selectedLineupSlotKey;
+      if (!targetSlot) {
+        const natRoles = getNaturalRolesForPlayer(card.role);
+        targetSlot = natRoles.find(rk => !slots[rk]) || LINEUP_ROLE_KEYS.find(rk => !slots[rk]) || natRoles[0];
+      }
+
+      slots[targetSlot] = cardId;
+      selectedLineupSlotKey = null;
+      currentUserState.lineupSlots = slots;
+      saveCurrentUserState();
+      renderLineupSection();
+    }
+
+    function autoBuildBestLineup() {
+      if (!currentUserState) return;
+      const ownedPlayers = ALL_CARDS
+        .filter(c => c.type === 'player' && (currentUserState.owned[c.id] || 0) > 0)
+        .sort((a, b) => b.ovr - a.ovr);
+
+      if (ownedPlayers.length === 0) {
+        showToast('Non hai giocatori da schierare!', 'error');
+        return;
+      }
+
+      const slots = { PG: null, SG: null, SF: null, PF: null, C: null };
+      const used = new Set();
+
+      LINEUP_ROLE_KEYS.forEach(rk => {
+        const match = ownedPlayers.find(p => !used.has(p.id) && getNaturalRolesForPlayer(p.role).includes(rk));
+        if (match) {
+          slots[rk] = match.id;
+          used.add(match.id);
+        }
+      });
+
+      LINEUP_ROLE_KEYS.forEach(rk => {
+        if (!slots[rk]) {
+          const fallback = ownedPlayers.find(p => !used.has(p.id));
+          if (fallback) {
+            slots[rk] = fallback.id;
+            used.add(fallback.id);
+          }
+        }
+      });
+
+      currentUserState.lineupSlots = slots;
+      selectedLineupSlotKey = null;
+      saveCurrentUserState();
+      renderLineupSection();
+      showToast('Miglior quintetto per ruoli schierato!', 'success');
+    }
+
+    function clearLineup() {
+      if (!currentUserState) return;
+      currentUserState.lineupSlots = { PG: null, SG: null, SF: null, PF: null, C: null };
+      selectedLineupSlotKey = null;
+      saveCurrentUserState();
+      renderLineupSection();
+    }
+
+    /**
+     * PARTITA TATTICA INTERATTIVA (MAX 10 AL GIORNO, +50 CREDITI VITTORIA, 0 CREDITI SCONFITTA)
+     */
+    let activeMatchSimulation = null;
+
+    function playTacticalMatch() {
+      if (!currentUserState) return;
+      const todayNum = getCurrentDayNumber();
+      if (!currentUserState.dailyMatches || currentUserState.dailyMatches.dayNum !== todayNum) {
+        currentUserState.dailyMatches = { dayNum: todayNum, count: 0 };
+      }
+
+      if (currentUserState.dailyMatches.count >= 10) {
+        showToast('Hai già giocato tutte e 10 le partite tattiche di oggi! Torna domani.', 'error');
+        updateDailyMatchesUI();
+        return;
+      }
+
+      const { assigned, chemistryBonus, totalEffectiveAvg } = calculateLineupMetrics();
+      if (assigned.length < 5) {
+        showToast('Schiera tutti i 5 ruoli del quintetto (PG, SG, SF, PF, C) prima di scendere in campo!', 'error');
+        return;
+      }
+
+      currentUserState.dailyMatches.count += 1;
+      saveCurrentUserState();
+      updateDailyMatchesUI();
+
+      const opponentTeam = TEAMS_DATA[Math.floor(Math.random() * TEAMS_DATA.length)];
+      const oppOvr = Math.floor(78 + Math.random() * 11);
+
+      const tactic = currentUserState.tactic || 'pace';
+      let tacticBonus = 0;
+      if (tactic === 'pace') {
+        const avgPace = assigned.reduce((s, a) => s + a.card.stats.att + a.card.stats.tir, 0) / 10;
+        if (avgPace >= 83) tacticBonus = 2;
+      } else if (tactic === 'defense') {
+        const avgDef = assigned.reduce((s, a) => s + a.card.stats.dif + a.card.stats.reg, 0) / 10;
+        if (avgDef >= 83) tacticBonus = 2;
+      } else if (tactic === 'pickroll') {
+        const avgPr = assigned.reduce((s, a) => s + a.card.stats.reg + a.card.stats.att, 0) / 10;
+        if (avgPr >= 83) tacticBonus = 2;
+      }
+
+      const diff1H = (totalEffectiveAvg + tacticBonus) - oppOvr;
+      const my1H = Math.max(32, Math.min(54, Math.round(41 + diff1H * 0.65 + (Math.random() * 8 - 4))));
+      const opp1H = Math.max(32, Math.min(54, Math.round(41 - diff1H * 0.55 + (Math.random() * 8 - 4))));
+
+      activeMatchSimulation = {
+        opponentTeam,
+        oppOvr,
+        totalEffectiveAvg,
+        chemistryBonus,
+        tacticBonus,
+        my1H,
+        opp1H,
+        assigned
+      };
+
+      const resBox = document.getElementById('match-result-box');
+      resBox.classList.remove('hidden');
+      resBox.innerHTML = `
+        <div class="text-[11px] font-extrabold uppercase tracking-widest text-amber-400">
+          <i class="fa-solid fa-stopwatch mr-1"></i> Fine 2° Quarto (Intervallo) • vs ${opponentTeam.name} (OVR ${oppOvr})
+        </div>
+        <div class="flex items-center justify-center gap-6 my-2">
+          <div class="text-center">
+            <span class="block text-[10px] font-bold text-slate-400">IL TUO QUINTETTO</span>
+            <span class="font-display text-4xl font-bold text-white">${my1H}</span>
+          </div>
+          <span class="font-display text-2xl text-slate-500">-</span>
+          <div class="text-center">
+            <span class="block text-[10px] font-bold text-slate-400">${opponentTeam.shortName.toUpperCase()}</span>
+            <span class="font-display text-4xl font-bold text-slate-200">${opp1H}</span>
+          </div>
+        </div>
+        <p class="text-xs text-slate-300">
+          Chiama il <strong>Timeout Tattico</strong> per il secondo tempo e scegli la strategia decisiva:
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+          <button type="button" data-action="finish-match-halftime" data-choice="three" class="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
+            <i class="fa-solid fa-bullseye mr-1 pointer-events-none"></i> Tiro da 3 & Ritmo
+          </button>
+          <button type="button" data-action="finish-match-halftime" data-choice="press" class="py-2.5 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
+            <i class="fa-solid fa-shield mr-1 pointer-events-none"></i> Pressing a Tutto Campo
+          </button>
+          <button type="button" data-action="finish-match-halftime" data-choice="paint" class="py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
+            <i class="fa-solid fa-basketball mr-1 pointer-events-none"></i> Palla Sotto Canestro
+          </button>
+        </div>
+      `;
+    }
+
+    function finishTacticalMatchSecondHalf(halftimeChoice) {
+      if (!activeMatchSimulation || !currentUserState) return;
+      const sim = activeMatchSimulation;
+      activeMatchSimulation = null;
+
+      let htBonus = 0;
+      if (halftimeChoice === 'three') {
+        const avgTir = sim.assigned.reduce((s, a) => s + a.card.stats.tir, 0) / 5;
+        htBonus = avgTir >= 82 ? 3 : 0;
+      } else if (halftimeChoice === 'press') {
+        const avgDif = sim.assigned.reduce((s, a) => s + a.card.stats.dif, 0) / 5;
+        htBonus = avgDif >= 82 ? 3 : 0;
+      } else if (halftimeChoice === 'paint') {
+        const avgAtt = sim.assigned.reduce((s, a) => s + a.card.stats.att, 0) / 5;
+        htBonus = avgAtt >= 82 ? 3 : 0;
+      }
+
+      const diff2H = (sim.totalEffectiveAvg + sim.tacticBonus + htBonus) - sim.oppOvr;
+      let my2H = Math.max(33, Math.min(56, Math.round(41 + diff2H * 0.7 + (Math.random() * 10 - 5))));
+      let opp2H = Math.max(33, Math.min(56, Math.round(41 - diff2H * 0.6 + (Math.random() * 10 - 5))));
+
+      let myFinal = sim.my1H + my2H;
+      let oppFinal = sim.opp1H + opp2H;
+      if (myFinal === oppFinal) myFinal += 2;
+
+      const isWin = myFinal > oppFinal;
+      const mvpPlayer = [...sim.assigned].sort((a, b) => b.effectiveOvr - a.effectiveOvr)[0].card;
+
+      let reward = 0;
+      if (isWin) {
+        reward = 50;
+        currentUserState.credits += reward;
+        currentUserState.matchWins = (currentUserState.matchWins || 0) + 1;
+        playSound('coin');
+        spawnConfettiBurst();
+      } else {
+        reward = 0;
+        playSound('flip');
+      }
+
+      saveCurrentUserState();
+      renderWheelAndMissionsTab();
+      updateCreditsUI();
+      renderLeaderboard();
+
+      const resBox = document.getElementById('match-result-box');
+      resBox.innerHTML = `
+        <div class="text-xs font-extrabold uppercase tracking-wider ${isWin ? 'text-emerald-400' : 'text-rose-400'}">
+          ${isWin ? 'FINALE • VITTORIA SUL PARQUET!' : 'FINALE • SCONFITTA DI MISURA'}
+        </div>
+        <div class="font-display text-3xl sm:text-4xl font-bold text-white">
+          TUO QUINTETTO <span class="${isWin ? 'text-emerald-400' : 'text-rose-400'}">${myFinal}</span> - <span class="text-slate-300">${oppFinal}</span> ${sim.opponentTeam.shortName.toUpperCase()}
+        </div>
+        <p class="text-xs text-slate-300">
+          MVP del Match: <strong class="text-amber-300">${mvpPlayer.name}</strong> (Intesa +${sim.chemistryBonus}, Tattica +${sim.tacticBonus + htBonus})
+        </p>
+        <div class="inline-flex items-center gap-2 ${isWin ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-300' : 'bg-rose-950/70 border-rose-500/40 text-rose-300'} border px-4 py-1.5 rounded-full text-sm font-extrabold">
+          ${isWin
+            ? `<i class="fa-solid fa-coins text-amber-400"></i> Premio Vittoria: +50 Crediti!`
+            : `<i class="fa-solid fa-circle-xmark text-rose-400"></i> Sconfitta: 0 Crediti guadagnati`}
+        </div>
+      `;
+    }
+
+    /**
+     * 9B. RUOTA DELLA FORTUNA GIORNALIERA & MISSIONI SBLOCCABILI
+     */
+    const WHEEL_SEGMENTS = [
+      { label: '+150 Crediti', type: 'credits', amount: 150, angleCenter: 30 },
+      { label: 'Bustina Base Gratis', type: 'pack', packType: 'base', angleCenter: 90 },
+      { label: '+400 Crediti', type: 'credits', amount: 400, angleCenter: 150 },
+      { label: 'Gold Pack Gratis', type: 'pack', packType: 'gold', angleCenter: 210 },
+      { label: '+750 Crediti', type: 'credits', amount: 750, angleCenter: 270 },
+      { label: 'JACKPOT: Mega Pack MVP + 500 Cr!', type: 'jackpot', packType: 'mvp', amount: 500, angleCenter: 330 }
+    ];
+
+    let wheelSpinning = false;
+    let currentWheelRotationDeg = 0;
+
+    function getMissionsProgressList() {
+      if (!currentUserState) return [];
+      const ownedCards = ALL_CARDS.filter(c => (currentUserState.owned[c.id] || 0) > 0);
+      const playmakersCount = ownedCards.filter(c => c.type === 'player' && c.role.toLowerCase().includes('play')).length;
+      const centersCount = ownedCards.filter(c => c.type === 'player' && c.role.toLowerCase().includes('centro')).length;
+      const logosCount = ownedCards.filter(c => c.type === 'logo').length;
+      const sigOrIconCount = ownedCards.filter(c => c.rarity === 'signature' || c.rarity === 'icon').length;
+      const claimedSet = new Set(currentUserState.claimedMissions || []);
+
+      const defs = [
+        {
+          id: 'm_first_pack',
+          title: 'Primi Passi sul Parquet',
+          desc: 'Apri almeno 3 bustine nel negozio.',
+          icon: 'fa-box-open',
+          current: currentUserState.packsOpened || 0,
+          target: 3,
+          reward: 250
+        },
+        {
+          id: 'm_5_playmakers',
+          title: 'Regista della Squadra',
+          desc: "Colleziona 5 Playmaker diversi nell'album.",
+          icon: 'fa-basketball',
+          current: playmakersCount,
+          target: 5,
+          reward: 350
+        },
+        {
+          id: 'm_5_centers',
+          title: "Dominatore dell'Area",
+          desc: "Colleziona 5 Centri diversi nell'album.",
+          icon: 'fa-shield-halved',
+          current: centersCount,
+          target: 5,
+          reward: 350
+        },
+        {
+          id: 'm_5_logos',
+          title: 'Collezionista di Stemmi',
+          desc: 'Trova 5 Scudetti Ufficiali dei club di Serie A2.',
+          icon: 'fa-flag',
+          current: logosCount,
+          target: 5,
+          reward: 400
+        },
+        {
+          id: 'm_first_sig_icon',
+          title: 'Cacciatore di Stelle',
+          desc: 'Trova la tua prima figurina Signature o MVP Icona.',
+          icon: 'fa-crown',
+          current: sigOrIconCount,
+          target: 1,
+          reward: 500
+        },
+        {
+          id: 'm_3_trades',
+          title: 'Direttore Sportivo',
+          desc: 'Completa 3 scambi con altri utenti nella Bacheca Scambi.',
+          icon: 'fa-right-left',
+          current: currentUserState.tradesCompleted || 0,
+          target: 3,
+          reward: 600
+        },
+        {
+          id: 'm_5_wins',
+          title: 'Coach Vincente',
+          desc: 'Vinci 5 Partite Tattiche sul parquet.',
+          icon: 'fa-trophy',
+          current: currentUserState.matchWins || 0,
+          target: 5,
+          reward: 450
+        },
+        {
+          id: 'm_1_club_100',
+          title: 'Orgoglio del Club',
+          desc: "Completa al 100% almeno 1 squadra intera dell'album.",
+          icon: 'fa-medal',
+          current: (currentUserState.completedTeams || []).length,
+          target: 1,
+          reward: 800
+        }
+      ];
+
+      return defs.map(d => ({
+        ...d,
+        completed: d.current >= d.target,
+        claimed: claimedSet.has(d.id)
+      }));
+    }
+
+    function renderWheelAndMissionsTab() {
+      if (!currentUserState) return;
+      const todayNum = getCurrentDayNumber();
+      const canSpinToday = currentUserState.lastWheelSpinDayNum !== todayNum;
+
+      const spinBtn = document.getElementById('btn-spin-wheel');
+      const spinLabel = document.getElementById('spin-wheel-btn-label');
+      if (spinBtn && spinLabel) {
+        spinBtn.disabled = !canSpinToday || wheelSpinning;
+        spinLabel.textContent = canSpinToday
+          ? 'GIRA LA RUOTA GRATIS!'
+          : 'GIÀ GIRATA OGGI • TORNA DOMANI!';
+      }
+
+      const missions = getMissionsProgressList();
+      const claimableCount = missions.filter(m => m.completed && !m.claimed).length;
+      const claimedCount = missions.filter(m => m.claimed).length;
+
+      const navBadge = document.getElementById('nav-missions-badge');
+      if (navBadge) {
+        if (canSpinToday || claimableCount > 0) {
+          navBadge.textContent = canSpinToday ? 'GIRA!' : `+${claimableCount}`;
+          navBadge.className = 'text-[10px] bg-emerald-500 text-slate-950 font-black px-1.5 py-0.5 rounded-md pointer-events-none animate-pulse';
+        } else {
+          navBadge.textContent = `${claimedCount}/${missions.length}`;
+          navBadge.className = 'text-[10px] bg-slate-950/70 text-emerald-400 font-bold px-1.5 py-0.5 rounded-md pointer-events-none';
+        }
+      }
+
+      const counterEl = document.getElementById('missions-completed-counter');
+      if (counterEl) {
+        counterEl.textContent = `${claimedCount} / ${missions.length}`;
+      }
+
+      const grid = document.getElementById('missions-grid');
+      if (!grid) return;
+
+      grid.innerHTML = missions.map(m => {
+        const pct = Math.min(100, Math.round((m.current / m.target) * 100));
+        return `
+          <div class="rounded-2xl p-4 border ${m.claimed ? 'border-emerald-500/40 bg-emerald-950/15' : m.completed ? 'border-amber-400 bg-amber-500/10 shadow-lg' : 'border-slate-700/80 bg-slate-900/80'} flex flex-col justify-between gap-3">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${m.claimed ? 'bg-emerald-500/20 text-emerald-400' : m.completed ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'}">
+                  <i class="fa-solid ${m.icon} text-base"></i>
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-sm text-white">${m.title}</h4>
+                  <p class="text-xs text-slate-400 mt-0.5">${m.desc}</p>
+                </div>
+              </div>
+              <span class="shrink-0 text-xs font-extrabold px-2.5 py-1 rounded-lg bg-slate-950/80 border border-amber-400/40 text-amber-300">
+                +${m.reward} <i class="fa-solid fa-coins text-[10px]"></i>
+              </span>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-[11px] font-bold">
+                <span class="text-slate-400">Progresso</span>
+                <span class="${m.completed ? 'text-emerald-400' : 'text-slate-200'}">${Math.min(m.current, m.target)} / ${m.target}</span>
+              </div>
+              <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                <div class="h-full ${m.claimed ? 'bg-emerald-500' : 'bg-gradient-to-r from-[#ff6b00] to-amber-400'} transition-all duration-300" style="width: ${pct}%"></div>
+              </div>
+            </div>
+
+            ${m.claimed ? `
+              <div class="w-full py-2 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs text-center">
+                <i class="fa-solid fa-check-double mr-1"></i> Premio Riscattato
+              </div>
+            ` : m.completed ? `
+              <button type="button" data-action="claim-mission" data-mission-id="${m.id}" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-black text-xs shadow-lg transition active:scale-95">
+                <i class="fa-solid fa-gift mr-1 pointer-events-none"></i> Riscatta +${m.reward} Crediti!
+              </button>
+            ` : `
+              <div class="w-full py-2 rounded-xl bg-slate-950/60 border border-slate-800 text-slate-500 font-bold text-xs text-center">
+                In Corso (${pct}%)
+              </div>
+            `}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function spinDailyLuckyWheel() {
+      if (!currentUserState || wheelSpinning) return;
+      const todayNum = getCurrentDayNumber();
+      if (currentUserState.lastWheelSpinDayNum === todayNum) {
+        showToast('Hai già girato la ruota oggi! Torna domani.', 'info');
+        return;
+      }
+
+      wheelSpinning = true;
+      const spinBtn = document.getElementById('btn-spin-wheel');
+      if (spinBtn) spinBtn.disabled = true;
+
+      const selectedIdx = Math.floor(Math.random() * WHEEL_SEGMENTS.length);
+      const prize = WHEEL_SEGMENTS[selectedIdx];
+
+      const targetStopAngle = (360 - prize.angleCenter) % 360;
+      const extraSpins = 360 * 6;
+      const currentMod = currentWheelRotationDeg % 360;
+      const delta = (targetStopAngle - currentMod + 360) % 360;
+      currentWheelRotationDeg += extraSpins + delta;
+
+      const disc = document.getElementById('lucky-wheel-disc');
+      if (disc) {
+        disc.style.transform = `rotate(${currentWheelRotationDeg}deg)`;
+      }
+      playSound('tear');
+
+      setTimeout(() => {
+        wheelSpinning = false;
+        currentUserState.lastWheelSpinDayNum = todayNum;
+
+        const msgEl = document.getElementById('wheel-last-prize-msg');
+        if (msgEl) {
+          msgEl.classList.remove('hidden');
+          msgEl.textContent = `Hai vinto oggi: ${prize.label}!`;
+        }
+
+        if (prize.type === 'credits') {
+          currentUserState.credits += prize.amount;
+          playSound('coin');
+          spawnConfettiBurst();
+          showToast(`Ruota della Fortuna: Hai vinto ${prize.label}!`, 'success');
+          saveCurrentUserState();
+          updateCreditsUI();
+          renderWheelAndMissionsTab();
+        } else if (prize.type === 'pack') {
+          playSound('legend');
+          spawnConfettiBurst();
+          showToast(`Ruota della Fortuna: Hai vinto ${prize.label}!`, 'success');
+          saveCurrentUserState();
+          renderWheelAndMissionsTab();
+          switchTab('shop');
+          openPackDirectly(prize.packType, false);
+        } else if (prize.type === 'jackpot') {
+          currentUserState.credits += prize.amount;
+          playSound('legend');
+          spawnConfettiBurst();
+          showToast(`JACKPOT! ${prize.label}`, 'success');
+          saveCurrentUserState();
+          updateCreditsUI();
+          renderWheelAndMissionsTab();
+          switchTab('shop');
+          openPackDirectly('mvp', false);
+        }
+      }, 4300);
+    }
+
+    function claimMissionReward(missionId) {
+      if (!currentUserState) return;
+      const missions = getMissionsProgressList();
+      const target = missions.find(m => m.id === missionId);
+      if (!target || !target.completed || target.claimed) return;
+
+      if (!Array.isArray(currentUserState.claimedMissions)) currentUserState.claimedMissions = [];
+      currentUserState.claimedMissions.push(missionId);
+      currentUserState.credits += target.reward;
+
+      playSound('coin');
+      spawnConfettiBurst();
+      saveCurrentUserState();
+      updateCreditsUI();
+      renderWheelAndMissionsTab();
+      showToast(`Obiettivo "${target.title}" completato! +${target.reward} Crediti!`, 'success');
+    }
+
+    /**
+     * 10. CLASSIFICA LIVE MULTI-BROWSER & ISPEZIONE COLLEZIONE ALTRI UTENTI
+     */
+    function renderLeaderboard() {
+      const tbody = document.getElementById('leaderboard-tbody');
+      if (!tbody) return;
+
+      const mergedMap = { ...livePublicProfilesMap };
+      if (currentUserState && currentUserState.discord) {
+        mergedMap[currentUserState.discord.id] = buildPublicSummary(currentUserState);
+      }
+
+      const sortMode = document.getElementById('leaderboard-sort-select')?.value || 'album';
+      const rows = Object.values(mergedMap).sort((a, b) => {
+        if (sortMode === 'clubs') {
+          if ((b.clubs100 || 0) !== (a.clubs100 || 0)) return (b.clubs100 || 0) - (a.clubs100 || 0);
+        } else if (sortMode === 'ovr') {
+          if ((b.lineupAvg || 0) !== (a.lineupAvg || 0)) return (b.lineupAvg || 0) - (a.lineupAvg || 0);
+        } else if (sortMode === 'wins') {
+          if ((b.wins || 0) !== (a.wins || 0)) return (b.wins || 0) - (a.wins || 0);
+        }
+        if ((b.uniqueOwned || 0) !== (a.uniqueOwned || 0)) return (b.uniqueOwned || 0) - (a.uniqueOwned || 0);
+        return (b.clubs100 || 0) - (a.clubs100 || 0);
+      });
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-8 text-center text-slate-400">
+              Nessun collezionista registrato ancora. Accedi con Discord per entrare in classifica!
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = rows.map((entry, idx) => {
+        const rank = idx + 1;
+        const d = entry.discord || {};
+        const isCurrent = currentUserState && currentUserState.discord && d.id === currentUserState.discord.id;
+
+        let medalHtml = `<span class="font-bold text-slate-400">#${rank}</span>`;
+        if (rank === 1) medalHtml = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-400 text-slate-950 font-black shadow"><i class="fa-solid fa-crown text-xs"></i></span>`;
+        else if (rank === 2) medalHtml = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-300 text-slate-950 font-black">2</span>`;
+        else if (rank === 3) medalHtml = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600 text-white font-black">3</span>`;
+
+        return `
+          <tr class="${isCurrent ? 'bg-indigo-950/50' : 'hover:bg-slate-900/50'} transition">
+            <td class="py-3.5 px-4">${medalHtml}</td>
+            <td class="py-3.5 px-4">
+              <div class="flex items-center gap-2.5">
+                <img src="${d.avatarUrl || generateDiscordAvatarUrl(d.username)}" alt="" class="w-8 h-8 rounded-full border border-indigo-400/60" />
+                <div>
+                  <div class="font-extrabold text-white flex items-center gap-1.5">
+                    <span>${d.username || 'Collezionista'}</span>
+                    ${isCurrent ? '<span class="text-[9px] bg-[#5865F2] text-white px-1.5 py-0.5 rounded uppercase">TU</span>' : ''}
+                  </div>
+                  <span class="text-[10px] text-slate-400">${d.favTeamShort || 'LNP Fan'}</span>
+                </div>
+              </div>
+            </td>
+            <td class="py-3.5 px-4">
+              <div class="flex items-center gap-2">
+                <span class="font-extrabold text-amber-400">${entry.uniqueOwned || 0}/${TOTAL_CARDS_COUNT}</span>
+                <span class="text-xs text-slate-400">(${entry.pct || 0}%)</span>
+              </div>
+            </td>
+            <td class="py-3.5 px-4 text-center font-bold text-emerald-300">${entry.clubs100 || 0}/20</td>
+            <td class="py-3.5 px-4 text-center font-bold text-cyan-300">${entry.lineupAvg || 0}</td>
+            <td class="py-3.5 px-4 text-center font-bold text-slate-200">${entry.wins || 0}</td>
+            <td class="py-3.5 px-4 text-right">
+              <button type="button" data-action="view-user-collection" data-user-id="${d.id}"
+                      class="px-3 py-1.5 rounded-xl bg-cyan-600/25 hover:bg-cyan-500 text-cyan-300 hover:text-white border border-cyan-500/50 font-extrabold text-[11px] transition active:scale-95">
+                <i class="fa-solid fa-eye mr-1 pointer-events-none"></i> Vedi Carte
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openUserCollectionModal(targetUserId) {
+      const mergedMap = { ...livePublicProfilesMap };
+      if (currentUserState && currentUserState.discord) {
+        mergedMap[currentUserState.discord.id] = buildPublicSummary(currentUserState);
+      }
+      const targetUser = mergedMap[targetUserId];
+      if (!targetUser) {
+        showToast('Collezione utente non disponibile.', 'error');
+        return;
+      }
+
+      currentlyViewedUserId = targetUserId;
+      const d = targetUser.discord || {};
+      document.getElementById('viewer-user-avatar').src = d.avatarUrl || generateDiscordAvatarUrl(d.username);
+      document.getElementById('viewer-user-name').textContent = `Album di ${d.username || 'Player'}`;
+      document.getElementById('viewer-user-badge').textContent = `${targetUser.uniqueOwned || 0} / ${TOTAL_CARDS_COUNT} (${targetUser.pct || 0}%)`;
+
+      const isSelf = currentUserState && currentUserState.discord && d.id === currentUserState.discord.id;
+      document.getElementById('viewer-user-subtitle').textContent = isSelf
+        ? 'Questa è la tua collezione pubblica visibile agli altri player.'
+        : 'Esplora le carte di questo player: clicca su "Proponi Scambio" su una figurina che ti serve!';
+
+      renderUserCollectionModalContent(targetUserId);
+      document.getElementById('user-collection-modal').classList.remove('hidden');
+    }
+
+    function renderUserCollectionModalContent(targetUserId) {
+      const mergedMap = { ...livePublicProfilesMap };
+      if (currentUserState && currentUserState.discord) {
+        mergedMap[currentUserState.discord.id] = buildPublicSummary(currentUserState);
+      }
+      const targetUser = mergedMap[targetUserId];
+      if (!targetUser) return;
+
+      const theirOwned = targetUser.owned || (targetUser.fullState && targetUser.fullState.owned) || {};
+      const myOwned = (currentUserState && currentUserState.owned) || {};
+      const isSelf = currentUserState && currentUserState.discord && targetUserId === currentUserState.discord.id;
+
+      const teamVal = document.getElementById('viewer-team-filter').value;
+      const rarityVal = document.getElementById('viewer-rarity-filter').value;
+      const copiesVal = document.getElementById('viewer-copies-filter').value;
+
+      const cardsToShow = ALL_CARDS.filter(card => {
+        const theirCount = theirOwned[card.id] || 0;
+        if (theirCount <= 0) return false;
+        if (teamVal !== 'ALL' && card.teamId !== teamVal) return false;
+        if (rarityVal !== 'ALL' && card.rarity !== rarityVal) return false;
+        if (copiesVal === 'DUPS_ONLY' && theirCount < 2) return false;
+        if (copiesVal === 'MISSING_FOR_ME' && (myOwned[card.id] || 0) > 0) return false;
+        return true;
+      });
+
+      const grid = document.getElementById('viewer-cards-grid');
+      if (cardsToShow.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 text-center text-xs text-slate-400">
+            Nessuna carta trovata con i filtri selezionati nella collezione di questo player.
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = cardsToShow.map(card => {
+        const theirCount = theirOwned[card.id] || 0;
+        const missingForMe = !isSelf && (myOwned[card.id] || 0) === 0;
+
+        return `
+          <div class="relative w-full max-w-[215px] flex flex-col items-center gap-2">
+            <div class="relative w-full flex justify-center">
+              ${renderCardHTML(card, {
+                showBadge: missingForMe ? 'NEEDED' : null,
+                clickable: true
+              })}
+              <span class="absolute bottom-2 right-2 z-10 bg-slate-950/90 text-cyan-300 border border-cyan-400/50 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow pointer-events-none">
+                x${theirCount}
+              </span>
+            </div>
+            ${!isSelf ? `
+              <button type="button" data-action="propose-trade-for-card" data-card-id="${card.id}"
+                      class="w-full py-1.5 px-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-[11px] shadow transition active:scale-95">
+                <i class="fa-solid fa-right-left mr-1 pointer-events-none"></i> Proponi Scambio
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function proposeTradeForSpecificCard(desiredCardId) {
+      document.getElementById('user-collection-modal').classList.add('hidden');
+      switchTab('trades');
+      const reqSelect = document.getElementById('trade-request-select');
+      if (reqSelect) {
+        reqSelect.value = desiredCardId;
+      }
+      const card = ALL_CARDS.find(c => c.id === desiredCardId);
+      showToast(`Selezionata "${card ? card.name : ''}" come carta desiderata! Scegli cosa offrire e pubblica.`, 'info');
+    }
+
+    /**
+     * 11. MODAL ISPEZIONE FIGURINA + WISHLIST + CARICAMENTO FOTO ADMIN
+     */
+    function openInspectModal(cardId) {
+      const card = ALL_CARDS.find(c => c.id === cardId);
+      if (!card || !currentUserState) return;
+
+      const count = currentUserState.owned[card.id] || 0;
+      const isWished = (currentUserState.wishlist || []).includes(card.id);
+
+      document.getElementById('inspect-card-container').innerHTML = renderCardHTML(card, { clickable: false });
+      document.getElementById('inspect-details-box').innerHTML = `
+        <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+          <span class="font-extrabold text-sm text-white">${card.name}</span>
+          <span class="text-amber-400 font-bold">#${card.num} / ${TOTAL_CARDS_COUNT}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-y-1.5 text-slate-300">
+          <div><span class="text-slate-500">Club:</span> <strong>${card.teamName}</strong></div>
+          <div><span class="text-slate-500">Ruolo:</span> <strong>${card.role}</strong></div>
+          <div><span class="text-slate-500">Nazionalità:</span> <strong>${card.nat}</strong></div>
+          <div><span class="text-slate-500">Nascita:</span> <strong>${card.dob}</strong></div>
+          ${card.height ? `<div><span class="text-slate-500">Altezza / Peso:</span> <strong>${card.height} cm / ${card.weight} kg</strong></div>` : ''}
+          <div><span class="text-slate-500">Nell'Album:</span> <strong class="${count > 0 ? 'text-emerald-400' : 'text-rose-400'}">${count > 0 ? `Posseduta (x${count})` : 'Mancante'}</strong></div>
+        </div>
+        <div class="pt-2 border-t border-slate-700 flex items-center justify-between gap-2">
+          <button type="button" data-action="toggle-wishlist-inspect" data-card-id="${card.id}"
+                  class="flex-1 py-2 px-3 rounded-xl font-extrabold text-xs transition active:scale-95 ${isWished ? 'bg-rose-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-rose-300 border border-rose-500/40'}">
+            <i class="fa-solid fa-heart mr-1 pointer-events-none"></i> ${isWished ? 'Nella Wishlist (Rimuovi)' : 'Aggiungi alla Wishlist'}
+          </button>
+          ${count === 0 ? `
+            <button type="button" data-action="propose-trade-for-card" data-card-id="${card.id}"
+                    class="py-2 px-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-xs transition active:scale-95">
+              <i class="fa-solid fa-right-left mr-1 pointer-events-none"></i> Cerca negli Scambi
+            </button>
+          ` : ''}
+        </div>
+
+        ${adminUnlocked ? `
+          <div class="pt-2.5 border-t border-cyan-500/40 space-y-2 bg-slate-950/70 p-2.5 rounded-xl">
+            <span class="block text-[10px] font-extrabold uppercase text-cyan-300">
+              <i class="fa-solid fa-camera mr-1"></i> Admin: Foto Reale Giocatore
+            </span>
+            <div class="flex gap-1.5">
+              <input id="inspect-admin-photo-url" type="url" placeholder="Incolla URL immagine..." value="${customCardPhotos[card.id] || ''}"
+                     class="flex-1 bg-slate-900 border border-slate-700 text-white text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:border-cyan-400" />
+              <button type="button" data-action="save-inspect-photo-url" data-card-id="${card.id}"
+                      class="px-2.5 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[11px]">
+                Salva
+              </button>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+              <label class="flex-1 cursor-pointer py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-center text-[10px] font-bold text-slate-200">
+                <i class="fa-solid fa-upload mr-1 text-cyan-400"></i> Carica dal Dispositivo
+                <input id="inspect-admin-photo-file" data-card-id="${card.id}" type="file" accept="image/*" class="hidden" />
+              </label>
+              <button type="button" data-action="remove-inspect-photo" data-card-id="${card.id}"
+                      class="py-1.5 px-2 rounded-lg bg-rose-900/70 hover:bg-rose-800 text-rose-200 font-bold text-[10px] border border-rose-700/60">
+                Rimuovi
+              </button>
+            </div>
+          </div>
+        ` : ''}
+      `;
+      document.getElementById('card-inspect-modal').classList.remove('hidden');
+    }
+
+    function compressImageFileToDataUrl(file, callback) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 320;
+          let w = img.width;
+          let h = img.height;
+          if (w > h && w > maxDim) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else if (h > maxDim) {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          callback(canvas.toDataURL('image/jpeg', 0.84));
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /**
+     * 12. PANNELLO SEGRETO ADMIN (CTRL + SHIFT + A -> "bananabella")
+     */
+    function openAdminModal() {
+      const modal = document.getElementById('admin-secret-modal');
+      modal.classList.remove('hidden');
+      if (adminUnlocked) {
+        document.getElementById('admin-login-box').classList.add('hidden');
+        document.getElementById('admin-controls-box').classList.remove('hidden');
+        updateAdminInfiniteBtnUI();
+      } else {
+        document.getElementById('admin-login-box').classList.remove('hidden');
+        document.getElementById('admin-controls-box').classList.add('hidden');
+        const input = document.getElementById('admin-password-input');
+        input.value = '';
+        setTimeout(() => input.focus(), 60);
+      }
+    }
+
+    function verifyAdminPassword() {
+      const val = document.getElementById('admin-password-input').value.trim();
+      if (val === 'bananabella') {
+        adminUnlocked = true;
+        document.getElementById('admin-login-box').classList.add('hidden');
+        document.getElementById('admin-controls-box').classList.remove('hidden');
+        updateAdminInfiniteBtnUI();
+        playSound('legend');
+        showToast('Accesso Admin sbloccato!', 'success');
+      } else {
+        showToast('Password segreta errata!', 'error');
+      }
+    }
+
+    function toggleInfiniteCredits() {
+      tempInfiniteCredits = !tempInfiniteCredits;
+      updateCreditsUI();
+      updateAdminInfiniteBtnUI();
+      showToast(
+        tempInfiniteCredits
+          ? 'Crediti infiniti temporanei ATTIVATI (∞)!'
+          : 'Crediti infiniti temporanei DISATTIVATI.',
+        'info'
+      );
+    }
+
+    function updateAdminInfiniteBtnUI() {
+      const btn = document.getElementById('btn-toggle-inf-credits');
+      if (!btn) return;
+      if (tempInfiniteCredits) {
+        btn.textContent = 'DISATTIVA ∞';
+        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-rose-600 text-white';
+      } else {
+        btn.textContent = 'ATTIVA ∞';
+        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-emerald-600 text-white';
+      }
+    }
+
+    /**
+     * 13. NAVIGAZIONE TAB, CONTATORI, AUDIO & CONFETTI
+     */
+    function switchTab(tabName) {
+      ['shop', 'pass', 'missions', 'album', 'trades', 'arena', 'leaderboard'].forEach(t => {
+        const sec = document.getElementById(`section-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (!sec || !btn) return;
+
+        if (t === tabName) {
+          sec.classList.remove('hidden');
+          btn.classList.remove('bg-slate-800/90', 'text-slate-300', 'hover:bg-slate-700');
+          btn.classList.add('bg-[#ff6b00]', 'text-white', 'shadow-lg', 'shadow-orange-600/25');
+        } else {
+          sec.classList.add('hidden');
+          btn.classList.add('bg-slate-800/90', 'text-slate-300', 'hover:bg-slate-700');
+          btn.classList.remove('bg-[#ff6b00]', 'text-white', 'shadow-lg', 'shadow-orange-600/25');
+        }
+      });
+
+      if (tabName === 'pass') renderWeeklyPass();
+      if (tabName === 'missions') renderWheelAndMissionsTab();
+      if (tabName === 'album') renderAlbum();
+      if (tabName === 'trades') renderTradesTab();
+      if (tabName === 'arena') renderArenaAndDuplicates();
+      if (tabName === 'leaderboard') renderLeaderboard();
+    }
+
+    function updateAlbumStatsUI() {
+      if (!currentUserState) return;
+      const uniqueOwned = ALL_CARDS.filter(c => (currentUserState.owned[c.id] || 0) > 0).length;
+      const pct = Math.round((uniqueOwned / TOTAL_CARDS_COUNT) * 100);
+
+      document.getElementById('header-progress-text').textContent = `${uniqueOwned}/${TOTAL_CARDS_COUNT} (${pct}%)`;
+      document.getElementById('header-progress-bar').style.width = `${pct}%`;
+      document.getElementById('nav-album-badge').textContent = `${uniqueOwned}/${TOTAL_CARDS_COUNT}`;
+
+      document.getElementById('album-stats-label').textContent = `${uniqueOwned} / ${TOTAL_CARDS_COUNT} (${pct}%)`;
+      document.getElementById('album-stats-bar').style.width = `${pct}%`;
+    }
+
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!currentUserState || !currentUserState.audioEnabled) return;
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      if (ctx.state === 'suspended') ctx.resume();
+
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      if (type === 'tear') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(170, now);
+        osc.frequency.exponentialRampToValueAtTime(520, now + 0.16);
+        gain.gain.setValueAtTime(0.11, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc.start(now);
+        osc.stop(now + 0.19);
+      } else if (type === 'flip') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(480, now);
+        osc.frequency.exponentialRampToValueAtTime(760, now + 0.08);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'legend') {
+        [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(freq, now + idx * 0.06);
+          g.gain.setValueAtTime(0.09, now + idx * 0.06);
+          g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.35);
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start(now + idx * 0.06);
+          o.stop(now + idx * 0.06 + 0.36);
+        });
+      } else if (type === 'coin') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.setValueAtTime(1174.66, now + 0.06);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+        osc.start(now);
+        osc.stop(now + 0.23);
+      }
+    }
+
+    function updateAudioIcon() {
+      if (!currentUserState) return;
+      const icon = document.getElementById('audio-icon');
+      icon.className = currentUserState.audioEnabled
+        ? 'fa-solid fa-volume-high text-sm text-amber-400 pointer-events-none'
+        : 'fa-solid fa-volume-xmark text-sm text-slate-500 pointer-events-none';
+    }
+
+    function toggleAudio() {
+      if (!currentUserState) return;
+      currentUserState.audioEnabled = !currentUserState.audioEnabled;
+      saveCurrentUserState();
+      updateAudioIcon();
+      showToast(currentUserState.audioEnabled ? 'Effetti sonori attivati' : 'Audio disattivato', 'info');
+    }
+
+    function spawnConfettiBurst() {
+      const colors = ['#ff6b00', '#ffd700', '#38bdf8', '#10b981', '#f43f5e'];
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2.2;
+      for (let i = 0; i < 32; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.backgroundColor = colors[i % colors.length];
+        el.style.left = `${cx}px`;
+        el.style.top = `${cy}px`;
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 80 + Math.random() * 240;
+        el.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+        el.style.setProperty('--ty', `${Math.sin(angle) * dist - 60}px`);
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1450);
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+
+      const styles = {
+        success: 'bg-emerald-950/95 border-emerald-500 text-emerald-100',
+        error: 'bg-rose-950/95 border-rose-500 text-rose-100',
+        info: 'bg-slate-900/95 border-[#ff6b00] text-slate-100'
+      };
+      const icons = {
+        success: 'fa-circle-check text-emerald-400',
+        error: 'fa-circle-exclamation text-rose-400',
+        info: 'fa-basketball text-[#ff6b00]'
+      };
+
+      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-2xl text-xs sm:text-sm font-bold backdrop-blur-md transition-all duration-300 ${styles[type] || styles.info}`;
+      toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info} text-base"></i><span>${message}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    /**
+     * 14. EVENT DELEGATION GLOBALE & SCORCIATOIA ADMIN (CTRL + SHIFT + A)
+     */
+    function bindGlobalEvents() {
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+          e.preventDefault();
+          openAdminModal();
+        }
+        if (e.key === 'Escape') {
+          document.getElementById('card-inspect-modal').classList.add('hidden');
+          document.getElementById('user-collection-modal').classList.add('hidden');
+          document.getElementById('admin-secret-modal').classList.add('hidden');
+        }
+      });
+
+      document.getElementById('admin-password-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          verifyAdminPassword();
+        }
+      });
+
+      document.addEventListener('change', (e) => {
+        if (e.target.id === 'admin-photo-file-input') {
+          const cardId = document.getElementById('admin-photo-card-select').value;
+          const file = e.target.files && e.target.files[0];
+          if (!cardId) {
+            showToast('Seleziona prima un giocatore dal menu a tendina!', 'error');
+            return;
+          }
+          if (file) {
+            compressImageFileToDataUrl(file, async (dataUrl) => {
+              await saveCustomCardPhoto(cardId, dataUrl);
+              renderAlbum();
+              renderLineupSection();
+              showToast('Foto giocatore caricata e sincronizzata!', 'success');
+            });
+          }
+        } else if (e.target.id === 'inspect-admin-photo-file') {
+          const cardId = e.target.dataset.cardId;
+          const file = e.target.files && e.target.files[0];
+          if (cardId && file) {
+            compressImageFileToDataUrl(file, async (dataUrl) => {
+              await saveCustomCardPhoto(cardId, dataUrl);
+              openInspectModal(cardId);
+              renderAlbum();
+              renderLineupSection();
+              showToast('Foto giocatore salvata!', 'success');
+            });
+          }
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+
+        const action = target.dataset.action;
+
+        if (action === 'discord-bot-oauth') {
+          handleDiscordBotOAuth();
+        } else if (action === 'quick-guest-login') {
+          const input = document.getElementById('quick-username-input');
+          const nick = (input && input.value.trim()) ? input.value.trim() : `Coach_${Math.floor(100 + Math.random() * 900)}`;
+          const safeId = 'local_' + nick.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          loginWithDiscordProfile({
+            id: safeId,
+            username: nick,
+            favTeamId: 'fortitudo',
+            favTeamShort: 'Serie A2 Fan',
+            avatarUrl: generateDiscordAvatarUrl(nick, '5865F2')
+          });
+        } else if (action === 'login-saved-account') {
+          const accId = target.dataset.accountId;
+          try {
+            const map = JSON.parse(localStorage.getItem(ACCOUNTS_INDEX_KEY) || '{}');
+            if (map[accId]) loginWithDiscordProfile(map[accId]);
+          } catch (err) {}
+        } else if (action === 'switch-discord-user') {
+          renderSavedAccountsList();
+          document.getElementById('discord-auth-screen').classList.remove('hidden');
+        } else if (action === 'switch-tab') {
+          switchTab(target.dataset.tab);
+        } else if (action === 'toggle-audio') {
+          toggleAudio();
+        } else if (action === 'buy-pack') {
+          buyAndOpenPack(target.dataset.pack);
+        } else if (action === 'tear-pack') {
+          tearPackAction();
+        } else if (action === 'flip-card') {
+          flipSinglePackCard(Number(target.dataset.index));
+        } else if (action === 'flip-all') {
+          flipAllPackCards();
+        } else if (action === 'close-stage') {
+          closePackStage();
+        } else if (action === 'claim-daily-pass') {
+          claimDailyPassReward();
+        } else if (action === 'spin-daily-wheel') {
+          spinDailyLuckyWheel();
+        } else if (action === 'claim-mission') {
+          claimMissionReward(target.dataset.missionId);
+        } else if (action === 'album-status') {
+          setAlbumStatusFilter(target.dataset.status);
+        } else if (action === 'toggle-wishlist') {
+          toggleWishlistCard(target.dataset.cardId);
+        } else if (action === 'toggle-wishlist-inspect') {
+          toggleWishlistCard(target.dataset.cardId);
+          openInspectModal(target.dataset.cardId);
+        } else if (action === 'inspect-card') {
+          openInspectModal(target.dataset.cardId);
+        } else if (action === 'close-inspect') {
+          if (e.target.id === 'card-inspect-modal' || target.tagName === 'BUTTON') {
+            document.getElementById('card-inspect-modal').classList.add('hidden');
+          }
+        } else if (action === 'close-user-collection') {
+          if (e.target.id === 'user-collection-modal' || target.tagName === 'BUTTON') {
+            document.getElementById('user-collection-modal').classList.add('hidden');
+            currentlyViewedUserId = null;
+          }
+        } else if (action === 'view-user-collection') {
+          openUserCollectionModal(target.dataset.userId);
+        } else if (action === 'propose-trade-for-card') {
+          document.getElementById('card-inspect-modal').classList.add('hidden');
+          proposeTradeForSpecificCard(target.dataset.cardId);
+        } else if (action === 'create-trade-offer') {
+          createTradeOffer();
+        } else if (action === 'cancel-trade-offer') {
+          cancelTradeOffer(target.dataset.tradeId);
+        } else if (action === 'accept-trade-offer') {
+          acceptTradeOffer(target.dataset.tradeId);
+        } else if (action === 'refresh-trades') {
+          renderTradesTab();
+          showToast('Bacheca scambi sincronizzata.', 'info');
+        } else if (action === 'discard-single-dup') {
+          discardSingleDuplicate(target.dataset.cardId);
+        } else if (action === 'discard-all-dups') {
+          discardAllDuplicates();
+        } else if (action === 'select-lineup-slot') {
+          const slotKey = target.dataset.slot;
+          selectedLineupSlotKey = (selectedLineupSlotKey === slotKey) ? null : slotKey;
+          renderLineupSection();
+        } else if (action === 'remove-lineup-slot') {
+          const slotKey = target.dataset.slot;
+          if (currentUserState && currentUserState.lineupSlots) {
+            currentUserState.lineupSlots[slotKey] = null;
+            saveCurrentUserState();
+            renderLineupSection();
+          }
+        } else if (action === 'assign-player-slot') {
+          assignPlayerToLineupSlot(target.dataset.cardId);
+        } else if (action === 'auto-lineup') {
+          autoBuildBestLineup();
+        } else if (action === 'clear-lineup') {
+          clearLineup();
+        } else if (action === 'select-tactic') {
+          if (currentUserState) {
+            currentUserState.tactic = target.dataset.tactic;
+            saveCurrentUserState();
+            renderLineupSection();
+          }
+        } else if (action === 'play-match') {
+          playTacticalMatch();
+        } else if (action === 'finish-match-halftime') {
+          finishTacticalMatchSecondHalf(target.dataset.choice);
+        } else if (action === 'refresh-leaderboard') {
+          renderLeaderboard();
+          showToast('Classifica live aggiornata.', 'info');
+        } else if (action === 'close-admin') {
+          if (e.target.id === 'admin-secret-modal' || target.tagName === 'BUTTON') {
+            document.getElementById('admin-secret-modal').classList.add('hidden');
+          }
+        } else if (action === 'verify-admin-password') {
+          verifyAdminPassword();
+        } else if (action === 'toggle-infinite-credits') {
+          toggleInfiniteCredits();
+        } else if (action === 'admin-sim-next-day') {
+          dayOffsetForTesting += 1;
+          renderWeeklyPass();
+          showToast(`Simulato avanzamento di +1 giorno consecutivo (Giorno virtuale +${dayOffsetForTesting}).`, 'info');
+        } else if (action === 'admin-sim-skip-day') {
+          dayOffsetForTesting += 2;
+          evaluatePassStreakIntegrity(true);
+          renderWeeklyPass();
+        } else if (action === 'admin-save-photo-url') {
+          const cardId = document.getElementById('admin-photo-card-select').value;
+          const urlVal = document.getElementById('admin-photo-url-input').value.trim();
+          if (!cardId || !urlVal) {
+            showToast('Seleziona un giocatore e incolla un URL valido!', 'error');
+            return;
+          }
+          saveCustomCardPhoto(cardId, urlVal).then(() => {
+            renderAlbum();
+            renderLineupSection();
+            showToast('URL foto salvato e sincronizzato!', 'success');
+          });
+        } else if (action === 'admin-remove-photo') {
+          const cardId = document.getElementById('admin-photo-card-select').value;
+          if (!cardId) return;
+          saveCustomCardPhoto(cardId, null).then(() => {
+            renderAlbum();
+            renderLineupSection();
+            showToast('Foto personalizzata rimossa.', 'info');
+          });
+        } else if (action === 'save-inspect-photo-url') {
+          const cardId = target.dataset.cardId;
+          const urlVal = document.getElementById('inspect-admin-photo-url').value.trim();
+          if (cardId && urlVal) {
+            saveCustomCardPhoto(cardId, urlVal).then(() => {
+              openInspectModal(cardId);
+              renderAlbum();
+              renderLineupSection();
+              showToast('Foto giocatore salvata!', 'success');
+            });
+          }
+        } else if (action === 'remove-inspect-photo') {
+          const cardId = target.dataset.cardId;
+          if (cardId) {
+            saveCustomCardPhoto(cardId, null).then(() => {
+              openInspectModal(cardId);
+              renderAlbum();
+              renderLineupSection();
+              showToast('Foto rimossa.', 'info');
+            });
+          }
+        } else if (action === 'admin-global-reset') {
+          forceGlobalResetFromAdmin();
+        }
+      });
+
+      document.getElementById('team-filter').addEventListener('change', renderAlbum);
+      document.getElementById('rarity-filter').addEventListener('change', renderAlbum);
+      document.getElementById('leaderboard-sort-select').addEventListener('change', renderLeaderboard);
+
+      document.getElementById('viewer-team-filter').addEventListener('change', () => {
+        if (currentlyViewedUserId) renderUserCollectionModalContent(currentlyViewedUserId);
+      });
+      document.getElementById('viewer-rarity-filter').addEventListener('change', () => {
+        if (currentlyViewedUserId) renderUserCollectionModalContent(currentlyViewedUserId);
+      });
+      document.getElementById('viewer-copies-filter').addEventListener('change', () => {
+        if (currentlyViewedUserId) renderUserCollectionModalContent(currentlyViewedUserId);
+      });
+    }
+
+    /**
+     * 15. AVVIO DELL'APPLICAZIONE
+     */
+    async function initApp() {
+      populateTeamDropdowns();
+      bindGlobalEvents();
+      initPackTearSwipe();
+
+      try {
+        const savedPhotos = localStorage.getItem(CUSTOM_PHOTOS_KEY);
+        if (savedPhotos) customCardPhotos = JSON.parse(savedPhotos);
+      } catch (e) {}
+
+      await initCloudBackend();
+
+      const loggedFromOAuth = await checkDiscordOAuthHashCallback();
+      if (loggedFromOAuth) return;
+
+      renderSavedAccountsList();
+
+      try {
+        const activeId = localStorage.getItem(ACTIVE_ACCOUNT_KEY);
+        const accountsMap = JSON.parse(localStorage.getItem(ACCOUNTS_INDEX_KEY) || '{}');
+        if (activeId && accountsMap[activeId]) {
+          await loginWithDiscordProfile(accountsMap[activeId]);
+        }
+      } catch (e) {}
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
