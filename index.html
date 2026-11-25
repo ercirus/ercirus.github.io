@@ -137,7 +137,7 @@
       border: 2px solid #60a5fa;
     }
     .pack-foil-gold {
-      background: linear-gradient(135deg, #92e 0%, #f59e0b 45%, #b45309 75%, #451a03 100%);
+      background: linear-gradient(135deg, #92400e 0%, #f59e0b 45%, #b45309 75%, #451a03 100%);
       border: 2px solid #fde047;
     }
     .pack-foil-mvp {
@@ -163,6 +163,84 @@
     ::-webkit-scrollbar-track { background: #0b132b; }
     ::-webkit-scrollbar-thumb { background: #27375e; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #ff6b00; }
+
+    /* Taglio Interattivo Bustina (Swipe / Drag) */
+    .tear-track-container {
+      position: relative;
+      width: 100%;
+      height: 44px;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 12px;
+      border: 2px dashed rgba(255, 255, 255, 0.65);
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+    }
+    .tear-track-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(255,215,0,0.35), rgba(255,255,255,0.75));
+      pointer-events: none;
+    }
+    .tear-handle {
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      width: 36px;
+      height: 34px;
+      border-radius: 9px;
+      background: #ffffff;
+      color: #0b132b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+      cursor: grab;
+      z-index: 5;
+    }
+    .tear-handle:active {
+      cursor: grabbing;
+    }
+
+    /* Bagliore anticipazione carta più rara nella bustina */
+    .pack-glow-rare {
+      box-shadow: 0 0 35px rgba(251, 191, 36, 0.75), 0 0 70px rgba(245, 158, 11, 0.45) !important;
+      border-color: #fde047 !important;
+    }
+    .pack-glow-epic {
+      box-shadow: 0 0 40px rgba(56, 189, 248, 0.8), 0 0 80px rgba(139, 92, 246, 0.55) !important;
+      border-color: #38bdf8 !important;
+    }
+    .pack-glow-signature {
+      box-shadow: 0 0 45px rgba(251, 113, 133, 0.85), 0 0 90px rgba(225, 29, 72, 0.6) !important;
+      border-color: #fda4af !important;
+    }
+    .pack-glow-legend {
+      box-shadow: 0 0 50px rgba(255, 215, 0, 0.95), 0 0 100px rgba(255, 107, 0, 0.7) !important;
+      border-color: #ffd700 !important;
+    }
+    .pack-glow-icon {
+      box-shadow: 0 0 55px rgba(45, 212, 191, 0.95), 0 0 110px rgba(254, 240, 138, 0.75) !important;
+      border-color: #5eead4 !important;
+    }
+
+    /* Ruota della Fortuna */
+    .wheel-pointer {
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 26px solid #ffd700;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.7));
+    }
+    .wheel-disc {
+      transition: transform 4.2s cubic-bezier(0.12, 0.85, 0.18, 1);
+    }
+
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -298,6 +376,12 @@
         <span id="nav-pass-badge" class="text-[10px] bg-amber-500 text-slate-950 font-black px-1.5 py-0.5 rounded-md pointer-events-none">PREMIO!</span>
       </button>
 
+      <button type="button" data-action="switch-tab" data-tab="missions" id="tab-btn-missions" class="shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition active:scale-95 bg-slate-800/90 text-slate-300 hover:bg-slate-700">
+        <i class="fa-solid fa-dharmachakra text-emerald-400 pointer-events-none"></i>
+        <span class="pointer-events-none">Ruota & Missioni</span>
+        <span id="nav-missions-badge" class="text-[10px] bg-emerald-500 text-slate-950 font-black px-1.5 py-0.5 rounded-md pointer-events-none">GIRA!</span>
+      </button>
+
       <button type="button" data-action="switch-tab" data-tab="album" id="tab-btn-album" class="shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition active:scale-95 bg-slate-800/90 text-slate-300 hover:bg-slate-700">
         <i class="fa-solid fa-book-open pointer-events-none"></i>
         <span class="pointer-events-none">Album Ufficiale</span>
@@ -389,7 +473,7 @@
           <button type="button" data-action="buy-pack" data-pack="base" class="mt-auto w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg transition active:scale-95">
             <span class="pointer-events-none">Acquista Bustina</span>
             <span class="bg-slate-950/60 px-2.5 py-0.5 rounded-lg text-amber-300 flex items-center gap-1 pointer-events-none">
-              <i class="fa-solid fa-coins text-xs"></i> <span data-price-label="base">400</span>
+              <i class="fa-solid fa-coins text-xs"></i> <span data-price-label="base">200</span>
             </span>
           </button>
         </div>
@@ -429,7 +513,7 @@
           <button type="button" data-action="buy-pack" data-pack="gold" class="mt-auto w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg transition active:scale-95">
             <span class="pointer-events-none">Acquista Gold Pack</span>
             <span class="bg-slate-950/80 px-2.5 py-0.5 rounded-lg text-amber-300 flex items-center gap-1 pointer-events-none">
-              <i class="fa-solid fa-coins text-xs"></i> <span data-price-label="gold">1.200</span>
+              <i class="fa-solid fa-coins text-xs"></i> <span data-price-label="gold">700</span>
             </span>
           </button>
         </div>
@@ -469,7 +553,7 @@
           <button type="button" data-action="buy-pack" data-pack="mvp" class="mt-auto w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 via-orange-500 to-amber-400 hover:brightness-110 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg transition active:scale-95">
             <span class="pointer-events-none">Acquista Mega MVP</span>
             <span class="bg-slate-950/75 px-2.5 py-0.5 rounded-lg text-yellow-300 flex items-center gap-1 pointer-events-none">
-              <i class="fa-solid fa-coins text-xs"></i> <span data-price-label="mvp">2.300</span>
+              <i class="fa-solid fa-coins text-xs"></i> <span data-price-label="mvp">1.500</span>
             </span>
           </button>
         </div>
@@ -477,28 +561,38 @@
 
       <!-- AREA INTERATTIVA DI APERTURA BUSTINA (STAGE) -->
       <div id="pack-opening-stage" class="hidden bg-[#111a33] border-2 border-[#ff6b00]/60 rounded-3xl p-5 sm:p-8 shadow-2xl relative">
-        <!-- Fase A: Bustina chiusa pronta da strappare -->
+        <!-- Fase A: Bustina chiusa da tagliare trascinando dito/mouse -->
         <div id="stage-tear-view" class="flex flex-col items-center justify-center py-6 text-center">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-amber-400 mb-3">
-            Tocca o clicca sulla bustina per strapparla!
+          <span id="stage-rarity-hint" class="text-xs font-extrabold uppercase tracking-widest text-amber-400 mb-3">
+            Trascina la forbice da sinistra a destra per tagliare la bustina!
           </span>
-          <div id="interactive-pack-wrapper" data-action="tear-pack" class="w-56 h-80 rounded-2xl pack-foil-gold holo-shimmer flex flex-col items-center justify-between p-6 shadow-2xl transition transform hover:scale-105 relative">
-            <div class="w-full border-b-2 border-dashed border-white/60 pb-2 text-center pointer-events-none">
-              <span class="text-[11px] font-black tracking-widest uppercase text-white/90 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-scissors"></i> STRAPPA QUI <i class="fa-solid fa-scissors"></i>
+          <div id="interactive-pack-wrapper" class="w-64 sm:w-72 h-88 rounded-2xl pack-foil-gold holo-shimmer flex flex-col items-center justify-between p-5 shadow-2xl transition-all duration-300 relative">
+            <!-- Barra di taglio interattiva -->
+            <div id="pack-tear-track" class="tear-track-container">
+              <div id="pack-tear-fill" class="tear-track-fill"></div>
+              <div id="pack-tear-handle" class="tear-handle" title="Trascina verso destra">
+                <i class="fa-solid fa-scissors text-sm pointer-events-none"></i>
+              </div>
+              <span class="absolute inset-0 flex items-center justify-center pl-7 text-[10px] font-black tracking-widest uppercase text-white/95 pointer-events-none">
+                TRASCINA PER TAGLIARE <i class="fa-solid fa-angles-right ml-1.5"></i>
               </span>
             </div>
-            <div class="my-auto flex flex-col items-center pointer-events-none">
+
+            <div class="my-8 flex flex-col items-center pointer-events-none">
               <i class="fa-solid fa-basketball text-5xl text-white mb-3 drop-shadow-lg"></i>
               <span id="stage-pack-title" class="font-display text-4xl font-bold text-white tracking-wider uppercase">GOLD PACK</span>
-              <span class="text-xs font-bold text-white/80 mt-1">SERIE A2 2026/27</span>
+              <span class="text-xs font-bold text-white/85 mt-1">SERIE A2 2026/27</span>
+              <span id="stage-pack-aura-label" class="mt-3 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-black/50 text-white/90 border border-white/25">
+                Scopri il bagliore...
+              </span>
             </div>
-            <div class="w-full text-[10px] font-bold text-white/80 uppercase tracking-wider pointer-events-none">
+
+            <div class="w-full text-[10px] font-bold text-white/80 uppercase tracking-wider border-t border-white/20 pt-2 pointer-events-none">
               Lega Nazionale Pallacanestro
             </div>
           </div>
-          <button type="button" data-action="tear-pack" class="mt-6 px-8 py-3 rounded-xl bg-[#ff6b00] hover:bg-orange-500 text-white font-extrabold text-base shadow-lg shadow-orange-600/40 transition active:scale-95">
-            <i class="fa-solid fa-bolt mr-2 pointer-events-none"></i> Strappa la Bustina!
+          <button type="button" data-action="tear-pack" class="mt-5 px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 transition active:scale-95">
+            <i class="fa-solid fa-bolt mr-1 text-amber-400 pointer-events-none"></i> Apertura Rapida
           </button>
         </div>
 
@@ -569,6 +663,115 @@
       <!-- Griglia dei 7 Giorni -->
       <div id="weekly-pass-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
     </section>
+
+    <!-- =========================================================
+         TAB 2B: RUOTA DELLA FORTUNA GIORNALIERA & MISSIONI SBLOCCABILI
+         ========================================================= -->
+    <section id="section-missions" class="hidden space-y-8">
+      <!-- RUOTA DELLA FORTUNA GIORNALIERA -->
+      <div class="bg-gradient-to-r from-[#15203b] via-[#1c2847] to-[#15203b] border border-emerald-500/40 rounded-3xl p-5 sm:p-8 shadow-2xl">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div class="space-y-4">
+            <span class="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-widest text-emerald-400">
+              <i class="fa-solid fa-dharmachakra"></i> Bonus Quotidiano Gratuito
+            </span>
+            <h2 class="font-display text-3xl sm:text-4xl font-bold uppercase text-white tracking-wide">
+              Ruota della Fortuna LNP Serie A2
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Hai <strong>1 giro gratuito ogni giorno</strong>! Gira la ruota per vincere subito crediti extra, bustine omaggio o il jackpot da <strong>1.500 Crediti + Mega Pack MVP</strong>!
+            </p>
+
+            <div class="grid grid-cols-2 gap-2.5 text-xs">
+              <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-blue-500 shrink-0"></span>
+                <span class="text-slate-200 font-bold">+150 Crediti</span>
+              </div>
+              <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-emerald-500 shrink-0"></span>
+                <span class="text-slate-200 font-bold">Bustina Base Gratis</span>
+              </div>
+              <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-amber-500 shrink-0"></span>
+                <span class="text-slate-200 font-bold">+400 Crediti</span>
+              </div>
+              <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-purple-500 shrink-0"></span>
+                <span class="text-slate-200 font-bold">Gold Pack Gratis</span>
+              </div>
+              <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-rose-500 shrink-0"></span>
+                <span class="text-slate-200 font-bold">+750 Crediti</span>
+              </div>
+              <div class="bg-slate-900/90 border border-yellow-400/50 rounded-xl p-2.5 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-yellow-400 shrink-0"></span>
+                <span class="text-yellow-300 font-extrabold">JACKPOT: Mega MVP!</span>
+              </div>
+            </div>
+
+            <div class="pt-2">
+              <button type="button" id="btn-spin-wheel" data-action="spin-daily-wheel" class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-black text-sm sm:text-base shadow-xl shadow-emerald-600/25 transition active:scale-95">
+                <i class="fa-solid fa-play mr-2 pointer-events-none"></i> <span id="spin-wheel-btn-label" class="pointer-events-none">GIRA LA RUOTA GRATIS!</span>
+              </button>
+              <p id="wheel-last-prize-msg" class="text-xs font-bold text-amber-300 mt-2.5 hidden"></p>
+            </div>
+          </div>
+
+          <!-- Grafica Ruota SVG -->
+          <div class="flex flex-col items-center justify-center relative py-2">
+            <div class="wheel-pointer z-20 -mb-3"></div>
+            <div class="relative w-64 h-64 sm:w-72 sm:h-72 rounded-full p-2 bg-gradient-to-b from-amber-300 via-amber-500 to-amber-700 shadow-2xl">
+              <div id="lucky-wheel-disc" class="wheel-disc w-full h-full rounded-full overflow-hidden relative bg-slate-900">
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                  <!-- 6 spicchi da 60 gradi ciascuno -->
+                  <path d="M100,100 L100,0 A100,100 0 0,1 186.6,50 Z" fill="#2563eb" />
+                  <path d="M100,100 L186.6,50 A100,100 0 0,1 186.6,150 Z" fill="#059669" />
+                  <path d="M100,100 L186.6,150 A100,100 0 0,1 100,200 Z" fill="#d97706" />
+                  <path d="M100,100 L100,200 A100,100 0 0,1 13.4,150 Z" fill="#7c3aed" />
+                  <path d="M100,100 L13.4,150 A100,100 0 0,1 13.4,50 Z" fill="#e11d48" />
+                  <path d="M100,100 L13.4,50 A100,100 0 0,1 100,0 Z" fill="#eab308" />
+
+                  <!-- Etichette sugli spicchi -->
+                  <text x="132" y="42" fill="#fff" font-size="10" font-weight="900" text-anchor="middle" transform="rotate(30 132 42)">+150 CR</text>
+                  <text x="162" y="103" fill="#fff" font-size="9" font-weight="900" text-anchor="middle" transform="rotate(90 162 103)">PACK BASE</text>
+                  <text x="132" y="162" fill="#fff" font-size="10" font-weight="900" text-anchor="middle" transform="rotate(150 132 162)">+400 CR</text>
+                  <text x="68" y="162" fill="#fff" font-size="9" font-weight="900" text-anchor="middle" transform="rotate(210 68 162)">GOLD PACK</text>
+                  <text x="38" y="103" fill="#fff" font-size="10" font-weight="900" text-anchor="middle" transform="rotate(270 38 103)">+750 CR</text>
+                  <text x="68" y="42" fill="#0f172a" font-size="9.5" font-weight="900" text-anchor="middle" transform="rotate(330 68 42)">MEGA MVP</text>
+                </svg>
+              </div>
+              <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="w-12 h-12 rounded-full bg-slate-950 border-4 border-amber-400 flex items-center justify-center shadow-lg">
+                  <i class="fa-solid fa-basketball text-[#ff6b00] text-lg"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MISSIONI & OBIETTIVI SBLOCCABILI (ACHIEVEMENT) -->
+      <div class="bg-[#15203b] border border-slate-700/80 rounded-3xl p-5 sm:p-7 shadow-xl space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-widest text-amber-400">
+              <i class="fa-solid fa-medal mr-1"></i> Sfide & Traguardi Collezionista
+            </span>
+            <h2 class="font-display text-3xl font-bold uppercase text-white tracking-wide">
+              Missioni & Obiettivi Sbloccabili
+            </h2>
+            <p class="text-xs text-slate-400">Completa gli obiettivi speciali dell'album e degli scambi per riscattare premi in crediti!</p>
+          </div>
+          <div class="bg-slate-950/80 border border-amber-400/40 px-4 py-2 rounded-xl text-center shrink-0">
+            <span class="block text-[10px] font-bold uppercase text-slate-400">Obiettivi Riscattati</span>
+            <span id="missions-completed-counter" class="font-display text-2xl font-bold text-amber-400">0 / 8</span>
+          </div>
+        </div>
+
+        <div id="missions-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+    </section>
+
 
     <!-- =========================================================
          TAB 3: ALBUM UFFICIALE SERIE A2 2026/27
@@ -1631,9 +1834,9 @@
       measurementId: "G-3K2R1PHLS8"
     };
 
-    const RESET_FLAG_KEY = 'lnp_a2_reset_done_v7_clean';
-    const ACCOUNTS_INDEX_KEY = 'lnp_a2_discord_accounts_v7';
-    const ACTIVE_ACCOUNT_KEY = 'lnp_a2_active_discord_user_v7';
+    const RESET_FLAG_KEY = 'lnp_a2_reset_done_v6_clean';
+    const ACCOUNTS_INDEX_KEY = 'lnp_a2_discord_accounts_v5';
+    const ACTIVE_ACCOUNT_KEY = 'lnp_a2_active_discord_user_v5';
     const CUSTOM_PHOTOS_KEY = 'lnp_a2_custom_card_photos_v5';
     const DISCORD_BOT_CLIENT_ID = '1541078187952308255';
 
@@ -1649,7 +1852,7 @@
     let currentlyViewedUserId = null;
 
     function getUserStorageKey(discordId) {
-      return `lnp_a2_user_data_${discordId}_v7`;
+      return `lnp_a2_user_data_${discordId}_v5`;
     }
 
     async function executeCleanResetIfNeeded() {
@@ -1667,7 +1870,7 @@
 
       if (firebaseDb && firebaseUser) {
         try {
-          const resetDocRef = doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'system_meta', 'v7_clean_reset');
+          const resetDocRef = doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'system_meta', 'v6_clean_reset');
           const resetSnap = await getDoc(resetDocRef);
           if (!resetSnap.exists()) {
             const oldProfiles = await getDocs(collection(firebaseDb, 'artifacts', appId, 'public', 'data', 'public_profiles'));
@@ -1779,23 +1982,6 @@
         },
         (err) => console.warn('Errore listener foto:', err)
       );
-
-      onSnapshot(
-        doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'system_meta', 'v7_clean_reset'),
-        (docSnap) => {
-          if (docSnap.exists() && !localStorage.getItem(RESET_FLAG_KEY)) {
-            const keysToRemove = [];
-            for (let i = 0; i < localStorage.length; i++) {
-              const k = localStorage.key(i);
-              if (k && k.startsWith('lnp_a2_')) keysToRemove.push(k);
-            }
-            keysToRemove.forEach(k => localStorage.removeItem(k));
-            localStorage.setItem(RESET_FLAG_KEY, '1');
-            location.reload();
-          }
-        },
-        (err) => console.warn('Errore listener reset:', err)
-      );
     }
 
     function setupPendingTradeCreditsListener(discordId) {
@@ -1903,6 +2089,9 @@
         matchWins: 0,
         audioEnabled: true,
         packsOpened: 0,
+        tradesCompleted: 0,
+        lastWheelSpinDayNum: null,
+        claimedMissions: [],
         pass: {
           streak: 0,
           lastClaimDayNum: null,
@@ -1998,6 +2187,9 @@
         if (!loaded.tactic) loaded.tactic = 'pace';
         if (!loaded.dailyMatches) loaded.dailyMatches = { dayNum: null, count: 0 };
         if (typeof loaded.matchWins !== 'number') loaded.matchWins = 0;
+        if (typeof loaded.tradesCompleted !== 'number') loaded.tradesCompleted = 0;
+        if (typeof loaded.lastWheelSpinDayNum === 'undefined') loaded.lastWheelSpinDayNum = null;
+        if (!Array.isArray(loaded.claimedMissions)) loaded.claimedMissions = [];
         currentUserState = loaded;
       } else {
         currentUserState = createDefaultUserState(discordProfile);
@@ -2014,6 +2206,7 @@
       updateAlbumStatsUI();
       updateAudioIcon();
       renderWeeklyPass();
+      renderWheelAndMissionsTab();
       renderAlbum();
       renderTradesTab();
       renderArenaAndDuplicates();
@@ -2593,8 +2786,10 @@
         return { card, isNew, flipped: false };
       });
 
+      currentUserState.tradesCompleted = (currentUserState.tradesCompleted || 0) + 1;
       checkTeamCompletions(true);
       saveCurrentUserState();
+      renderWheelAndMissionsTab();
       updateCreditsUI();
       updateAlbumStatsUI();
 
@@ -2605,9 +2800,88 @@
       document.getElementById('stage-tear-view').classList.remove('hidden');
       document.getElementById('stage-cards-view').classList.add('hidden');
 
+      // Calcola la carta più rara contenuta nella bustina per il bagliore luminoso
+      const rarityRank = { common: 1, rare: 2, epic: 3, signature: 4, legend: 5, icon: 6 };
+      let bestCard = currentOpenedPackCards[0].card;
+      currentOpenedPackCards.forEach(item => {
+        if ((rarityRank[item.card.rarity] || 1) > (rarityRank[bestCard.rarity] || 1)) {
+          bestCard = item.card;
+        }
+      });
+
+      const glowMap = {
+        common: { cls: '', label: 'Bustina Standard LNP' },
+        rare: { cls: 'pack-glow-rare', label: 'Bagliore Oro Raro!' },
+        epic: { cls: 'pack-glow-epic', label: 'Energia All-Star Epica!' },
+        signature: { cls: 'pack-glow-signature', label: 'Bagliore Signature Edition!' },
+        legend: { cls: 'pack-glow-legend', label: 'AURA LEGGENDA OVR 88+!' },
+        icon: { cls: 'pack-glow-icon', label: 'AURA SUPREMA MVP ICONA!' }
+      };
+      const gInfo = glowMap[bestCard.rarity] || glowMap.common;
+
       const packWrapper = document.getElementById('interactive-pack-wrapper');
-      packWrapper.className = `w-56 h-80 rounded-2xl ${cfg.foilClass} holo-shimmer flex flex-col items-center justify-between p-6 shadow-2xl transition transform hover:scale-105 relative`;
+      packWrapper.className = `w-64 sm:w-72 h-88 rounded-2xl ${cfg.foilClass} ${gInfo.cls} holo-shimmer flex flex-col items-center justify-between p-5 shadow-2xl transition-all duration-300 relative`;
       document.getElementById('stage-pack-title').textContent = cfg.name;
+      document.getElementById('stage-pack-aura-label').textContent = gInfo.label;
+
+      resetTearSlider();
+    }
+
+    function resetTearSlider() {
+      const handle = document.getElementById('pack-tear-handle');
+      const fill = document.getElementById('pack-tear-fill');
+      if (handle) handle.style.left = '4px';
+      if (fill) fill.style.width = '0%';
+    }
+
+    function initPackTearSwipe() {
+      const track = document.getElementById('pack-tear-track');
+      const handle = document.getElementById('pack-tear-handle');
+      const fill = document.getElementById('pack-tear-fill');
+      if (!track || !handle || !fill) return;
+
+      let isDragging = false;
+      let startX = 0;
+
+      const onStart = (clientX) => {
+        isDragging = true;
+        startX = clientX - handle.offsetLeft;
+      };
+
+      const onMove = (clientX) => {
+        if (!isDragging) return;
+        const maxLeft = track.clientWidth - handle.clientWidth - 6;
+        let newLeft = clientX - startX;
+        if (newLeft < 4) newLeft = 4;
+        if (newLeft > maxLeft) newLeft = maxLeft;
+
+        handle.style.left = `${newLeft}px`;
+        const pct = Math.round((newLeft / maxLeft) * 100);
+        fill.style.width = `${pct}%`;
+
+        if (pct >= 86) {
+          isDragging = false;
+          tearPackAction();
+        }
+      };
+
+      const onEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        resetTearSlider();
+      };
+
+      handle.addEventListener('mousedown', (e) => { e.preventDefault(); onStart(e.clientX); });
+      window.addEventListener('mousemove', (e) => onMove(e.clientX));
+      window.addEventListener('mouseup', onEnd);
+
+      handle.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches[0]) onStart(e.touches[0].clientX);
+      }, { passive: true });
+      window.addEventListener('touchmove', (e) => {
+        if (isDragging && e.touches && e.touches[0]) onMove(e.touches[0].clientX);
+      }, { passive: true });
+      window.addEventListener('touchend', onEnd);
     }
 
     function tearPackAction() {
@@ -3830,8 +4104,277 @@
       document.getElementById('album-stats-bar').style.width = `${pct}%`;
     }
 
+
+    /**
+     * 10B. RUOTA DELLA FORTUNA GIORNALIERA & MISSIONI SBLOCCABILI (ACHIEVEMENT)
+     */
+    const WHEEL_SEGMENTS = [
+      { label: '+150 Crediti', type: 'credits', amount: 150, angleCenter: 30 },
+      { label: '1 Bustina Base Gratis', type: 'pack', packType: 'base', angleCenter: 90 },
+      { label: '+400 Crediti', type: 'credits', amount: 400, angleCenter: 150 },
+      { label: '1 Gold Pack Gratis', type: 'pack', packType: 'gold', angleCenter: 210 },
+      { label: '+750 Crediti', type: 'credits', amount: 750, angleCenter: 270 },
+      { label: 'JACKPOT: Mega Pack MVP Gratis!', type: 'pack', packType: 'mvp', angleCenter: 330 }
+    ];
+
+    let wheelSpinning = false;
+    let currentWheelRotation = 0;
+
+    function renderWheelAndMissionsTab() {
+      if (!currentUserState) return;
+      const todayNum = getCurrentDayNumber();
+      const alreadySpun = currentUserState.lastWheelSpinDayNum === todayNum;
+
+      const spinBtn = document.getElementById('btn-spin-wheel');
+      const spinLabel = document.getElementById('spin-wheel-btn-label');
+      const navBadge = document.getElementById('nav-missions-badge');
+
+      if (spinBtn && spinLabel) {
+        spinBtn.disabled = alreadySpun || wheelSpinning;
+        spinLabel.textContent = alreadySpun
+          ? 'GIÀ GIRATA OGGI • TORNA DOMANI'
+          : 'GIRA LA RUOTA GRATIS!';
+      }
+
+      const missions = getMissionsProgressList();
+      const claimableCount = missions.filter(m => m.completed && !m.claimed).length;
+
+      if (navBadge) {
+        if (!alreadySpun) {
+          navBadge.textContent = 'GIRA!';
+          navBadge.className = 'text-[10px] bg-emerald-500 text-slate-950 font-black px-1.5 py-0.5 rounded-md pointer-events-none animate-pulse';
+        } else if (claimableCount > 0) {
+          navBadge.textContent = `+${claimableCount}`;
+          navBadge.className = 'text-[10px] bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded-md pointer-events-none animate-pulse';
+        } else {
+          navBadge.textContent = `${missions.filter(m => m.claimed).length}/${missions.length}`;
+          navBadge.className = 'text-[10px] bg-slate-950/70 text-emerald-400 font-bold px-1.5 py-0.5 rounded-md pointer-events-none';
+        }
+      }
+
+      const claimedCount = missions.filter(m => m.claimed).length;
+      const counterEl = document.getElementById('missions-completed-counter');
+      if (counterEl) counterEl.textContent = `${claimedCount} / ${missions.length}`;
+
+      const grid = document.getElementById('missions-grid');
+      if (!grid) return;
+
+      grid.innerHTML = missions.map(m => {
+        const pct = Math.min(100, Math.round((m.current / m.target) * 100));
+        return `
+          <div class="rounded-2xl p-4 border ${m.claimed ? 'border-emerald-500/40 bg-emerald-950/15' : m.completed ? 'border-amber-400 bg-amber-500/10 shadow-lg' : 'border-slate-700/80 bg-slate-900/85'} flex flex-col justify-between gap-3">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${m.claimed ? 'bg-emerald-500/20 text-emerald-400' : m.completed ? 'bg-amber-400 text-slate-950' : 'bg-slate-800 text-slate-400'}">
+                  <i class="fa-solid ${m.icon} text-base"></i>
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-sm text-white">${m.title}</h4>
+                  <p class="text-xs text-slate-400">${m.desc}</p>
+                </div>
+              </div>
+              <span class="shrink-0 text-xs font-black px-2.5 py-1 rounded-lg bg-slate-950/80 text-amber-300 border border-amber-400/30">
+                +${m.reward} CR
+              </span>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-[11px] font-bold">
+                <span class="text-slate-400">Progresso</span>
+                <span class="${m.completed ? 'text-emerald-400' : 'text-slate-300'}">${Math.min(m.current, m.target)} / ${m.target}</span>
+              </div>
+              <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                <div class="h-full ${m.claimed ? 'bg-emerald-500' : 'bg-gradient-to-r from-[#ff6b00] to-amber-400'}" style="width: ${pct}%"></div>
+              </div>
+            </div>
+
+            ${m.claimed ? `
+              <div class="w-full py-2 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs text-center">
+                <i class="fa-solid fa-check-double mr-1"></i> Premio Riscattato
+              </div>
+            ` : m.completed ? `
+              <button type="button" data-action="claim-mission-reward" data-mission-id="${m.id}" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 text-slate-950 font-black text-xs shadow-lg transition active:scale-95">
+                <i class="fa-solid fa-gift mr-1 pointer-events-none"></i> Riscatta +${m.reward} Crediti!
+              </button>
+            ` : `
+              <div class="w-full py-2 rounded-xl bg-slate-950/70 border border-slate-800 text-slate-500 font-bold text-xs text-center">
+                In corso...
+              </div>
+            `}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function spinDailyLuckyWheel() {
+      if (!currentUserState || wheelSpinning) return;
+      const todayNum = getCurrentDayNumber();
+      if (currentUserState.lastWheelSpinDayNum === todayNum) {
+        showToast('Hai già girato la ruota oggi! Torna domani.', 'info');
+        return;
+      }
+
+      wheelSpinning = true;
+      const spinBtn = document.getElementById('btn-spin-wheel');
+      if (spinBtn) spinBtn.disabled = true;
+
+      const winIndex = Math.floor(Math.random() * WHEEL_SEGMENTS.length);
+      const prize = WHEEL_SEGMENTS[winIndex];
+
+      // Calcola l'angolo esatto affinché lo spicchio vincente si fermi sotto la freccia in alto (0°)
+      const targetAngle = 360 - prize.angleCenter;
+      const extraSpins = 360 * 6;
+      const normalizedCurrent = currentWheelRotation % 360;
+      currentWheelRotation += extraSpins + ((targetAngle - normalizedCurrent + 360) % 360);
+
+      const disc = document.getElementById('lucky-wheel-disc');
+      if (disc) {
+        disc.style.transform = `rotate(${currentWheelRotation}deg)`;
+      }
+
+      playSound('tear');
+
+      setTimeout(() => {
+        wheelSpinning = false;
+        currentUserState.lastWheelSpinDayNum = todayNum;
+
+        const msgEl = document.getElementById('wheel-last-prize-msg');
+        if (msgEl) {
+          msgEl.textContent = `Hai vinto: ${prize.label}!`;
+          msgEl.classList.remove('hidden');
+        }
+
+        if (prize.type === 'credits') {
+          currentUserState.credits += prize.amount;
+          saveCurrentUserState();
+          updateCreditsUI();
+          renderWheelAndMissionsTab();
+          playSound('coin');
+          spawnConfettiBurst();
+          showToast(`Ruota della Fortuna: hai vinto ${prize.label}!`, 'success');
+        } else if (prize.type === 'pack') {
+          saveCurrentUserState();
+          renderWheelAndMissionsTab();
+          playSound('legend');
+          spawnConfettiBurst();
+          showToast(`Ruota della Fortuna: hai vinto ${prize.label}!`, 'success');
+          switchTab('shop');
+          openPackDirectly(prize.packType, false);
+        }
+      }, 4300);
+    }
+
+    function getMissionsProgressList() {
+      if (!currentUserState) return [];
+      const ownedCards = ALL_CARDS.filter(c => (currentUserState.owned[c.id] || 0) > 0);
+      const playmakersCount = ownedCards.filter(c => c.type === 'player' && c.role.toLowerCase().includes('play')).length;
+      const centersCount = ownedCards.filter(c => c.type === 'player' && c.role.toLowerCase().includes('centro')).length;
+      const logosCount = ownedCards.filter(c => c.type === 'logo').length;
+      const sigOrIconCount = ownedCards.filter(c => c.rarity === 'signature' || c.rarity === 'icon').length;
+      const claimedSet = new Set(currentUserState.claimedMissions || []);
+
+      const defs = [
+        {
+          id: 'm_first_pack',
+          title: 'Primi Passi sul Parquet',
+          desc: 'Apri almeno 3 bustine nel negozio.',
+          icon: 'fa-box-open',
+          current: currentUserState.packsOpened || 0,
+          target: 3,
+          reward: 250
+        },
+        {
+          id: 'm_5_playmakers',
+          title: 'Regista della Squadra',
+          desc: 'Colleziona 5 Playmaker diversi nell'album.',
+          icon: 'fa-basketball',
+          current: playmakersCount,
+          target: 5,
+          reward: 350
+        },
+        {
+          id: 'm_5_centers',
+          title: 'Dominatore dell'Area',
+          desc: 'Colleziona 5 Centri diversi nell'album.',
+          icon: 'fa-shield-halved',
+          current: centersCount,
+          target: 5,
+          reward: 350
+        },
+        {
+          id: 'm_5_logos',
+          title: 'Collezionista di Stemmi',
+          desc: 'Trova 5 Scudetti Ufficiali dei club di Serie A2.',
+          icon: 'fa-flag',
+          current: logosCount,
+          target: 5,
+          reward: 400
+        },
+        {
+          id: 'm_first_sig_icon',
+          title: 'Cacciatore di Stelle',
+          desc: 'Trova la tua prima figurina Signature o MVP Icona.',
+          icon: 'fa-crown',
+          current: sigOrIconCount,
+          target: 1,
+          reward: 500
+        },
+        {
+          id: 'm_3_trades',
+          title: 'Direttore Sportivo',
+          desc: 'Completa 3 scambi con altri utenti nella Bacheca Scambi.',
+          icon: 'fa-right-left',
+          current: currentUserState.tradesCompleted || 0,
+          target: 3,
+          reward: 600
+        },
+        {
+          id: 'm_5_wins',
+          title: 'Coach Vincente',
+          desc: 'Vinci 5 Partite Tattiche sul parquet.',
+          icon: 'fa-trophy',
+          current: currentUserState.matchWins || 0,
+          target: 5,
+          reward: 450
+        },
+        {
+          id: 'm_1_club_100',
+          title: 'Orgoglio del Club',
+          desc: 'Completa al 100% almeno 1 squadra intera dell'album.',
+          icon: 'fa-medal',
+          current: (currentUserState.completedTeams || []).length,
+          target: 1,
+          reward: 800
+        }
+      ];
+
+      return defs.map(d => ({
+        ...d,
+        completed: d.current >= d.target,
+        claimed: claimedSet.has(d.id)
+      }));
+    }
+
+    function claimMissionReward(missionId) {
+      if (!currentUserState) return;
+      const missions = getMissionsProgressList();
+      const target = missions.find(m => m.id === missionId);
+      if (!target || !target.completed || target.claimed) return;
+
+      if (!Array.isArray(currentUserState.claimedMissions)) currentUserState.claimedMissions = [];
+      currentUserState.claimedMissions.push(missionId);
+      currentUserState.credits += target.reward;
+
+      saveCurrentUserState();
+      updateCreditsUI();
+      renderWheelAndMissionsTab();
+      playSound('legend');
+      spawnConfettiBurst();
+      showToast(`Obiettivo "${target.title}" riscattato! +${target.reward} Crediti!`, 'success');
+    }
+
     function switchTab(tabName) {
-      const tabs = ['shop', 'pass', 'album', 'trades', 'arena', 'leaderboard'];
+      const tabs = ['shop', 'pass', 'missions', 'album', 'trades', 'arena', 'leaderboard'];
       tabs.forEach(t => {
         const sec = document.getElementById(`section-${t}`);
         const btn = document.getElementById(`tab-btn-${t}`);
@@ -3845,6 +4388,7 @@
       });
 
       if (tabName === 'pass') renderWeeklyPass();
+      if (tabName === 'missions') renderWheelAndMissionsTab();
       if (tabName === 'album') renderAlbum();
       if (tabName === 'trades') renderTradesTab();
       if (tabName === 'arena') renderArenaAndDuplicates();
@@ -4266,6 +4810,10 @@
         } else if (action === 'refresh-leaderboard') {
           renderLeaderboard();
           showToast('Classifica live aggiornata!', 'info');
+        } else if (action === 'spin-daily-wheel') {
+          spinDailyLuckyWheel();
+        } else if (action === 'claim-mission-reward') {
+          claimMissionReward(target.getAttribute('data-mission-id'));
         } else if (action === 'close-admin') {
           if (e.target.id === 'admin-secret-modal' || target.tagName === 'BUTTON') {
             document.getElementById('admin-secret-modal').classList.add('hidden');
@@ -4350,6 +4898,7 @@
       } catch (e) {}
 
       populateTeamDropdowns();
+      initPackTearSwipe();
       bindGlobalEvents();
       await initCloudBackend();
       renderSavedAccountsList();
