@@ -3747,79 +3747,80 @@
       document.getElementById('user-collection-modal').classList.remove('hidden');
     }
 
-    function renderUserCollectionModalContent(targetUserId) {
+ function renderUserCollectionModalContent(userId) {
       if (!currentUserState) return;
-      const targetProfile = targetUserId === currentUserState.discord.id
+      const targetProfile = userId === currentUserState.discord.id
         ? buildPublicSummary(currentUserState)
-        : livePublicProfilesMap[targetUserId];
+        : livePublicProfilesMap[userId];
 
       if (!targetProfile) {
-        showToast('Impossibile caricare la collezione di questo utente.', 'error');
+        showToast('Profilo giocatore non trovato.', 'error');
         return;
       }
 
-      document.getElementById('viewer-user-avatar').src = targetProfile.discord.avatarUrl;
-      document.getElementById('viewer-user-name').textContent = `Album di ${targetProfile.discord.username}`;
-      document.getElementById('viewer-user-badge').textContent = `${targetProfile.uniqueOwned} / ${TOTAL_CARDS_COUNT} (${targetProfile.pct}%)`;
-
-      const isMe = targetUserId === currentUserState.discord.id;
-      document.getElementById('viewer-user-subtitle').textContent = isMe
-        ? 'Questa è la tua collezione pubblica visibile agli altri utenti Discord.'
-        : `Esplora le carte di ${targetProfile.discord.username} e clicca "Proponi Scambio" sulle carte che ti servono!`;
-
+      const isMe = userId === currentUserState.discord.id;
+      const targetOwnedMap = targetProfile.owned || (targetProfile.fullState && targetProfile.fullState.owned) || {};
       const teamFilter = document.getElementById('viewer-team-filter').value;
       const rarityFilter = document.getElementById('viewer-rarity-filter').value;
       const copiesFilter = document.getElementById('viewer-copies-filter').value;
 
-      const targetOwnedMap = targetProfile.owned || {};
-      const myOwnedMap = currentUserState.owned || {};
+      const actualUniqueCount = ALL_CARDS.filter(c => Number(targetOwnedMap[c.id] || 0) > 0).length;
+      const actualPct = Math.round((actualUniqueCount / TOTAL_CARDS_COUNT) * 100);
 
-      const matchingCards = ALL_CARDS.filter(card => {
-        const theirCount = targetOwnedMap[card.id] || 0;
-        if (theirCount <= 0) return false;
+      document.getElementById('viewer-user-avatar').src = targetProfile.discord.avatarUrl;
+      document.getElementById('viewer-user-name').textContent = isMe
+        ? `La Tua Collezione (${targetProfile.discord.username})`
+        : `Carte di ${targetProfile.discord.username}`;
+      document.getElementById('viewer-user-badge').textContent = `${actualUniqueCount} / ${TOTAL_CARDS_COUNT} (${actualPct}%)`;
+      document.getElementById('viewer-user-subtitle').textContent = isMe
+        ? 'Stai visualizzando il tuo inventario completo.'
+        : 'Le figurine che non hai ancora sono evidenziate in verde: clicca "Proponi Scambio" per richiederle!';
+
+      const userCards = ALL_CARDS.filter(card => {
+        const theirCopies = Number(targetOwnedMap[card.id] || 0);
+        if (theirCopies <= 0) return false;
         if (teamFilter !== 'ALL' && card.teamId !== teamFilter) return false;
         if (rarityFilter !== 'ALL' && card.rarity !== rarityFilter) return false;
-        if (copiesFilter === 'DUPS_ONLY' && theirCount < 2) return false;
-        if (copiesFilter === 'MISSING_FOR_ME' && (myOwnedMap[card.id] || 0) > 0) return false;
+        if (copiesFilter === 'DUPS_ONLY' && theirCopies < 2) return false;
+        if (copiesFilter === 'MISSING_FOR_ME' && Number(currentUserState.owned[card.id] || 0) > 0) return false;
         return true;
       });
 
       const grid = document.getElementById('viewer-cards-grid');
-      if (matchingCards.length === 0) {
+      if (userCards.length === 0) {
         grid.innerHTML = `
-          <div class="col-span-full py-12 text-center text-xs text-slate-400">
-            Nessuna figurina trovata con i filtri selezionati nella collezione di ${targetProfile.discord.username}.
+          <div class="col-span-full py-12 text-center text-sm text-slate-400">
+            Nessuna figurina trovata con i filtri selezionati nella collezione di <strong>${targetProfile.discord.username}</strong>.
           </div>
         `;
         return;
       }
 
-      grid.innerHTML = matchingCards.map(card => {
-        const theirCount = targetOwnedMap[card.id] || 0;
-        const iMissIt = !isMe && (myOwnedMap[card.id] || 0) === 0;
+      grid.innerHTML = userCards.map(card => {
+        const theirCopies = Number(targetOwnedMap[card.id] || 0);
+        const iOwnIt = Number(currentUserState.owned[card.id] || 0) > 0;
+        const badgeType = (!isMe && !iOwnIt) ? 'NEEDED' : null;
 
         return `
-          <div class="flex flex-col items-center gap-2 w-full max-w-[215px]">
+          <div class="w-full max-w-[215px] flex flex-col gap-2">
             <div class="relative w-full flex justify-center">
-              ${renderCardHTML(card, {
-                showBadge: iMissIt ? 'NEEDED' : null,
-                clickable: true
-              })}
-              <span class="absolute bottom-2 right-2 z-10 bg-slate-950/90 text-cyan-300 border border-cyan-400/50 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow pointer-events-none">
-                Possiede: x${theirCount}
+              ${renderCardHTML(card, { showBadge: badgeType, clickable: true })}
+              <span class="absolute bottom-2 right-2 z-10 bg-slate-950/95 text-cyan-300 border border-cyan-400/60 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow pointer-events-none">
+                Ha x${theirCopies}
               </span>
             </div>
+
             ${!isMe ? `
-              <button type="button" data-action="quick-propose-trade" data-card-id="${card.id}"
-                      class="w-full py-1.5 px-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-[11px] shadow transition active:scale-95">
-                <i class="fa-solid fa-right-left mr-1 pointer-events-none"></i> Proponi Scambio
+              <button type="button" data-action="propose-trade-for-card" data-card-id="${card.id}"
+                      class="w-full py-2 px-2.5 rounded-xl ${!iOwnIt ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md' : 'bg-slate-800 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-slate-700'} font-extrabold text-[11px] flex items-center justify-center gap-1.5 transition active:scale-95">
+                <i class="fa-solid fa-right-left pointer-events-none"></i>
+                <span class="pointer-events-none">Proponi Scambio</span>
               </button>
             ` : ''}
           </div>
         `;
       }).join('');
     }
-
     function quickProposeTradeForCard(requestedCardId) {
       document.getElementById('user-collection-modal').classList.add('hidden');
       switchTab('trades');
