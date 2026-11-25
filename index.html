@@ -645,7 +645,7 @@
               Scambi Player & Lista Desideri
             </h2>
             <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
-              Pubblica una proposta offrendo una tua figurina in cambio di una che ti manca: tutti gli utenti su qualsiasi browser o dispositivo la vedranno istantaneamente! Le offerte che contengono una carta della tua <strong>Wishlist</strong> mostrano il badge <span class="text-emerald-300 font-bold">MATCH WISHLIST!</span>
+              Pubblica una proposta offrendo una tua figurina in cambio di una che ti manca: tutti gli utenti su qualsiasi browser o dispositivo la vedranno istantaneamente! Puoi anche cliccare su <strong>Vedi Carte</strong> nella <button type="button" data-action="switch-tab" data-tab="leaderboard" class="underline text-amber-300 font-bold">Classifica Live</button> per vedere le figurine di un altro player!
             </p>
           </div>
           <div class="bg-slate-950/80 border border-rose-400/40 rounded-2xl px-4 py-3 text-center shrink-0">
@@ -826,7 +826,7 @@
             Classifica Collezionisti LNP Serie A2
           </h2>
           <p class="text-xs sm:text-sm text-slate-300 mt-1">
-            Sincronizzata in tempo reale su tutti i browser e dispositivi: confronta completamento album, club al 100%, OVR del quintetto e vittorie!
+            Sincronizzata in tempo reale su tutti i browser: clicca su <strong class="text-cyan-300">Vedi Carte</strong> accanto a un player per esplorare la sua collezione e proporre scambi mirati!
           </p>
         </div>
 
@@ -854,6 +854,7 @@
                 <th class="py-3.5 px-4 text-center">Club 100%</th>
                 <th class="py-3.5 px-4 text-center">OVR Quintetto</th>
                 <th class="py-3.5 px-4 text-center">Vittorie</th>
+                <th class="py-3.5 px-4 text-right">Collezione</th>
               </tr>
             </thead>
             <tbody id="leaderboard-tbody" class="divide-y divide-slate-800/80 text-xs sm:text-sm"></tbody>
@@ -863,6 +864,63 @@
     </section>
 
   </main>
+
+  <!-- =========================================================
+       MODAL ISPEZIONE COLLEZIONE ALTRO PLAYER
+       ========================================================= -->
+  <div id="user-collection-modal" data-action="close-user-collection" class="hidden fixed inset-0 z-40 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="bg-[#15203b] border border-cyan-500/50 rounded-3xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto">
+      <!-- Intestazione Modal -->
+      <div class="p-4 sm:p-5 bg-slate-950/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-3">
+          <img id="viewer-user-avatar" src="" alt="" class="w-11 h-11 rounded-full border-2 border-cyan-400 object-cover" />
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 id="viewer-user-name" class="font-display text-2xl sm:text-3xl font-bold uppercase text-white leading-none">
+                Collezione Player
+              </h3>
+              <span id="viewer-user-badge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">
+                0 / 354
+              </span>
+            </div>
+            <p id="viewer-user-subtitle" class="text-xs text-slate-400 mt-0.5">
+              Esplora le carte possedute da questo utente e proponi uno scambio diretto!
+            </p>
+          </div>
+        </div>
+
+        <button type="button" data-action="close-user-collection" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center border border-slate-600 transition active:scale-95">
+          <i class="fa-solid fa-xmark pointer-events-none"></i>
+        </button>
+      </div>
+
+      <!-- Barra Filtri Collezione Player -->
+      <div class="p-3 sm:px-5 bg-slate-900/90 border-b border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-2.5 shrink-0">
+        <select id="viewer-team-filter" class="bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-400">
+          <option value="ALL">Tutte le Squadre</option>
+        </select>
+
+        <select id="viewer-rarity-filter" class="bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-400">
+          <option value="ALL">Tutte le Rarità</option>
+          <option value="icon">MVP Icona</option>
+          <option value="legend">MVP Leggenda</option>
+          <option value="signature">Signature Edition</option>
+          <option value="epic">All-Star Epica</option>
+          <option value="rare">Rara Oro & Scudetti</option>
+          <option value="common">Comune</option>
+        </select>
+
+        <select id="viewer-copies-filter" class="bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-400">
+          <option value="ALL">Tutte le Carte Possedute</option>
+          <option value="DUPS_ONLY">Solo Doppioni Scambiabili (x2+)</option>
+          <option value="MISSING_FOR_ME">Solo Carte che TI MANCANO</option>
+        </select>
+      </div>
+
+      <!-- Griglia Figurine dell'Altro Utente -->
+      <div id="viewer-cards-grid" class="p-4 sm:p-6 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 justify-items-center flex-1"></div>
+    </div>
+  </div>
 
   <!-- =========================================================
        MODAL ISPEZIONE FIGURINA + WISHLIST + CARICAMENTO FOTO ADMIN
@@ -1621,12 +1679,12 @@
     let liveTradesList = [];
     let livePublicProfilesMap = {};
     let customCardPhotos = {};
+    let currentlyViewedUserId = null;
 
     function getUserStorageKey(discordId) {
       return `lnp_a2_user_data_${discordId}_v5`;
     }
 
-    // Esegue la pulizia completa di vecchi account, vecchie carte e scambi (v5_clean_reset)
     async function executeCleanResetIfNeeded() {
       try {
         if (!localStorage.getItem(RESET_FLAG_KEY)) {
@@ -1706,7 +1764,6 @@
     function setupRealtimeListeners() {
       if (!firebaseDb || !firebaseUser) return;
 
-      // 1. Listener in tempo reale Bacheca Scambi (tutti i browser vedono subito ogni scambio)
       onSnapshot(
         collection(firebaseDb, 'artifacts', appId, 'public', 'data', 'trades'),
         (snapshot) => {
@@ -1722,7 +1779,6 @@
         (err) => console.warn('Errore listener scambi:', err)
       );
 
-      // 2. Listener in tempo reale Classifica & Profili Pubblici Discord
       onSnapshot(
         collection(firebaseDb, 'artifacts', appId, 'public', 'data', 'public_profiles'),
         (snapshot) => {
@@ -1735,11 +1791,13 @@
           });
           livePublicProfilesMap = map;
           renderLeaderboard();
+          if (currentlyViewedUserId && !document.getElementById('user-collection-modal').classList.contains('hidden')) {
+            renderUserCollectionModalContent(currentlyViewedUserId);
+          }
         },
         (err) => console.warn('Errore listener classifica:', err)
       );
 
-      // 3. Listener in tempo reale Foto Giocatori caricate dall'Admin
       onSnapshot(
         doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'admin_assets', 'card_photos'),
         (docSnap) => {
@@ -1756,7 +1814,6 @@
       );
     }
 
-    // Controlla se un altro player ha accettato un nostro scambio mentre eravamo su un altro browser/sessione
     function setupPendingTradeCreditsListener(discordId) {
       if (!firebaseDb || !firebaseUser || !discordId) return;
       onSnapshot(
@@ -1894,6 +1951,7 @@
 
       return {
         discord: state.discord,
+        owned: state.owned || {},
         uniqueOwned,
         pct,
         clubs100,
@@ -2374,6 +2432,11 @@
               DOPPIONE
             </span>
           ` : ''}
+          ${showBadge === 'NEEDED' ? `
+            <span class="absolute -top-2.5 -right-2 z-10 bg-emerald-500 text-slate-950 font-black text-[9px] px-2 py-0.5 rounded-full shadow-lg border border-white pointer-events-none">
+              TI MANCA!
+            </span>
+          ` : ''}
 
           <div class="flex items-start justify-between gap-1 border-b border-white/15 pb-1.5 pointer-events-none">
             <div class="flex flex-col leading-none">
@@ -2709,11 +2772,20 @@
      */
     function populateTeamDropdowns() {
       const albumSelect = document.getElementById('team-filter');
+      const viewerSelect = document.getElementById('viewer-team-filter');
+
       TEAMS_DATA.forEach(team => {
         const opt = document.createElement('option');
         opt.value = team.id;
         opt.textContent = team.name;
         albumSelect.appendChild(opt);
+
+        if (viewerSelect) {
+          const opt2 = document.createElement('option');
+          opt2.value = team.id;
+          opt2.textContent = team.name;
+          viewerSelect.appendChild(opt2);
+        }
       });
 
       const adminSelect = document.getElementById('admin-photo-card-select');
@@ -2930,6 +3002,9 @@
               <div class="flex items-center gap-2">
                 <img src="${tr.creatorAvatar}" alt="" class="w-6 h-6 rounded-full border border-indigo-400" />
                 <span class="text-xs font-extrabold text-white">${tr.creatorName}</span>
+                <button type="button" data-action="view-user-collection" data-user-id="${tr.creatorId}" class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-slate-700 transition">
+                  <i class="fa-solid fa-eye mr-0.5 pointer-events-none"></i> Album
+                </button>
               </div>
               ${isWishlistMatch ? `
                 <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 animate-pulse">
@@ -2989,7 +3064,6 @@
         return;
       }
 
-      // Scaliamo temporaneamente la carta offerta dall'inventario del mittente finché l'offerta è pubblicata
       currentUserState.owned[offeredId] -= 1;
       if (currentUserState.owned[offeredId] <= 0) {
         delete currentUserState.owned[offeredId];
@@ -3029,7 +3103,6 @@
       const trade = liveTradesList.find(t => t.id === tradeId);
       if (!trade || trade.creatorId !== currentUserState.discord.id) return;
 
-      // Restituiamo la figurina al mittente
       currentUserState.owned[trade.offeredCardId] = (currentUserState.owned[trade.offeredCardId] || 0) + 1;
       saveCurrentUserState();
       updateAlbumStatsUI();
@@ -3061,7 +3134,6 @@
         return;
       }
 
-      // 1. Aggiorna inventario di chi accetta
       currentUserState.owned[trade.requestedCardId] -= 1;
       if (currentUserState.owned[trade.requestedCardId] <= 0) {
         delete currentUserState.owned[trade.requestedCardId];
@@ -3069,7 +3141,6 @@
       currentUserState.owned[trade.offeredCardId] = (currentUserState.owned[trade.offeredCardId] || 0) + 1;
       currentUserState.wishlist = (currentUserState.wishlist || []).filter(id => id !== trade.offeredCardId);
 
-      // 2. Rimuovi scambio dalla bacheca live e crea consegna cloud per il creatore
       if (firebaseDb && firebaseUser) {
         try {
           await deleteDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'trades', tradeId));
@@ -3316,7 +3387,7 @@
       if (ownedPlayers.length === 0) {
         pickerEl.innerHTML = `
           <div class="col-span-full py-6 text-center text-xs text-slate-500">
-            Non possiedi ancora giocatori. Apri una bustina per costruire il tuo quintetto!
+            Non possiedi ancora giocatori. Apri una bustina nello Store per formare il tuo quintetto!
           </div>
         `;
       } else {
@@ -3324,21 +3395,21 @@
           const isSelected = selectedIds.has(p.id);
           const natRole = getNaturalRoleCode(p.role);
           return `
-            <button type="button" data-action="assign-player-slot" data-card-id="${p.id}" class="text-left rounded-xl p-2 border transition active:scale-95 flex items-center justify-between gap-2 ${isSelected ? 'bg-[#ff6b00]/20 border-[#ff6b00] text-white' : 'bg-slate-900 border-slate-800 hover:border-slate-600 text-slate-300'}">
-              <div class="min-w-0 pointer-events-none">
-                <div class="font-bold text-xs truncate">${p.name}</div>
-                <div class="text-[10px] text-slate-400 truncate">${natRole} • ${p.teamShort}</div>
+            <button type="button" data-action="assign-player-slot" data-card-id="${p.id}"
+                    class="text-left p-2 rounded-xl border transition active:scale-95 ${isSelected ? 'bg-[#ff6b00]/20 border-[#ff6b00]' : 'bg-slate-900 border-slate-700 hover:border-slate-500'}">
+              <div class="flex justify-between items-center pointer-events-none">
+                <span class="font-display text-lg font-bold text-amber-400 leading-none">${p.ovr}</span>
+                <span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">${natRole}</span>
               </div>
-              <span class="font-display text-xl font-bold ${isSelected ? 'text-[#ff6b00]' : 'text-amber-400'} shrink-0 pointer-events-none">
-                ${p.ovr}
-              </span>
+              <div class="font-bold text-xs text-white truncate mt-0.5 pointer-events-none">${p.name}</div>
+              <div class="text-[9px] text-slate-400 truncate pointer-events-none">${p.teamShort}</div>
             </button>
           `;
         }).join('');
       }
     }
 
-    function assignPlayerToRoleSlot(cardId) {
+    function assignPlayerToLineup(cardId) {
       if (!currentUserState) return;
       const card = ALL_CARDS.find(c => c.id === cardId);
       if (!card) return;
@@ -3353,69 +3424,62 @@
         }
       }
 
-      const baseName = card.basePlayerName || card.name;
-      for (const r of LINEUP_ROLES) {
-        if (slots[r]) {
-          const existing = ALL_CARDS.find(c => c.id === slots[r]);
-          if (existing && (existing.basePlayerName || existing.name) === baseName) {
-            showToast(`${baseName} è già schierato nel quintetto!`, 'error');
-            return;
-          }
-        }
-      }
-
       let targetRole = activeSlotRole;
       if (!targetRole) {
         const nat = getNaturalRoleCode(card.role);
-        if (!slots[nat]) targetRole = nat;
-        else targetRole = LINEUP_ROLES.find(r => !slots[r]) || nat;
+        if (!slots[nat]) {
+          targetRole = nat;
+        } else {
+          const compatEmpty = LINEUP_ROLES.find(r => !slots[r] && isPlayerCompatibleWithSlot(card, r));
+          targetRole = compatEmpty || LINEUP_ROLES.find(r => !slots[r]) || nat;
+        }
       }
 
       slots[targetRole] = cardId;
       activeSlotRole = null;
+      playSound('flip');
       saveCurrentUserState();
       renderLineupSection();
     }
 
-    function autoFillBestLineup() {
+    function autoSelectBestLineup() {
       if (!currentUserState) return;
       const ownedPlayers = ALL_CARDS
         .filter(c => c.type === 'player' && (currentUserState.owned[c.id] || 0) > 0)
         .sort((a, b) => b.ovr - a.ovr);
 
-      if (ownedPlayers.length === 0) {
-        showToast('Apri prima qualche bustina per ottenere giocatori!', 'error');
+      if (ownedPlayers.length < 5) {
+        showToast('Ti servono almeno 5 giocatori diversi nell\'album!', 'error');
         return;
       }
 
-      const usedNames = new Set();
-      const newSlots = { PG: null, SG: null, SF: null, PF: null, C: null };
+      const slots = { PG: null, SG: null, SF: null, PF: null, C: null };
+      const used = new Set();
 
       LINEUP_ROLES.forEach(role => {
-        const candidate = ownedPlayers.find(p => {
-          const bName = p.basePlayerName || p.name;
-          return !usedNames.has(bName) && isPlayerCompatibleWithSlot(p, role);
-        });
-        if (candidate) {
-          newSlots[role] = candidate.id;
-          usedNames.add(candidate.basePlayerName || candidate.name);
+        const bestMatch = ownedPlayers.find(p => !used.has(p.id) && isPlayerCompatibleWithSlot(p, role));
+        if (bestMatch) {
+          slots[role] = bestMatch.id;
+          used.add(bestMatch.id);
         }
       });
 
       LINEUP_ROLES.forEach(role => {
-        if (!newSlots[role]) {
-          const candidate = ownedPlayers.find(p => !usedNames.has(p.basePlayerName || p.name));
-          if (candidate) {
-            newSlots[role] = candidate.id;
-            usedNames.add(candidate.basePlayerName || candidate.name);
+        if (!slots[role]) {
+          const fallback = ownedPlayers.find(p => !used.has(p.id));
+          if (fallback) {
+            slots[role] = fallback.id;
+            used.add(fallback.id);
           }
         }
       });
 
-      currentUserState.lineupSlots = newSlots;
+      currentUserState.lineupSlots = slots;
+      activeSlotRole = null;
       saveCurrentUserState();
+      playSound('coin');
       renderLineupSection();
-      showToast('Miglior quintetto per ruoli schierato!', 'info');
+      showToast('Miglior quintetto per ruoli schierato sul parquet!', 'success');
     }
 
     function clearLineup() {
@@ -3425,6 +3489,8 @@
       saveCurrentUserState();
       renderLineupSection();
     }
+
+    const MAX_DAILY_MATCHES = 10;
 
     function getTodayMatchesCount() {
       if (!currentUserState) return 0;
@@ -3438,26 +3504,34 @@
     function updateDailyMatchesBadge() {
       const used = getTodayMatchesCount();
       const badge = document.getElementById('daily-matches-badge');
+      const btn = document.getElementById('btn-start-tactical-match');
       if (badge) {
-        badge.textContent = `Partite oggi: ${used} / 10`;
-        badge.className = used >= 10
+        badge.textContent = `Partite oggi: ${used} / ${MAX_DAILY_MATCHES}`;
+        badge.className = used >= MAX_DAILY_MATCHES
           ? 'text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-rose-950 border border-rose-500 text-rose-300'
           : 'text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-slate-900 border border-amber-400/50 text-amber-300';
+      }
+      if (btn) {
+        btn.disabled = used >= MAX_DAILY_MATCHES;
+        if (used >= MAX_DAILY_MATCHES) {
+          btn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
       }
     }
 
     function startTacticalMatch() {
       if (!currentUserState) return;
-      const { count, effectiveAvg, chemBonus, cardsByRole } = computeLineupMetrics();
-
-      if (count < 5) {
-        showToast('Schiera tutti i 5 ruoli (PG, SG, SF, PF, C) per scendere sul parquet!', 'error');
+      const usedToday = getTodayMatchesCount();
+      if (usedToday >= MAX_DAILY_MATCHES) {
+        showToast('Hai raggiunto il limite giornaliero di 10 partite! Torna domani per giocare ancora.', 'error');
         return;
       }
 
-      const usedToday = getTodayMatchesCount();
-      if (usedToday >= 10) {
-        showToast('Hai raggiunto il limite massimo di 10 partite giornaliere! Torna domani.', 'error');
+      const { count, effectiveAvg, chemBonus, cardsByRole } = computeLineupMetrics();
+      if (count < 5) {
+        showToast('Completa tutti e 5 i ruoli del quintetto (PG, SG, SF, PF, C) prima di scendere in campo!', 'error');
         return;
       }
 
@@ -3466,253 +3540,346 @@
       updateDailyMatchesBadge();
 
       const opponentTeam = TEAMS_DATA[Math.floor(Math.random() * TEAMS_DATA.length)];
-      const oppOvr = 79 + Math.floor(Math.random() * 8);
+      const oppOvr = Math.floor(77 + Math.random() * 11);
 
-      const tactic = currentUserState.tactic || 'pace';
-      const lineupList = Object.values(cardsByRole);
-      const avgTir = lineupList.reduce((a, c) => a + c.stats.tir, 0) / 5;
-      const avgDif = lineupList.reduce((a, c) => a + c.stats.dif, 0) / 5;
-      const avgReg = lineupList.reduce((a, c) => a + c.stats.reg, 0) / 5;
-
+      const lineupCards = Object.values(cardsByRole);
       let tacticBonus = 0;
-      if (tactic === 'pace' && avgTir >= 82) tacticBonus = 2;
-      if (tactic === 'defense' && avgDif >= 81) tacticBonus = 2;
-      if (tactic === 'pickroll' && avgReg >= 82) tacticBonus = 2;
+      if (currentUserState.tactic === 'pace') {
+        const avgTir = lineupCards.reduce((s, c) => s + c.stats.tir, 0) / 5;
+        tacticBonus = avgTir >= 84 ? 3 : 1;
+      } else if (currentUserState.tactic === 'defense') {
+        const avgDif = lineupCards.reduce((s, c) => s + c.stats.dif, 0) / 5;
+        tacticBonus = avgDif >= 83 ? 3 : 1;
+      } else {
+        const avgReg = lineupCards.reduce((s, c) => s + c.stats.reg, 0) / 5;
+        tacticBonus = avgReg >= 83 ? 3 : 1;
+      }
 
-      const myHalftime = Math.round((effectiveAvg * 0.48) + tacticBonus + (Math.random() * 10 - 3));
-      const oppHalftime = Math.round((oppOvr * 0.48) + (Math.random() * 10 - 3));
+      const halfUserPts = Math.max(32, Math.round((effectiveAvg * 0.48) + tacticBonus + (Math.random() * 10 - 3)));
+      const halfOppPts = Math.max(30, Math.round((oppOvr * 0.48) + (Math.random() * 10 - 3)));
+
+      const starPlayer = lineupCards.sort((a, b) => b.ovr - a.ovr)[0];
 
       activeTacticalMatchState = {
         opponentTeam,
         oppOvr,
         effectiveAvg,
         chemBonus,
-        tacticBonus,
-        myHalftime,
-        oppHalftime,
-        lineupList
+        halfUserPts,
+        halfOppPts,
+        starPlayer
       };
 
       playSound('flip');
-      const box = document.getElementById('match-result-box');
-      box.classList.remove('hidden');
-      box.innerHTML = `
+      const resBox = document.getElementById('match-result-box');
+      resBox.classList.remove('hidden');
+      resBox.innerHTML = `
         <div class="text-xs font-extrabold uppercase tracking-widest text-amber-400">
-          Intervallo • Fine 2° Quarto (Partita ${currentUserState.dailyMatches.count}/10 di oggi)
+          <i class="fa-solid fa-stopwatch mr-1"></i> INTERVALLO • FINE 2° QUARTO (Partita ${currentUserState.dailyMatches.count}/${MAX_DAILY_MATCHES} oggi)
         </div>
-        <div class="flex items-center justify-center gap-6 py-1">
-          <div class="text-center">
-            <span class="block text-xs text-slate-400">${currentUserState.discord.username} (OVR ${effectiveAvg})</span>
-            <span class="font-display text-4xl font-bold text-white">${myHalftime}</span>
+        <div class="flex items-center justify-center gap-6 py-2">
+          <div class="text-right">
+            <span class="block text-xs text-slate-400">IL TUO QUINTETTO (OVR ${effectiveAvg})</span>
+            <span class="font-display text-4xl font-bold text-white">${halfUserPts}</span>
           </div>
-          <span class="font-display text-2xl text-slate-500">VS</span>
-          <div class="text-center">
-            <span class="block text-xs text-slate-400">${opponentTeam.shortName} (OVR ${oppOvr})</span>
-            <span class="font-display text-4xl font-bold text-white">${oppHalftime}</span>
+          <span class="font-display text-2xl font-bold text-slate-500">VS</span>
+          <div class="text-left">
+            <span class="block text-xs text-slate-400">${opponentTeam.shortName.toUpperCase()} (OVR ${oppOvr})</span>
+            <span class="font-display text-4xl font-bold text-white">${halfOppPts}</span>
           </div>
         </div>
         <p class="text-xs text-slate-300">
-          Chiama il <strong>Timeout Tattico</strong> per impostare il finale di gara (Vittoria: <strong class="text-emerald-400">+50 Crediti</strong> • Sconfitta: <strong class="text-rose-400">0 Crediti</strong>):
+          Ottimo primo tempo guidato da <strong>${starPlayer.name}</strong>! Chiama il <strong>Timeout Tattico</strong> per decidere la strategia del 2° tempo:
         </p>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-          <button type="button" data-action="finish-tactical-match" data-choice="three" class="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
-            <i class="fa-solid fa-fire mr-1 pointer-events-none"></i> Tiro Pesante da 3
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
+          <button type="button" data-action="finish-tactical-match" data-adj="three" class="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
+            <i class="fa-solid fa-fire mr-1 pointer-events-none"></i> Tiro da 3 & Ritmo Alto
           </button>
-          <button type="button" data-action="finish-tactical-match" data-choice="press" class="py-2.5 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
-            <i class="fa-solid fa-shield mr-1 pointer-events-none"></i> Pressing a Tutto Campo
+          <button type="button" data-action="finish-tactical-match" data-adj="lockdown" class="py-2.5 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
+            <i class="fa-solid fa-shield mr-1 pointer-events-none"></i> Difesa a Uomo Aggressiva
           </button>
-          <button type="button" data-action="finish-tactical-match" data-choice="paint" class="py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
-            <i class="fa-solid fa-basketball mr-1 pointer-events-none"></i> Palla Sotto Canestro
+          <button type="button" data-action="finish-tactical-match" data-adj="star" class="py-2.5 px-3 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-extrabold text-xs transition active:scale-95">
+            <i class="fa-solid fa-star mr-1 pointer-events-none"></i> Palla a ${starPlayer.name.split(' ').pop()}
           </button>
         </div>
       `;
     }
 
-    function finishTacticalMatch(timeoutChoice) {
-      if (!activeTacticalMatchState || !currentUserState) return;
-      const m = activeTacticalMatchState;
+    function finishTacticalMatch(halftimeAdj) {
+      if (!currentUserState || !activeTacticalMatchState) return;
+      const st = activeTacticalMatchState;
+      activeTacticalMatchState = null;
 
-      let choiceBonus = 0;
-      if (timeoutChoice === 'three') choiceBonus = (Math.random() < 0.65) ? 4 : -1;
-      if (timeoutChoice === 'press') choiceBonus = (m.chemBonus >= 1) ? 3 : 1;
-      if (timeoutChoice === 'paint') choiceBonus = 2;
-
-      let myFinal = m.myHalftime + Math.round((m.effectiveAvg * 0.48) + choiceBonus + (Math.random() * 11 - 3));
-      let oppFinal = m.oppHalftime + Math.round((m.oppOvr * 0.48) + (Math.random() * 11 - 3));
-      if (myFinal === oppFinal) myFinal += 2;
-
-      const won = myFinal > oppFinal;
-      const rewardCredits = won ? 50 : 0;
-
-      if (won) {
-        currentUserState.credits += rewardCredits;
-        currentUserState.matchWins = (currentUserState.matchWins || 0) + 1;
+      let secondHalfBonus = 0;
+      let tacticalNote = '';
+      if (halftimeAdj === 'three') {
+        secondHalfBonus = st.starPlayer.stats.tir >= 84 ? 5 : 1;
+        tacticalNote = 'Le triple nel quarto quarto spaccano la partita!';
+      } else if (halftimeAdj === 'lockdown') {
+        secondHalfBonus = st.effectiveAvg >= st.oppOvr ? 4 : 2;
+        tacticalNote = 'Difesa asfissiante negli ultimi 2 minuti!';
+      } else {
+        secondHalfBonus = st.starPlayer.ovr >= 86 ? 6 : 2;
+        tacticalNote = `${st.starPlayer.name} domina i possessi decisivi!`;
       }
 
-      saveCurrentUserState();
-      updateCreditsUI();
-      renderLeaderboard();
+      let finalUser = st.halfUserPts + Math.max(32, Math.round((st.effectiveAvg * 0.48) + secondHalfBonus + (Math.random() * 11 - 4)));
+      let finalOpp = st.halfOppPts + Math.max(30, Math.round((st.oppOvr * 0.48) + (Math.random() * 11 - 4)));
+      if (finalUser === finalOpp) finalUser += 2;
 
-      const mvpPlayer = [...m.lineupList].sort((a, b) => b.ovr - a.ovr)[0];
+      const won = finalUser > finalOpp;
+      const reward = won ? 50 : 0;
 
       if (won) {
+        currentUserState.credits += reward;
+        currentUserState.matchWins = (currentUserState.matchWins || 0) + 1;
         playSound('legend');
         spawnConfettiBurst();
       } else {
         playSound('flip');
       }
 
-      const box = document.getElementById('match-result-box');
-      box.innerHTML = `
-        <div class="text-xs font-extrabold uppercase tracking-widest ${won ? 'text-emerald-400' : 'text-rose-400'}">
-          ${won ? 'FINALE • VITTORIA SUL PARQUET LNP!' : 'FINALE • SCONFITTA DI MISURA'}
-        </div>
-        <div class="flex items-center justify-center gap-6 py-1">
-          <div class="text-center">
-            <span class="block text-xs text-slate-400">${currentUserState.discord.username}</span>
-            <span class="font-display text-4xl font-bold text-white">${myFinal}</span>
-          </div>
-          <span class="font-display text-2xl text-slate-500">VS</span>
-          <div class="text-center">
-            <span class="block text-xs text-slate-400">${m.opponentTeam.shortName}</span>
-            <span class="font-display text-4xl font-bold text-white">${oppFinal}</span>
-          </div>
-        </div>
-        <p class="text-xs text-slate-300">
-          MVP del Match: <strong class="text-amber-300">${mvpPlayer.name}</strong> (${Math.round(mvpPlayer.ovr * 0.31)} PTS) •
-          Premio Partita: <strong class="${won ? 'text-emerald-400' : 'text-rose-400'}">${won ? '+50 Crediti' : '0 Crediti (Nessun premio per sconfitta)'}</strong>
-        </p>
-      `;
+      saveCurrentUserState();
+      updateCreditsUI();
+      renderLeaderboard();
 
-      activeTacticalMatchState = null;
+      const resBox = document.getElementById('match-result-box');
+      resBox.innerHTML = `
+        <div class="text-xs font-extrabold uppercase tracking-widest ${won ? 'text-emerald-400' : 'text-rose-400'}">
+          ${won ? 'FINALE • VITTORIA ALLA SIRENA!' : 'FINALE • SCONFITTA AL FOTOFINISH'}
+        </div>
+        <div class="flex items-center justify-center gap-6 py-2">
+          <div class="text-right">
+            <span class="block text-xs text-slate-400">IL TUO QUINTETTO (OVR ${st.effectiveAvg})</span>
+            <span class="font-display text-4xl font-bold text-white">${finalUser}</span>
+          </div>
+          <span class="font-display text-2xl font-bold text-slate-500">VS</span>
+          <div class="text-left">
+            <span class="block text-xs text-slate-400">${st.opponentTeam.shortName.toUpperCase()} (OVR ${st.oppOvr})</span>
+            <span class="font-display text-4xl font-bold text-white">${finalOpp}</span>
+          </div>
+        </div>
+        <p class="text-xs text-slate-300">${tacticalNote} MVP: <strong>${st.starPlayer.name}</strong> (OVR ${st.starPlayer.ovr}).</p>
+        <div class="inline-flex items-center gap-2 ${won ? 'bg-amber-500/20 border-amber-400/50 text-amber-300' : 'bg-rose-950/70 border-rose-500/50 text-rose-300'} border px-4 py-1.5 rounded-full font-extrabold text-sm">
+          <i class="fa-solid fa-coins"></i> ${won ? '+50 Crediti vinti!' : '0 Crediti (nessun premio in caso di sconfitta)'}
+        </div>
+      `;
     }
 
     /**
-     * 10. CLASSIFICA LIVE COLLEZIONISTI DISCORD (SYNC CLOUD REAL-TIME)
+     * 10. CLASSIFICA LIVE COLLEZIONISTI & ISPEZIONE CARTE DI UN ALTRO PLAYER
      */
     function renderLeaderboard() {
-      const sortBy = document.getElementById('leaderboard-sort-select')?.value || 'album';
-      const tbody = document.getElementById('leaderboard-tbody');
-      if (!tbody) return;
+      if (!currentUserState) return;
+      const sortMode = document.getElementById('leaderboard-sort-select').value;
 
-      const entriesMap = { ...livePublicProfilesMap };
-      if (currentUserState && currentUserState.discord) {
-        entriesMap[currentUserState.discord.id] = buildPublicSummary(currentUserState);
-      }
+      const mergedMap = { ...livePublicProfilesMap };
+      mergedMap[currentUserState.discord.id] = buildPublicSummary(currentUserState);
 
-      const entries = Object.values(entriesMap);
-
-      entries.sort((a, b) => {
-        if (sortBy === 'clubs') return (b.clubs100 - a.clubs100) || (b.uniqueOwned - a.uniqueOwned);
-        if (sortBy === 'ovr') return (b.lineupAvg - a.lineupAvg) || (b.uniqueOwned - a.uniqueOwned);
-        if (sortBy === 'wins') return (b.wins - a.wins) || (b.uniqueOwned - a.uniqueOwned);
+      const entries = Object.values(mergedMap).sort((a, b) => {
+        if (sortMode === 'clubs') return (b.clubs100 - a.clubs100) || (b.uniqueOwned - a.uniqueOwned);
+        if (sortMode === 'ovr') return (b.lineupAvg - a.lineupAvg) || (b.uniqueOwned - a.uniqueOwned);
+        if (sortMode === 'wins') return (b.wins - a.wins) || (b.uniqueOwned - a.uniqueOwned);
         return (b.uniqueOwned - a.uniqueOwned) || (b.clubs100 - a.clubs100);
       });
 
+      const tbody = document.getElementById('leaderboard-tbody');
       if (entries.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="6" class="py-8 text-center text-slate-400">
-              Nessun giocatore registrato in classifica.
+            <td colspan="7" class="py-8 text-center text-xs text-slate-400">
+              Nessun utente registrato in classifica al momento.
             </td>
           </tr>
         `;
         return;
       }
 
-      tbody.innerHTML = entries.map((entry, index) => {
-        const rank = index + 1;
-        const isMe = currentUserState && currentUserState.discord && entry.discord.id === currentUserState.discord.id;
-        let rankBadge = `<span class="font-bold text-slate-400">#${rank}</span>`;
-        if (rank === 1) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-400 text-slate-950 font-black text-xs shadow">1°</span>`;
-        if (rank === 2) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-300 text-slate-950 font-black text-xs shadow">2°</span>`;
-        if (rank === 3) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600 text-white font-black text-xs shadow">3°</span>`;
+      tbody.innerHTML = entries.map((entry, idx) => {
+        const rank = idx + 1;
+        const isMe = entry.discord.id === currentUserState.discord.id;
+        let rankBadge = `<span class="font-extrabold text-slate-400">#${rank}</span>`;
+        if (rank === 1) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-400 text-slate-950 font-black text-xs shadow">1</span>`;
+        if (rank === 2) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-300 text-slate-950 font-black text-xs shadow">2</span>`;
+        if (rank === 3) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600 text-white font-black text-xs shadow">3</span>`;
 
         return `
-          <tr class="${isMe ? 'bg-[#ff6b00]/15' : 'hover:bg-slate-900/60'} transition">
-            <td class="py-3 px-4">${rankBadge}</td>
-            <td class="py-3 px-4">
+          <tr class="${isMe ? 'bg-[#5865F2]/20' : 'hover:bg-slate-900/60'} transition">
+            <td class="py-3.5 px-4">${rankBadge}</td>
+            <td class="py-3.5 px-4">
               <div class="flex items-center gap-2.5">
-                <img src="${entry.discord.avatarUrl}" alt="" class="w-8 h-8 rounded-full border ${isMe ? 'border-[#ff6b00]' : 'border-indigo-400/60'}" />
+                <img src="${entry.discord.avatarUrl}" alt="" class="w-8 h-8 rounded-full border border-indigo-400/60 object-cover" />
                 <div>
                   <div class="font-extrabold text-white flex items-center gap-1.5">
                     <span>${entry.discord.username}</span>
-                    ${isMe ? `<span class="text-[9px] font-black uppercase bg-[#ff6b00] text-white px-1.5 py-0.5 rounded">TU</span>` : ''}
+                    ${isMe ? '<span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-[#5865F2] text-white">TU</span>' : ''}
                   </div>
-                  <div class="text-[10px] text-slate-400">${entry.discord.favTeamShort || 'LNP Fan'}</div>
+                  <span class="text-[10px] text-slate-400">${entry.discord.favTeamShort || 'LNP Fan'}</span>
                 </div>
               </div>
             </td>
-            <td class="py-3 px-4">
+            <td class="py-3.5 px-4">
               <div class="flex items-center gap-2">
-                <span class="font-extrabold text-amber-300">${entry.uniqueOwned}/${TOTAL_CARDS_COUNT}</span>
-                <span class="text-[11px] text-slate-400">(${entry.pct}%)</span>
-              </div>
-              <div class="w-28 h-1.5 bg-slate-900 rounded-full overflow-hidden mt-1">
-                <div class="h-full bg-gradient-to-r from-[#ff6b00] to-amber-400" style="width: ${entry.pct}%"></div>
+                <div class="w-24 h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-[#ff6b00] to-amber-400" style="width: ${entry.pct}%"></div>
+                </div>
+                <span class="font-extrabold text-amber-300 text-xs">${entry.uniqueOwned}/${TOTAL_CARDS_COUNT} (${entry.pct}%)</span>
               </div>
             </td>
-            <td class="py-3 px-4 text-center font-extrabold text-emerald-400">${entry.clubs100}/20</td>
-            <td class="py-3 px-4 text-center font-display text-xl font-bold text-cyan-300">${entry.lineupAvg || '-'}</td>
-            <td class="py-3 px-4 text-center font-extrabold text-white">${entry.wins}</td>
+            <td class="py-3.5 px-4 text-center font-extrabold text-emerald-400">
+              ${entry.clubs100}/20
+            </td>
+            <td class="py-3.5 px-4 text-center font-display text-xl font-bold text-cyan-300">
+              ${entry.lineupAvg || '-'}
+            </td>
+            <td class="py-3.5 px-4 text-center font-bold text-slate-300">
+              ${entry.wins}
+            </td>
+            <td class="py-3.5 px-4 text-right">
+              <button type="button" data-action="view-user-collection" data-user-id="${entry.discord.id}"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${isMe ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600' : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow'} font-extrabold text-xs transition active:scale-95">
+                <i class="fa-solid fa-eye pointer-events-none"></i>
+                <span class="pointer-events-none">${isMe ? 'Tue Carte' : 'Vedi Carte'}</span>
+              </button>
+            </td>
           </tr>
         `;
       }).join('');
     }
 
-    /**
-     * 11. STATISTICHE ALBUM, ISPEZIONE FIGURINA (CON CARICAMENTO FOTO ADMIN), CONSOLE ADMIN
-     */
-    function updateAlbumStatsUI() {
+    function openUserCollectionModal(userId) {
       if (!currentUserState) return;
-      const uniqueOwned = ALL_CARDS.filter(c => (currentUserState.owned[c.id] || 0) > 0).length;
-      const pct = Math.round((uniqueOwned / TOTAL_CARDS_COUNT) * 100);
+      currentlyViewedUserId = userId;
+      document.getElementById('viewer-team-filter').value = 'ALL';
+      document.getElementById('viewer-rarity-filter').value = 'ALL';
+      document.getElementById('viewer-copies-filter').value = 'ALL';
 
-      document.getElementById('header-progress-text').textContent = `${uniqueOwned}/${TOTAL_CARDS_COUNT} (${pct}%)`;
-      document.getElementById('header-progress-bar').style.width = `${pct}%`;
-      document.getElementById('nav-album-badge').textContent = `${uniqueOwned}/${TOTAL_CARDS_COUNT}`;
-      document.getElementById('album-stats-label').textContent = `${uniqueOwned} / ${TOTAL_CARDS_COUNT} (${pct}%)`;
-      document.getElementById('album-stats-bar').style.width = `${pct}%`;
-
-      const badgeCounter = document.getElementById('header-badges-count');
-      if (badgeCounter) {
-        badgeCounter.textContent = `${(currentUserState.completedTeams || []).length}/20`;
-      }
+      renderUserCollectionModalContent(userId);
+      document.getElementById('user-collection-modal').classList.remove('hidden');
     }
 
-    function openCardInspectModal(cardId) {
+    function renderUserCollectionModalContent(userId) {
+      if (!currentUserState) return;
+      const targetProfile = userId === currentUserState.discord.id
+        ? buildPublicSummary(currentUserState)
+        : livePublicProfilesMap[userId];
+
+      if (!targetProfile) {
+        showToast('Profilo giocatore non trovato.', 'error');
+        return;
+      }
+
+      const isMe = userId === currentUserState.discord.id;
+      const targetOwnedMap = targetProfile.owned || {};
+      const teamFilter = document.getElementById('viewer-team-filter').value;
+      const rarityFilter = document.getElementById('viewer-rarity-filter').value;
+      const copiesFilter = document.getElementById('viewer-copies-filter').value;
+
+      document.getElementById('viewer-user-avatar').src = targetProfile.discord.avatarUrl;
+      document.getElementById('viewer-user-name').textContent = isMe
+        ? `La Tua Collezione (${targetProfile.discord.username})`
+        : `Carte di ${targetProfile.discord.username}`;
+      document.getElementById('viewer-user-badge').textContent = `${targetProfile.uniqueOwned} / ${TOTAL_CARDS_COUNT} (${targetProfile.pct}%)`;
+      document.getElementById('viewer-user-subtitle').textContent = isMe
+        ? 'Stai visualizzando il tuo inventario completo.'
+        : 'Le figurine che non hai ancora sono evidenziate in verde: clicca "Proponi Scambio" per richiederle!';
+
+      const userCards = ALL_CARDS.filter(card => {
+        const theirCopies = targetOwnedMap[card.id] || 0;
+        if (theirCopies <= 0) return false;
+        if (teamFilter !== 'ALL' && card.teamId !== teamFilter) return false;
+        if (rarityFilter !== 'ALL' && card.rarity !== rarityFilter) return false;
+        if (copiesFilter === 'DUPS_ONLY' && theirCopies < 2) return false;
+        if (copiesFilter === 'MISSING_FOR_ME' && (currentUserState.owned[card.id] || 0) > 0) return false;
+        return true;
+      });
+
+      const grid = document.getElementById('viewer-cards-grid');
+      if (userCards.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 text-center text-sm text-slate-400">
+            Nessuna figurina trovata con i filtri selezionati nella collezione di <strong>${targetProfile.discord.username}</strong>.
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = userCards.map(card => {
+        const theirCopies = targetOwnedMap[card.id] || 0;
+        const iOwnIt = (currentUserState.owned[card.id] || 0) > 0;
+        const badgeType = (!isMe && !iOwnIt) ? 'NEEDED' : null;
+
+        return `
+          <div class="w-full max-w-[215px] flex flex-col gap-2">
+            <div class="relative w-full flex justify-center">
+              ${renderCardHTML(card, { showBadge: badgeType, clickable: true })}
+              <span class="absolute bottom-2 right-2 z-10 bg-slate-950/95 text-cyan-300 border border-cyan-400/60 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow pointer-events-none">
+                Ha x${theirCopies}
+              </span>
+            </div>
+
+            ${!isMe ? `
+              <button type="button" data-action="propose-trade-for-card" data-card-id="${card.id}"
+                      class="w-full py-2 px-2.5 rounded-xl ${!iOwnIt ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md' : 'bg-slate-800 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-slate-700'} font-extrabold text-[11px] flex items-center justify-center gap-1.5 transition active:scale-95">
+                <i class="fa-solid fa-right-left pointer-events-none"></i>
+                <span class="pointer-events-none">Proponi Scambio</span>
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function proposeTradeForSpecificCard(requestedCardId) {
+      document.getElementById('user-collection-modal').classList.add('hidden');
+      currentlyViewedUserId = null;
+
+      switchTab('trades');
+      const reqSelect = document.getElementById('trade-request-select');
+      if (reqSelect) {
+        reqSelect.value = requestedCardId;
+      }
+      const card = ALL_CARDS.find(c => c.id === requestedCardId);
+      showToast(`Figurina "${card ? card.name : ''}" impostata come carta richiesta! Scegli cosa offrire e pubblica.`, 'info');
+    }
+
+    /**
+     * 11. MODAL ISPEZIONE FIGURINA + WISHLIST + CARICAMENTO FOTO ADMIN
+     */
+    function inspectCard(cardId) {
+      if (!currentUserState) return;
       const card = ALL_CARDS.find(c => c.id === cardId);
-      if (!card || !currentUserState) return;
+      if (!card) return;
 
       const count = currentUserState.owned[card.id] || 0;
       const isWished = (currentUserState.wishlist || []).includes(card.id);
-      const hasCustomPhoto = Boolean(getCustomPhotoForCard(card));
-
+      const modal = document.getElementById('card-inspect-modal');
       document.getElementById('inspect-card-container').innerHTML = renderCardHTML(card, { clickable: false });
 
-      const bioDetails = card.type === 'player'
+      const detailsBox = document.getElementById('inspect-details-box');
+      const bioRows = card.type === 'player'
         ? `
-          <div class="grid grid-cols-2 gap-2 text-left bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
-            <div><span class="text-slate-400">Ruolo:</span> <strong class="text-white">${card.role}</strong></div>
+          <div class="grid grid-cols-2 gap-2 bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-[11px]">
             <div><span class="text-slate-400">Nazionalità:</span> <strong class="text-white">${card.nat}</strong></div>
             <div><span class="text-slate-400">Nascita:</span> <strong class="text-white">${card.dob}</strong></div>
-            <div><span class="text-slate-400">Fisico:</span> <strong class="text-white">${card.height} cm • ${card.weight} kg</strong></div>
+            <div><span class="text-slate-400">Altezza:</span> <strong class="text-white">${card.height} cm</strong></div>
+            <div><span class="text-slate-400">Peso:</span> <strong class="text-white">${card.weight} kg</strong></div>
           </div>
         `
-        : `<p class="text-slate-300 text-center">Stemma Ufficiale <strong>${card.fullName}</strong> • Stagione LNP Serie A2 2026/27.</p>`;
+        : `<div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-[11px] text-slate-300">Stemma Ufficiale <strong>${card.fullName}</strong> • Stagione LNP 2026/27</div>`;
 
-      const adminQuickPhotoSection = adminUnlocked ? `
-        <div class="bg-cyan-950/40 border border-cyan-500/40 rounded-xl p-2.5 space-y-2 text-left">
-          <div class="text-[10px] font-extrabold uppercase text-cyan-300">
-            <i class="fa-solid fa-camera mr-1"></i> Controllo Admin: Foto Ufficiale Figurina
-          </div>
-          <div class="flex gap-1.5">
-            <label class="flex-1 cursor-pointer py-1.5 px-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[11px] text-center transition">
-              <i class="fa-solid fa-upload mr-1"></i> Carica Foto da PC/Telefono
-              <input type="file" accept="image/*" data-admin-inspect-file="${card.id}" class="hidden" />
+      const adminQuickUpload = adminUnlocked ? `
+        <div class="pt-2 border-t border-slate-700 space-y-2">
+          <span class="block text-[10px] font-extrabold uppercase text-cyan-300">
+            <i class="fa-solid fa-camera mr-1"></i> Controllo Admin: Carica Foto Ufficiale
+          </span>
+          <div class="flex gap-2">
+            <label class="flex-1 cursor-pointer py-2 px-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-center font-bold text-xs transition">
+              <i class="fa-solid fa-upload mr-1"></i> Scegli Foto Reale
+              <input type="file" accept="image/*" data-action="inspect-upload-photo" data-card-id="${card.id}" class="hidden" />
             </label>
-            ${hasCustomPhoto ? `
-              <button type="button" data-action="admin-remove-inspect-photo" data-card-id="${card.id}" class="py-1.5 px-2.5 rounded-lg bg-rose-700 hover:bg-rose-600 text-white font-bold text-[11px] transition">
+            ${getCustomPhotoForCard(card) ? `
+              <button type="button" data-action="inspect-remove-photo" data-card-id="${card.id}" class="px-3 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white font-bold text-xs">
                 Rimuovi
               </button>
             ` : ''}
@@ -3720,31 +3887,35 @@
         </div>
       ` : '';
 
-      document.getElementById('inspect-details-box').innerHTML = `
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+      detailsBox.innerHTML = `
+        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
           <span class="font-bold text-white text-sm">${card.teamName}</span>
-          <span class="bg-slate-800 text-amber-300 font-extrabold px-2.5 py-0.5 rounded-full">
-            Copie: ${count}
-          </span>
+          <span class="text-amber-400 font-extrabold">Possedute: ${count}</span>
         </div>
-        ${bioDetails}
-        ${adminQuickPhotoSection}
+        ${bioRows}
         <button type="button" data-action="toggle-wishlist-inspect" data-card-id="${card.id}" class="w-full py-2.5 rounded-xl font-extrabold text-xs transition active:scale-95 ${isWished ? 'bg-rose-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-rose-300 border border-rose-500/40'}">
           <i class="fa-solid fa-heart mr-1.5 pointer-events-none"></i>
           <span class="pointer-events-none">${isWished ? 'Rimuovi dalla Lista Desideri (Wishlist)' : 'Aggiungi alla Lista Desideri (Wishlist)'}</span>
         </button>
+        ${adminQuickUpload}
       `;
 
-      document.getElementById('card-inspect-modal').classList.remove('hidden');
+      modal.classList.remove('hidden');
     }
 
-    function closeCardInspectModal() {
+    function closeInspectModal() {
       document.getElementById('card-inspect-modal').classList.add('hidden');
     }
 
-    function openAdminSecretModal() {
+    /**
+     * 12. PANNELLO SEGRETO ADMIN (CTRL + SHIFT + A -> PASSWORD "bananabella")
+     */
+    const SECRET_ADMIN_PASS = 'bananabella';
+
+    function openAdminModal() {
       const modal = document.getElementById('admin-secret-modal');
       modal.classList.remove('hidden');
+
       if (adminUnlocked) {
         document.getElementById('admin-login-box').classList.add('hidden');
         document.getElementById('admin-controls-box').classList.remove('hidden');
@@ -3754,39 +3925,38 @@
         document.getElementById('admin-controls-box').classList.add('hidden');
         const input = document.getElementById('admin-password-input');
         input.value = '';
-        setTimeout(() => input.focus(), 50);
+        setTimeout(() => input.focus(), 60);
       }
     }
 
-    function closeAdminSecretModal() {
+    function closeAdminModal() {
       document.getElementById('admin-secret-modal').classList.add('hidden');
     }
 
     function verifyAdminPassword() {
       const val = document.getElementById('admin-password-input').value.trim();
-      if (val === 'bananabella') {
+      if (val === SECRET_ADMIN_PASS) {
         adminUnlocked = true;
         document.getElementById('admin-login-box').classList.add('hidden');
         document.getElementById('admin-controls-box').classList.remove('hidden');
         updateAdminToggleBtnUI();
         playSound('legend');
-        showToast('Accesso Admin sbloccato! Ora puoi anche caricare foto sui giocatori.', 'success');
+        showToast('Accesso Admin sbloccato!', 'success');
       } else {
-        showToast('Password segreta errata!', 'error');
+        showToast('Password errata!', 'error');
       }
     }
 
     function toggleInfiniteCredits() {
-      if (!adminUnlocked) return;
       tempInfiniteCredits = !tempInfiniteCredits;
       updateCreditsUI();
       updateAdminToggleBtnUI();
       playSound('coin');
       showToast(
         tempInfiniteCredits
-          ? 'Crediti infiniti temporanei ATTIVATI (∞)!'
-          : 'Crediti infiniti disattivati: ripristinato il tuo saldo reale.',
-        'info'
+          ? 'Crediti Infiniti Temporanei (∞) ATTIVATI!'
+          : 'Crediti Infiniti Temporanei disattivati.',
+        tempInfiniteCredits ? 'success' : 'info'
       );
     }
 
@@ -3802,175 +3972,33 @@
       }
     }
 
-    // Ridimensiona e comprime la foto caricata dall'Admin in JPEG ad alta nitidezza per salvarla rapidamente su Cloud/LocalStorage
-    function compressAndSaveAdminPhoto(cardId, file) {
-      if (!file || !cardId) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const img = new Image();
-        img.onload = async () => {
-          const canvas = document.createElement('canvas');
-          const maxDim = 420;
-          let w = img.width;
-          let h = img.height;
-          if (w > maxDim || h > maxDim) {
-            if (w > h) {
-              h = Math.round((h * maxDim) / w);
-              w = maxDim;
-            } else {
-              w = Math.round((w * maxDim) / h);
-              h = maxDim;
-            }
-          }
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          await saveCustomCardPhoto(cardId, dataUrl);
-          renderAlbum();
-          renderLineupSection();
-          if (!document.getElementById('card-inspect-modal').classList.contains('hidden')) {
-            openCardInspectModal(cardId);
-          }
-          showToast('Foto ufficiale salvata e sincronizzata su tutti i dispositivi!', 'success');
-        };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
     /**
-     * 12. AUDIO SINTETICO & EFFETTI VISIVI
+     * 13. AGGIORNAMENTO STATISTICHE HEADER & NAVIGAZIONE TAB
      */
-    let audioCtx = null;
-
-    function playSound(type) {
-      if (currentUserState && !currentUserState.audioEnabled) return;
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        const now = audioCtx.currentTime;
-
-        if (type === 'tear') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(170, now);
-          osc.frequency.exponentialRampToValueAtTime(520, now + 0.16);
-          gain.gain.setValueAtTime(0.12, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
-          osc.start(now);
-          osc.stop(now + 0.18);
-        } else if (type === 'flip') {
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(420, now);
-          osc.frequency.exponentialRampToValueAtTime(680, now + 0.08);
-          gain.gain.setValueAtTime(0.09, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
-          osc.start(now);
-          osc.stop(now + 0.09);
-        } else if (type === 'coin') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(980, now);
-          osc.frequency.setValueAtTime(1310, now + 0.06);
-          gain.gain.setValueAtTime(0.11, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
-          osc.start(now);
-          osc.stop(now + 0.22);
-        } else if (type === 'legend') {
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(523.25, now);
-          osc.frequency.setValueAtTime(659.25, now + 0.08);
-          osc.frequency.setValueAtTime(783.99, now + 0.16);
-          osc.frequency.setValueAtTime(1046.50, now + 0.24);
-          gain.gain.setValueAtTime(0.14, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
-          osc.start(now);
-          osc.stop(now + 0.45);
-        }
-      } catch (e) {}
-    }
-
-    function toggleAudio() {
+    function updateAlbumStatsUI() {
       if (!currentUserState) return;
-      currentUserState.audioEnabled = !currentUserState.audioEnabled;
-      saveCurrentUserState();
-      updateAudioIcon();
-      showToast(currentUserState.audioEnabled ? 'Effetti sonori attivati' : 'Effetti sonori disattivati', 'info');
+      const uniqueOwned = ALL_CARDS.filter(c => (currentUserState.owned[c.id] || 0) > 0).length;
+      const pct = Math.round((uniqueOwned / TOTAL_CARDS_COUNT) * 100);
+
+      document.getElementById('header-progress-text').textContent = `${uniqueOwned}/${TOTAL_CARDS_COUNT} (${pct}%)`;
+      document.getElementById('header-progress-bar').style.width = `${pct}%`;
+      document.getElementById('nav-album-badge').textContent = `${uniqueOwned}/${TOTAL_CARDS_COUNT}`;
+
+      document.getElementById('album-stats-label').textContent = `${uniqueOwned} / ${TOTAL_CARDS_COUNT} (${pct}%)`;
+      document.getElementById('album-stats-bar').style.width = `${pct}%`;
     }
 
-    function updateAudioIcon() {
-      const icon = document.getElementById('audio-icon');
-      if (!currentUserState || currentUserState.audioEnabled) {
-        icon.className = 'fa-solid fa-volume-high text-sm text-amber-400 pointer-events-none';
-      } else {
-        icon.className = 'fa-solid fa-volume-xmark text-sm text-slate-500 pointer-events-none';
-      }
-    }
-
-    function spawnConfettiBurst() {
-      const colors = ['#ff6b00', '#ffd700', '#38bdf8', '#10b981', '#a855f7'];
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2.2;
-
-      for (let i = 0; i < 24; i++) {
-        const el = document.createElement('div');
-        el.className = 'confetti-piece';
-        el.style.backgroundColor = colors[i % colors.length];
-        el.style.left = `${cx}px`;
-        el.style.top = `${cy}px`;
-        const angle = (Math.PI * 2 * i) / 24;
-        const dist = 80 + Math.random() * 140;
-        el.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
-        el.style.setProperty('--ty', `${Math.sin(angle) * dist + 40}px`);
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 1450);
-      }
-    }
-
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-
-      const colors = {
-        success: 'bg-emerald-950/95 border-emerald-500 text-emerald-200',
-        error: 'bg-rose-950/95 border-rose-500 text-rose-200',
-        info: 'bg-slate-900/95 border-amber-500/70 text-amber-200'
-      };
-      const icons = {
-        success: 'fa-circle-check text-emerald-400',
-        error: 'fa-circle-exclamation text-rose-400',
-        info: 'fa-basketball text-amber-400'
-      };
-
-      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-2xl text-xs sm:text-sm font-bold transition-all duration-300 ${colors[type] || colors.info}`;
-      toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span>${message}</span>`;
-
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(8px)';
-        setTimeout(() => toast.remove(), 300);
-      }, 3200);
-    }
-
-    /**
-     * 13. NAVIGAZIONE & EVENT DELEGATION GLOBALE
-     */
     function switchTab(tabName) {
       const tabs = ['shop', 'pass', 'album', 'trades', 'arena', 'leaderboard'];
       tabs.forEach(t => {
         const sec = document.getElementById(`section-${t}`);
         const btn = document.getElementById(`tab-btn-${t}`);
-        if (sec) sec.classList.toggle('hidden', t !== tabName);
-        if (btn) {
-          btn.className = t === tabName
-            ? 'shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition active:scale-95 bg-[#ff6b00] text-white shadow-lg shadow-orange-600/25'
-            : 'shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition active:scale-95 bg-slate-800/90 text-slate-300 hover:bg-slate-700';
+        if (t === tabName) {
+          sec.classList.remove('hidden');
+          btn.className = 'shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition active:scale-95 bg-[#ff6b00] text-white shadow-lg shadow-orange-600/25';
+        } else {
+          sec.classList.add('hidden');
+          btn.className = 'shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition active:scale-95 bg-slate-800/90 text-slate-300 hover:bg-slate-700';
         }
       });
 
@@ -3981,257 +4009,426 @@
       if (tabName === 'leaderboard') renderLeaderboard();
     }
 
-    document.addEventListener('click', (e) => {
-      const target = e.target.closest('[data-action]');
-      if (!target) return;
-
-      const action = target.dataset.action;
-
-      if (action === 'close-inspect' && target.id === 'card-inspect-modal' && e.target !== target) return;
-      if (action === 'close-admin' && target.id === 'admin-secret-modal' && e.target !== target) return;
-
-      switch (action) {
-        case 'discord-bot-oauth':
-          handleDiscordBotOAuth();
-          break;
-        case 'login-saved-account': {
-          const accId = target.dataset.accountId;
-          try {
-            const idxRaw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
-            const map = idxRaw ? JSON.parse(idxRaw) : {};
-            if (map[accId]) loginWithDiscordProfile(map[accId]);
-          } catch (err) {}
-          break;
-        }
-        case 'switch-discord-user':
-          renderSavedAccountsList();
-          document.getElementById('discord-auth-screen').classList.remove('hidden');
-          break;
-        case 'switch-tab':
-          switchTab(target.dataset.tab);
-          break;
-        case 'toggle-audio':
-          toggleAudio();
-          break;
-        case 'buy-pack':
-          buyAndOpenPack(target.dataset.pack);
-          break;
-        case 'tear-pack':
-          tearPackAction();
-          break;
-        case 'flip-card':
-          flipSinglePackCard(Number(target.dataset.index));
-          break;
-        case 'flip-all':
-          flipAllPackCards();
-          break;
-        case 'close-stage':
-          closePackStage();
-          break;
-        case 'claim-daily-pass':
-          claimDailyPassReward();
-          break;
-        case 'album-status':
-          setAlbumStatusFilter(target.dataset.status);
-          break;
-        case 'toggle-wishlist':
-          e.stopPropagation();
-          toggleWishlistCard(target.dataset.cardId);
-          break;
-        case 'toggle-wishlist-inspect':
-          toggleWishlistCard(target.dataset.cardId);
-          openCardInspectModal(target.dataset.cardId);
-          break;
-        case 'create-trade-offer':
-          createTradeOffer();
-          break;
-        case 'cancel-trade-offer':
-          cancelTradeOffer(target.dataset.tradeId);
-          break;
-        case 'accept-trade-offer':
-          acceptTradeOffer(target.dataset.tradeId);
-          break;
-        case 'refresh-trades':
-          renderTradesTab();
-          showToast('Bacheca scambi sincronizzata.', 'info');
-          break;
-        case 'inspect-card':
-          openCardInspectModal(target.dataset.cardId);
-          break;
-        case 'close-inspect':
-          closeCardInspectModal();
-          break;
-        case 'discard-single-dup':
-          discardSingleDuplicate(target.dataset.cardId);
-          break;
-        case 'discard-all-dups':
-          discardAllDuplicates();
-          break;
-        case 'focus-role-slot':
-          activeSlotRole = (activeSlotRole === target.dataset.role) ? null : target.dataset.role;
-          renderLineupSection();
-          break;
-        case 'clear-role-slot':
-          if (currentUserState && currentUserState.lineupSlots) {
-            currentUserState.lineupSlots[target.dataset.role] = null;
-            saveCurrentUserState();
-            renderLineupSection();
-          }
-          break;
-        case 'assign-player-slot':
-          assignPlayerToRoleSlot(target.dataset.cardId);
-          break;
-        case 'auto-lineup':
-          autoFillBestLineup();
-          break;
-        case 'clear-lineup':
-          clearLineup();
-          break;
-        case 'select-tactic':
-          if (currentUserState) {
-            currentUserState.tactic = target.dataset.tactic;
-            saveCurrentUserState();
-            renderLineupSection();
-          }
-          break;
-        case 'play-match':
-          startTacticalMatch();
-          break;
-        case 'finish-tactical-match':
-          finishTacticalMatch(target.dataset.choice);
-          break;
-        case 'refresh-leaderboard':
-          renderLeaderboard();
-          showToast('Classifica Live aggiornata.', 'info');
-          break;
-        case 'close-admin':
-          closeAdminSecretModal();
-          break;
-        case 'verify-admin-password':
-          verifyAdminPassword();
-          break;
-        case 'toggle-infinite-credits':
-          toggleInfiniteCredits();
-          break;
-        case 'admin-sim-next-day':
-          dayOffsetForTesting += 1;
-          renderWeeklyPass();
-          showToast(`Simulato avanzamento di +1 giorno consecutivo (Offset: +${dayOffsetForTesting}g).`, 'info');
-          break;
-        case 'admin-sim-skip-day':
-          dayOffsetForTesting += 2;
-          evaluatePassStreakIntegrity(true);
-          renderWeeklyPass();
-          break;
-        case 'admin-save-photo-url': {
-          const cid = document.getElementById('admin-photo-card-select').value;
-          const url = document.getElementById('admin-photo-url-input').value.trim();
-          if (!cid || !url) {
-            showToast('Seleziona un giocatore e incolla un URL valido!', 'error');
-            break;
-          }
-          saveCustomCardPhoto(cid, url);
-          renderAlbum();
-          renderLineupSection();
-          showToast('URL foto ufficiale salvato e sincronizzato!', 'success');
-          break;
-        }
-        case 'admin-remove-photo': {
-          const cid = document.getElementById('admin-photo-card-select').value;
-          if (!cid) {
-            showToast('Seleziona prima un giocatore!', 'error');
-            break;
-          }
-          saveCustomCardPhoto(cid, null);
-          renderAlbum();
-          renderLineupSection();
-          showToast('Foto personalizzata rimossa.', 'info');
-          break;
-        }
-        case 'admin-remove-inspect-photo': {
-          const cid = target.dataset.cardId;
-          saveCustomCardPhoto(cid, null);
-          renderAlbum();
-          renderLineupSection();
-          openCardInspectModal(cid);
-          showToast('Foto personalizzata rimossa.', 'info');
-          break;
-        }
-        case 'admin-global-reset':
-          forceGlobalResetFromAdmin();
-          break;
-      }
-    });
-
-    document.addEventListener('change', (e) => {
-      if (e.target && e.target.id === 'admin-photo-file-input') {
-        const cid = document.getElementById('admin-photo-card-select').value;
-        const file = e.target.files && e.target.files[0];
-        if (!cid) {
-          showToast('Seleziona prima la figurina dal menu sopra!', 'error');
-          e.target.value = '';
-          return;
-        }
-        compressAndSaveAdminPhoto(cid, file);
-        e.target.value = '';
-      } else if (e.target && e.target.dataset && e.target.dataset.adminInspectFile) {
-        const cid = e.target.dataset.adminInspectFile;
-        const file = e.target.files && e.target.files[0];
-        compressAndSaveAdminPhoto(cid, file);
-        e.target.value = '';
-      }
-    });
-
-    document.getElementById('team-filter').addEventListener('change', renderAlbum);
-    document.getElementById('rarity-filter').addEventListener('change', renderAlbum);
-    document.getElementById('leaderboard-sort-select').addEventListener('change', renderLeaderboard);
-
-    // Scorciatoia Segreta Admin: Ctrl + Shift + A
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key && e.key.toLowerCase() === 'a') {
-        e.preventDefault();
-        openAdminSecretModal();
-      }
-    });
-
-    document.getElementById('admin-password-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        verifyAdminPassword();
-      }
-    });
-
     /**
-     * 14. AVVIO APPLICAZIONE
+     * 14. EFFETTI SONORI WEB AUDIO API & CONFETTI
      */
-    async function bootstrapApp() {
-      populateTeamDropdowns();
-      await initCloudBackend();
+    let audioCtx = null;
 
+    function playSound(type) {
+      if (!currentUserState || !currentUserState.audioEnabled) return;
       try {
-        const photosRaw = localStorage.getItem(CUSTOM_PHOTOS_KEY);
-        if (photosRaw) customCardPhotos = { ...JSON.parse(photosRaw), ...customCardPhotos };
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'tear') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(190, now);
+          osc.frequency.exponentialRampToValueAtTime(55, now + 0.28);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
+          osc.start(now);
+          osc.stop(now + 0.28);
+        } else if (type === 'flip') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(420, now);
+          osc.frequency.exponentialRampToValueAtTime(760, now + 0.14);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+          osc.start(now);
+          osc.stop(now + 0.14);
+        } else if (type === 'legend') {
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(freq, now + i * 0.08);
+            g.gain.setValueAtTime(0.15, now + i * 0.08);
+            g.gain.exponentialRampToValueAtTime(0.005, now + i * 0.08 + 0.35);
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.start(now + i * 0.08);
+            o.stop(now + i * 0.08 + 0.35);
+          });
+        } else if (type === 'coin') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, now);
+          osc.frequency.setValueAtTime(1174.66, now + 0.09);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.24);
+          osc.start(now);
+          osc.stop(now + 0.24);
+        }
       } catch (e) {}
+    }
 
-      const oauthLoggedIn = await checkDiscordOAuthHashCallback();
-      if (!oauthLoggedIn) {
-        renderSavedAccountsList();
+    function updateAudioIcon() {
+      if (!currentUserState) return;
+      const icon = document.getElementById('audio-icon');
+      icon.className = currentUserState.audioEnabled
+        ? 'fa-solid fa-volume-high text-sm text-amber-400 pointer-events-none'
+        : 'fa-solid fa-volume-xmark text-sm text-slate-500 pointer-events-none';
+    }
 
-        try {
-          const activeId = localStorage.getItem(ACTIVE_ACCOUNT_KEY);
-          const idxRaw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
-          if (activeId && idxRaw) {
-            const map = JSON.parse(idxRaw);
-            if (map[activeId]) {
-              await loginWithDiscordProfile(map[activeId]);
-              return;
-            }
-          }
-        } catch (e) {}
+    function toggleAudio() {
+      if (!currentUserState) return;
+      currentUserState.audioEnabled = !currentUserState.audioEnabled;
+      saveCurrentUserState();
+      updateAudioIcon();
+      showToast(currentUserState.audioEnabled ? 'Effetti sonori attivati' : 'Effetti sonori disattivati', 'info');
+    }
+
+    function spawnConfettiBurst() {
+      const colors = ['#ff6b00', '#ffd700', '#38bdf8', '#10b981', '#f43f5e', '#ffffff'];
+      for (let i = 0; i < 36; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.left = `${50 + (Math.random() * 20 - 10)}vw`;
+        el.style.top = `${42 + (Math.random() * 10 - 5)}vh`;
+        el.style.backgroundColor = colors[i % colors.length];
+        el.style.setProperty('--tx', `${(Math.random() - 0.5) * 340}px`);
+        el.style.setProperty('--ty', `${(Math.random() - 0.7) * 320}px`);
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1450);
       }
     }
 
-    bootstrapApp();
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bgMap = {
+        success: 'bg-emerald-950/95 border-emerald-500 text-emerald-100',
+        error: 'bg-rose-950/95 border-rose-500 text-rose-100',
+        info: 'bg-slate-900/95 border-amber-400/60 text-slate-100'
+      };
+      const iconMap = {
+        success: 'fa-circle-check text-emerald-400',
+        error: 'fa-circle-exclamation text-rose-400',
+        info: 'fa-basketball text-amber-400'
+      };
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-2xl text-xs sm:text-sm font-bold ${bgMap[type] || bgMap.info} sticker-reveal-anim`;
+      toast.innerHTML = `<i class="fa-solid ${iconMap[type] || iconMap.info}"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s';
+        setTimeout(() => toast.remove(), 260);
+      }, 3400);
+    }
+
+    /**
+     * 15. EVENT DELEGATION GLOBALE + SCORCIATOIA SEGRETA CTRL + SHIFT + A
+     */
+    function handleImageFileToDataUrl(file, callback) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 480;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+            else { w = Math.round(w * maxDim / h); h = maxDim; }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          callback(canvas.toDataURL('image/jpeg', 0.85));
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function initApp() {
+      try {
+        const savedPhotosRaw = localStorage.getItem(CUSTOM_PHOTOS_KEY);
+        if (savedPhotosRaw) customCardPhotos = JSON.parse(savedPhotosRaw);
+      } catch (e) {}
+
+      populateTeamDropdowns();
+      renderSavedAccountsList();
+
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key && e.key.toLowerCase() === 'a') {
+          e.preventDefault();
+          openAdminModal();
+        }
+        if (e.key === 'Escape') {
+          closeInspectModal();
+          closeAdminModal();
+          document.getElementById('user-collection-modal').classList.add('hidden');
+          currentlyViewedUserId = null;
+        }
+      });
+
+      document.getElementById('admin-password-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') verifyAdminPassword();
+      });
+
+      document.addEventListener('change', async (e) => {
+        if (e.target.id === 'admin-photo-file-input') {
+          const cardId = document.getElementById('admin-photo-card-select').value;
+          if (!cardId) {
+            showToast('Seleziona prima un giocatore dal menu a tendina!', 'error');
+            return;
+          }
+          handleImageFileToDataUrl(e.target.files[0], async (dataUrl) => {
+            await saveCustomCardPhoto(cardId, dataUrl);
+            renderAlbum();
+            renderLineupSection();
+            showToast('Foto giocatore caricata e sincronizzata!', 'success');
+          });
+        } else if (e.target.dataset && e.target.dataset.action === 'inspect-upload-photo') {
+          const cardId = e.target.dataset.cardId;
+          handleImageFileToDataUrl(e.target.files[0], async (dataUrl) => {
+            await saveCustomCardPhoto(cardId, dataUrl);
+            inspectCard(cardId);
+            renderAlbum();
+            renderLineupSection();
+            showToast('Foto ufficiale applicata alla figurina!', 'success');
+          });
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        const targetEl = e.target.closest('[data-action]');
+        if (!targetEl) return;
+
+        const action = targetEl.dataset.action;
+
+        if (action === 'close-inspect' && targetEl.id === 'card-inspect-modal' && e.target.id !== 'card-inspect-modal') {
+          return;
+        }
+        if (action === 'close-admin' && targetEl.id === 'admin-secret-modal' && e.target.id !== 'admin-secret-modal') {
+          return;
+        }
+        if (action === 'close-user-collection' && targetEl.id === 'user-collection-modal' && e.target.id !== 'user-collection-modal') {
+          return;
+        }
+
+        switch (action) {
+          case 'discord-bot-oauth':
+            handleDiscordBotOAuth();
+            break;
+          case 'login-saved-account': {
+            const accId = targetEl.dataset.accountId;
+            const idxRaw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
+            if (idxRaw) {
+              const map = JSON.parse(idxRaw);
+              if (map[accId]) loginWithDiscordProfile(map[accId]);
+            }
+            break;
+          }
+          case 'switch-discord-user':
+            renderSavedAccountsList();
+            document.getElementById('discord-auth-screen').classList.remove('hidden');
+            break;
+          case 'switch-tab':
+            switchTab(targetEl.dataset.tab);
+            break;
+          case 'toggle-audio':
+            toggleAudio();
+            break;
+          case 'buy-pack':
+            buyAndOpenPack(targetEl.dataset.pack);
+            break;
+          case 'tear-pack':
+            tearPackAction();
+            break;
+          case 'flip-card':
+            flipSinglePackCard(Number(targetEl.dataset.index));
+            break;
+          case 'flip-all':
+            flipAllPackCards();
+            break;
+          case 'close-stage':
+            closePackStage();
+            break;
+          case 'claim-daily-pass':
+            claimDailyPassReward();
+            break;
+          case 'album-status':
+            setAlbumStatusFilter(targetEl.dataset.status);
+            break;
+          case 'toggle-wishlist':
+            toggleWishlistCard(targetEl.dataset.cardId);
+            break;
+          case 'toggle-wishlist-inspect':
+            toggleWishlistCard(targetEl.dataset.cardId);
+            inspectCard(targetEl.dataset.cardId);
+            break;
+          case 'inspect-remove-photo': {
+            const cid = targetEl.dataset.cardId;
+            saveCustomCardPhoto(cid, null);
+            inspectCard(cid);
+            renderAlbum();
+            showToast('Foto personalizzata rimossa.', 'info');
+            break;
+          }
+          case 'create-trade-offer':
+            createTradeOffer();
+            break;
+          case 'cancel-trade-offer':
+            cancelTradeOffer(targetEl.dataset.tradeId);
+            break;
+          case 'accept-trade-offer':
+            acceptTradeOffer(targetEl.dataset.tradeId);
+            break;
+          case 'refresh-trades':
+            renderTradesTab();
+            showToast('Bacheca scambi sincronizzata.', 'info');
+            break;
+          case 'discard-single-dup':
+            discardSingleDuplicate(targetEl.dataset.cardId);
+            break;
+          case 'discard-all-dups':
+            discardAllDuplicates();
+            break;
+          case 'auto-lineup':
+            autoSelectBestLineup();
+            break;
+          case 'clear-lineup':
+            clearLineup();
+            break;
+          case 'focus-role-slot':
+            activeSlotRole = (activeSlotRole === targetEl.dataset.role) ? null : targetEl.dataset.role;
+            renderLineupSection();
+            break;
+          case 'clear-role-slot':
+            if (currentUserState && currentUserState.lineupSlots) {
+              currentUserState.lineupSlots[targetEl.dataset.role] = null;
+              saveCurrentUserState();
+              renderLineupSection();
+            }
+            break;
+          case 'assign-player-slot':
+            assignPlayerToLineup(targetEl.dataset.cardId);
+            break;
+          case 'select-tactic':
+            if (currentUserState) {
+              currentUserState.tactic = targetEl.dataset.tactic;
+              saveCurrentUserState();
+              renderLineupSection();
+            }
+            break;
+          case 'play-match':
+            startTacticalMatch();
+            break;
+          case 'finish-tactical-match':
+            finishTacticalMatch(targetEl.dataset.adj);
+            break;
+          case 'refresh-leaderboard':
+            renderLeaderboard();
+            showToast('Classifica live aggiornata!', 'info');
+            break;
+          case 'view-user-collection':
+            openUserCollectionModal(targetEl.dataset.userId);
+            break;
+          case 'close-user-collection':
+            document.getElementById('user-collection-modal').classList.add('hidden');
+            currentlyViewedUserId = null;
+            break;
+          case 'propose-trade-for-card':
+            proposeTradeForSpecificCard(targetEl.dataset.cardId);
+            break;
+          case 'inspect-card':
+            inspectCard(targetEl.dataset.cardId);
+            break;
+          case 'close-inspect':
+            closeInspectModal();
+            break;
+          case 'close-admin':
+            closeAdminModal();
+            break;
+          case 'verify-admin-password':
+            verifyAdminPassword();
+            break;
+          case 'toggle-infinite-credits':
+            toggleInfiniteCredits();
+            break;
+          case 'admin-sim-next-day':
+            dayOffsetForTesting += 1;
+            renderWeeklyPass();
+            showToast('Avanzato di +1 giorno consecutivo nel Pass Settimanale!', 'info');
+            break;
+          case 'admin-sim-skip-day':
+            dayOffsetForTesting += 2;
+            evaluatePassStreakIntegrity(true);
+            renderWeeklyPass();
+            break;
+          case 'admin-save-photo-url': {
+            const cid = document.getElementById('admin-photo-card-select').value;
+            const url = document.getElementById('admin-photo-url-input').value.trim();
+            if (!cid || !url) {
+              showToast('Seleziona un giocatore e incolla un URL valido!', 'error');
+              break;
+            }
+            saveCustomCardPhoto(cid, url);
+            renderAlbum();
+            renderLineupSection();
+            showToast('URL foto salvato e sincronizzato!', 'success');
+            break;
+          }
+          case 'admin-remove-photo': {
+            const cid = document.getElementById('admin-photo-card-select').value;
+            if (!cid) {
+              showToast('Seleziona prima un giocatore!', 'error');
+              break;
+            }
+            saveCustomCardPhoto(cid, null);
+            renderAlbum();
+            renderLineupSection();
+            showToast('Foto giocatore rimossa.', 'info');
+            break;
+          }
+          case 'admin-global-reset':
+            forceGlobalResetFromAdmin();
+            break;
+        }
+      });
+
+      document.getElementById('team-filter').addEventListener('change', renderAlbum);
+      document.getElementById('rarity-filter').addEventListener('change', renderAlbum);
+      document.getElementById('leaderboard-sort-select').addEventListener('change', renderLeaderboard);
+
+      document.getElementById('viewer-team-filter').addEventListener('change', () => {
+        if (currentlyViewedUserId) renderUserCollectionModalContent(currentlyViewedUserId);
+      });
+      document.getElementById('viewer-rarity-filter').addEventListener('change', () => {
+        if (currentlyViewedUserId) renderUserCollectionModalContent(currentlyViewedUserId);
+      });
+      document.getElementById('viewer-copies-filter').addEventListener('change', () => {
+        if (currentlyViewedUserId) renderUserCollectionModalContent(currentlyViewedUserId);
+      });
+
+      initCloudBackend().then(async () => {
+        const loggedFromOAuth = await checkDiscordOAuthHashCallback();
+        if (!loggedFromOAuth) {
+          try {
+            const activeId = localStorage.getItem(ACTIVE_ACCOUNT_KEY);
+            const idxRaw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
+            if (activeId && idxRaw) {
+              const map = JSON.parse(idxRaw);
+              if (map[activeId]) {
+                await loginWithDiscordProfile(map[activeId]);
+              }
+            }
+          } catch (e) {}
+        }
+      });
+    }
+
+    initApp();
   </script>
 </body>
 </html>
