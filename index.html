@@ -1631,9 +1631,9 @@
       measurementId: "G-3K2R1PHLS8"
     };
 
-    const RESET_FLAG_KEY = 'lnp_a2_reset_done_v6_clean';
-    const ACCOUNTS_INDEX_KEY = 'lnp_a2_discord_accounts_v5';
-    const ACTIVE_ACCOUNT_KEY = 'lnp_a2_active_discord_user_v5';
+    const RESET_FLAG_KEY = 'lnp_a2_reset_done_v7_clean';
+    const ACCOUNTS_INDEX_KEY = 'lnp_a2_discord_accounts_v7';
+    const ACTIVE_ACCOUNT_KEY = 'lnp_a2_active_discord_user_v7';
     const CUSTOM_PHOTOS_KEY = 'lnp_a2_custom_card_photos_v5';
     const DISCORD_BOT_CLIENT_ID = '1541078187952308255';
 
@@ -1649,7 +1649,7 @@
     let currentlyViewedUserId = null;
 
     function getUserStorageKey(discordId) {
-      return `lnp_a2_user_data_${discordId}_v5`;
+      return `lnp_a2_user_data_${discordId}_v7`;
     }
 
     async function executeCleanResetIfNeeded() {
@@ -1667,7 +1667,7 @@
 
       if (firebaseDb && firebaseUser) {
         try {
-          const resetDocRef = doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'system_meta', 'v6_clean_reset');
+          const resetDocRef = doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'system_meta', 'v7_clean_reset');
           const resetSnap = await getDoc(resetDocRef);
           if (!resetSnap.exists()) {
             const oldProfiles = await getDocs(collection(firebaseDb, 'artifacts', appId, 'public', 'data', 'public_profiles'));
@@ -1778,6 +1778,23 @@
           }
         },
         (err) => console.warn('Errore listener foto:', err)
+      );
+
+      onSnapshot(
+        doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'system_meta', 'v7_clean_reset'),
+        (docSnap) => {
+          if (docSnap.exists() && !localStorage.getItem(RESET_FLAG_KEY)) {
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const k = localStorage.key(i);
+              if (k && k.startsWith('lnp_a2_')) keysToRemove.push(k);
+            }
+            keysToRemove.forEach(k => localStorage.removeItem(k));
+            localStorage.setItem(RESET_FLAG_KEY, '1');
+            location.reload();
+          }
+        },
+        (err) => console.warn('Errore listener reset:', err)
       );
     }
 
