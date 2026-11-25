@@ -181,7 +181,7 @@
           Accedi con Bot Discord
         </h1>
         <p class="text-xs sm:text-sm text-slate-300 mt-1">
-          Autorizza il Bot ufficiale su Discord per collegare il tuo account, salvare automaticamente la collezione, i crediti e la serie settimanale!
+          Autorizza il Bot ufficiale su Discord per collegare il tuo account, sincronizzare gli scambi e scalare la classifica live!
         </p>
       </div>
 
@@ -207,7 +207,7 @@
 
         <div class="text-[11px] text-slate-400 bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex items-start gap-2">
           <i class="fa-solid fa-shield-halved text-indigo-400 mt-0.5 shrink-0"></i>
-          <span>Connessione sicura OAuth2 (Bot ID: <code class="text-indigo-300 font-mono">1541078187952308255</code>). Non è richiesta alcuna password o inserimento manuale del nome.</span>
+          <span>Connessione sicura OAuth2 (Bot ID: <code class="text-indigo-300 font-mono">1541078187952308255</code>).</span>
         </div>
       </div>
 
@@ -234,8 +234,8 @@
             <h1 class="font-display text-2xl sm:text-3xl tracking-wide uppercase font-bold text-white leading-none">
               LNP SERIE A2 <span class="text-[#ff6b00]">2026/27</span>
             </h1>
-            <span id="cloud-sync-badge" class="hidden md:inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-              <i class="fa-solid fa-cloud-check"></i> Cloud Sync
+            <span id="cloud-sync-badge" class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">
+              <i class="fa-solid fa-spinner fa-spin"></i> Connessione Cloud...
             </span>
           </div>
           <p class="text-xs text-slate-400">Album Figurine • 20 Squadre • Pass Settimanale</p>
@@ -344,7 +344,7 @@
               Colleziona tutte le <span id="shop-total-cards-title">354</span> figurine della Serie A2
             </h2>
             <p class="text-sm text-slate-300 max-w-2xl mt-1">
-              Completa le 20 squadre al 100% per ricevere <span class="text-emerald-300 font-bold">+600 Crediti bonus e il Badge Club Ufficiale</span>, scambia i doppioni nella bacheca Discord e scala la <span class="text-amber-300 font-bold">Classifica Live</span>!
+              Completa le 20 squadre al 100% per ricevere <span class="text-emerald-300 font-bold">+600 Crediti bonus e il Badge Club Ufficiale</span>, scambia i doppioni nella bacheca live e scala la <span class="text-amber-300 font-bold">Classifica Live</span>!
             </p>
           </div>
           <button type="button" data-action="switch-tab" data-tab="pass" class="px-4 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 font-bold text-xs sm:text-sm flex items-center gap-2 shrink-0 transition active:scale-95">
@@ -521,9 +521,7 @@
             </div>
           </div>
 
-          <div id="opened-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 justify-items-center">
-            <!-- Popolata dinamicamente -->
-          </div>
+          <div id="opened-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 justify-items-center"></div>
         </div>
       </div>
     </section>
@@ -569,9 +567,7 @@
       </div>
 
       <!-- Griglia dei 7 Giorni -->
-      <div id="weekly-pass-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Popolata dinamicamente da JS -->
-      </div>
+      <div id="weekly-pass-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
     </section>
 
     <!-- =========================================================
@@ -636,20 +632,20 @@
     </section>
 
     <!-- =========================================================
-         TAB 4: SCAMBI PLAYER & WISHLIST (MULTI-UTENTE DISCORD)
+         TAB 4: SCAMBI PLAYER & WISHLIST (CLOUD LIVE)
          ========================================================= -->
     <section id="section-trades" class="hidden space-y-6">
       <div class="bg-gradient-to-r from-[#15203b] via-[#162a4a] to-[#15203b] border border-cyan-500/40 rounded-2xl p-5 sm:p-7 shadow-xl space-y-5">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <span class="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-widest text-cyan-400 mb-1">
-              <i class="fa-solid fa-right-left"></i> Mercato Scambi Multi-Utente Discord
+              <i class="fa-solid fa-right-left"></i> Mercato Scambi Multi-Browser in Tempo Reale
             </span>
             <h2 class="font-display text-3xl sm:text-4xl font-bold uppercase text-white tracking-wide">
               Scambi Player & Lista Desideri
             </h2>
             <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
-              Pubblica una proposta offrendo una tua figurina in cambio di una che ti manca. Le offerte che contengono una carta della tua <strong>Wishlist</strong> vengono evidenziate con il badge <span class="text-emerald-300 font-bold">MATCH WISHLIST!</span>
+              Pubblica una proposta offrendo una tua figurina in cambio di una che ti manca: tutti gli utenti su qualsiasi browser o dispositivo la vedranno istantaneamente! Le offerte che contengono una carta della tua <strong>Wishlist</strong> mostrano il badge <span class="text-emerald-300 font-bold">MATCH WISHLIST!</span>
             </p>
           </div>
           <div class="bg-slate-950/80 border border-rose-400/40 rounded-2xl px-4 py-3 text-center shrink-0">
@@ -687,9 +683,14 @@
       <!-- Elenco Scambi Attivi -->
       <div class="bg-[#15203b] border border-slate-700/80 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-          <h3 class="font-display text-2xl sm:text-3xl font-bold uppercase text-white tracking-wide">
-            Bacheca Scambi Aperti
-          </h3>
+          <div class="flex items-center gap-2">
+            <h3 class="font-display text-2xl sm:text-3xl font-bold uppercase text-white tracking-wide">
+              Bacheca Scambi Aperti
+            </h3>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+              LIVE SYNC
+            </span>
+          </div>
           <button type="button" data-action="refresh-trades" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 border border-slate-700 transition active:scale-95">
             <i class="fa-solid fa-arrows-rotate mr-1 pointer-events-none"></i> Aggiorna
           </button>
@@ -725,7 +726,7 @@
         <div id="duplicates-list" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 max-h-72 overflow-y-auto pr-1"></div>
       </div>
 
-      <!-- Sezione 2: Partite Tattiche Serie A2 (Max 10 al giorno, +50 Crediti a vittoria) -->
+      <!-- Sezione 2: Partite Tattiche Serie A2 (Max 10 al giorno, +50 Crediti a vittoria, 0 a sconfitta) -->
       <div class="bg-[#15203b] border border-slate-700/80 rounded-2xl p-5 sm:p-6 shadow-xl space-y-6">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div>
@@ -738,7 +739,7 @@
             <h2 class="font-display text-3xl font-bold uppercase text-white tracking-wide">
               Quintetto per Ruoli (PG • SG • SF • PF • C) & Partita Tattica
             </h2>
-            <p class="text-xs text-slate-400">Schiera 5 giocatori nei rispettivi ruoli (fuori ruolo <span class="text-rose-400 font-bold">-5 OVR</span>), scegli lo schema tattico e vinci <span class="text-emerald-400 font-bold">+50 Crediti</span> a partita (max 10 partite al giorno)!</p>
+            <p class="text-xs text-slate-400">Schiera 5 giocatori nei rispettivi ruoli (fuori ruolo <span class="text-rose-400 font-bold">-5 OVR</span>), scegli lo schema tattico e vinci <span class="text-emerald-400 font-bold">+50 Crediti</span> a vittoria (<span class="text-rose-400 font-bold">0 Crediti in caso di sconfitta</span>, max 10 partite al giorno)!</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
@@ -792,7 +793,7 @@
 
           <div class="flex flex-col items-center justify-center space-y-4">
             <button type="button" id="btn-start-tactical-match" data-action="play-match" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#ff6b00] to-amber-500 hover:brightness-110 text-white font-extrabold text-base shadow-xl shadow-orange-600/30 transition active:scale-95">
-              <i class="fa-solid fa-basketball mr-2 pointer-events-none"></i> Gioca Partita Tattica (+50 Crediti Vittoria)
+              <i class="fa-solid fa-basketball mr-2 pointer-events-none"></i> Gioca Partita Tattica (+50 Vittoria / 0 Sconfitta)
             </button>
 
             <!-- Cronaca Interattiva 1° Tempo + Timeout Intervallo + 2° Tempo -->
@@ -813,19 +814,19 @@
     </section>
 
     <!-- =========================================================
-         TAB 6: CLASSIFICA LIVE COLLEGHI DISCORD
+         TAB 6: CLASSIFICA LIVE COLLEZIONISTI DISCORD
          ========================================================= -->
     <section id="section-leaderboard" class="hidden space-y-6">
       <div class="bg-gradient-to-r from-[#15203b] via-[#1f2947] to-[#15203b] border border-yellow-500/40 rounded-2xl p-5 sm:p-7 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <span class="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-widest text-yellow-400 mb-1">
-            <i class="fa-solid fa-ranking-star"></i> Classifica Live Multi-Utente Discord
+            <i class="fa-solid fa-ranking-star"></i> Classifica Live Multi-Browser Discord
           </span>
           <h2 class="font-display text-3xl sm:text-4xl font-bold uppercase text-white tracking-wide">
             Classifica Collezionisti LNP Serie A2
           </h2>
           <p class="text-xs sm:text-sm text-slate-300 mt-1">
-            Confronta in tempo reale il completamento dell'album, i club completati al 100%, l'OVR del quintetto e le vittorie sul parquet!
+            Sincronizzata in tempo reale su tutti i browser e dispositivi: confronta completamento album, club al 100%, OVR del quintetto e vittorie!
           </p>
         </div>
 
@@ -925,9 +926,6 @@
           <span class="block text-xs font-extrabold text-amber-300">
             <i class="fa-solid fa-calendar-days mr-1"></i> Test Serie Consecutiva Pass Settimanale
           </span>
-          <p class="text-[11px] text-slate-400">
-            Verifica subito il comportamento della serie consecutiva di 7 giorni:
-          </p>
           <div class="grid grid-cols-2 gap-2">
             <button type="button" data-action="admin-sim-next-day" class="py-2 px-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] transition active:scale-95">
               +1 Giorno Consecutivo
@@ -944,7 +942,7 @@
             <i class="fa-solid fa-camera mr-1"></i> Gestione Foto Ufficiali Giocatori
           </span>
           <p class="text-[11px] text-slate-400">
-            Seleziona una figurina (Base, Signature o MVP Icona) e carica una foto reale che riempirà l'intero riquadro:
+            Seleziona una figurina e carica una foto reale che riempirà l'intero riquadro:
           </p>
           <select id="admin-photo-card-select" class="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-lg px-2.5 py-2 focus:outline-none focus:border-cyan-400">
             <option value="">Seleziona giocatore/figurina...</option>
@@ -965,22 +963,35 @@
             </button>
           </div>
         </div>
+
+        <!-- Reset Globale di Tutte le Carte e Tutti gli Account -->
+        <div class="bg-rose-950/50 border border-rose-500/50 rounded-xl p-3.5 space-y-2">
+          <span class="block text-xs font-extrabold text-rose-300">
+            <i class="fa-solid fa-radiation mr-1"></i> Reset Completo Carte & Account
+          </span>
+          <p class="text-[11px] text-slate-300">
+            Azzera tutte le collezioni, gli scambi aperti, i profili Discord e la classifica live.
+          </p>
+          <button type="button" data-action="admin-global-reset" class="w-full py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs transition active:scale-95">
+            Resetta Tutte le Carte e Tutti gli Account
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- FOOTER -->
   <footer class="border-t border-slate-800/80 bg-[#080e21] py-4 px-4 text-center text-xs text-slate-500 mt-10">
-    LNP Serie A2 2026/27 - Album & Pack Opener • Multi-Utente Discord • Pass Settimanale Consecutivo • 20 Squadre Ufficiali (354 Figurine).
+    LNP Serie A2 2026/27 - Album & Pack Opener • Multi-Utente Discord • Sync Live • 20 Squadre Ufficiali (354 Figurine).
   </footer>
 
   <!-- =========================================================
-       LOGICA JAVASCRIPT COMPLETA + FIREBASE CLOUD SYNC
+       LOGICA JAVASCRIPT COMPLETA + FIREBASE CLOUD REAL-TIME SYNC
        ========================================================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     /**
      * 1. DATABASE UFFICIALE DELLE 20 SQUADRE SERIE A2 2026/27 (IDENTICO A v2_3_3)
@@ -1504,7 +1515,6 @@
 
       team.roster.forEach((player, idx) => {
         const baseRarity = getRarityFromOvr(player.ovr, false);
-        // 1. Carta Ufficiale Base / Rara / Epica / Leggenda
         ALL_CARDS.push({
           id: `${team.id}_p_${idx}`,
           num: String(cardNumberCounter++).padStart(3, '0'),
@@ -1527,7 +1537,6 @@
           jerseyNum: player.num
         });
 
-        // 2. Versione Speciale SIGNATURE (OVR +2, max 95) per OVR base >= 85
         if (player.ovr >= 85) {
           const sigOvr = Math.min(95, player.ovr + 2);
           ALL_CARDS.push({
@@ -1554,7 +1563,6 @@
           });
         }
 
-        // 3. Versione Speciale MVP ICONA (OVR +4, max 97) per OVR base >= 88
         if (player.ovr >= 88) {
           const iconOvr = Math.min(97, player.ovr + 4);
           ALL_CARDS.push({
@@ -1586,12 +1594,12 @@
     const TOTAL_CARDS_COUNT = ALL_CARDS.length;
 
     /**
-     * 2. FIREBASE CLOUD & MULTI-UTENTE DISCORD
+     * 2. FIREBASE CLOUD REAL-TIME (ONSNAPSHOT) & RESET GLOBALE v5_clean_reset
      */
-    const ACCOUNTS_INDEX_KEY = 'lnp_a2_discord_accounts_v4';
-    const ACTIVE_ACCOUNT_KEY = 'lnp_a2_active_discord_user_v4';
-    const CUSTOM_PHOTOS_KEY = 'lnp_a2_custom_card_photos_v1';
-    const LOCAL_TRADES_KEY = 'lnp_a2_local_trades_v1';
+    const RESET_FLAG_KEY = 'lnp_a2_reset_done_v5_clean';
+    const ACCOUNTS_INDEX_KEY = 'lnp_a2_discord_accounts_v5';
+    const ACTIVE_ACCOUNT_KEY = 'lnp_a2_active_discord_user_v5';
+    const CUSTOM_PHOTOS_KEY = 'lnp_a2_custom_card_photos_v5';
     const DISCORD_BOT_CLIENT_ID = '1541078187952308255';
 
     let firebaseDb = null;
@@ -1599,22 +1607,177 @@
     let firebaseUser = null;
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'lnp-a2-2026-27';
 
-    // Foto reali caricate dall'Admin: { [cardId]: imageUrlOrDataUrl }
+    // Dati live sincronizzati via onSnapshot tra tutti i browser/dispositivi
+    let liveTradesList = [];
+    let livePublicProfilesMap = {};
     let customCardPhotos = {};
-    try {
-      const savedPhotos = localStorage.getItem(CUSTOM_PHOTOS_KEY);
-      if (savedPhotos) customCardPhotos = JSON.parse(savedPhotos);
-    } catch (e) {}
 
-    async function loadCloudCustomPhotos() {
-      if (!firebaseDb || !firebaseUser) return;
+    function getUserStorageKey(discordId) {
+      return `lnp_a2_user_data_${discordId}_v5`;
+    }
+
+    // Esegue la pulizia completa di vecchi account, vecchie carte e scambi (v5_clean_reset)
+    async function executeCleanResetIfNeeded() {
       try {
-        const snap = await getDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'admin_assets', 'card_photos'));
-        if (snap.exists() && snap.data().photos) {
-          customCardPhotos = { ...customCardPhotos, ...snap.data().photos };
-          localStorage.setItem(CUSTOM_PHOTOS_KEY, JSON.stringify(customCardPhotos));
+        if (!localStorage.getItem(RESET_FLAG_KEY)) {
+          const keysToRemove = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('lnp_a2_')) keysToRemove.push(k);
+          }
+          keysToRemove.forEach(k => localStorage.removeItem(k));
+          localStorage.setItem(RESET_FLAG_KEY, '1');
         }
       } catch (e) {}
+
+      if (firebaseDb && firebaseUser) {
+        try {
+          const resetDocRef = doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'system_meta', 'v5_clean_reset');
+          const resetSnap = await getDoc(resetDocRef);
+          if (!resetSnap.exists()) {
+            const oldProfiles = await getDocs(collection(firebaseDb, 'artifacts', appId, 'public', 'data', 'public_profiles'));
+            const delPromises = [];
+            oldProfiles.forEach(d => delPromises.push(deleteDoc(d.ref)));
+
+            const oldTrades = await getDocs(collection(firebaseDb, 'artifacts', appId, 'public', 'data', 'trades'));
+            oldTrades.forEach(d => delPromises.push(deleteDoc(d.ref)));
+
+            await Promise.all(delPromises);
+            await setDoc(resetDocRef, { resetCompletedAt: Date.now() });
+          }
+        } catch (e) {
+          console.warn('Reset cloud non applicato o già eseguito:', e);
+        }
+      }
+    }
+
+    async function forceGlobalResetFromAdmin() {
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('lnp_a2_')) keysToRemove.push(k);
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+        localStorage.setItem(RESET_FLAG_KEY, '1');
+      } catch (e) {}
+
+      if (firebaseDb && firebaseUser) {
+        try {
+          const oldProfiles = await getDocs(collection(firebaseDb, 'artifacts', appId, 'public', 'data', 'public_profiles'));
+          const delPromises = [];
+          oldProfiles.forEach(d => delPromises.push(deleteDoc(d.ref)));
+
+          const oldTrades = await getDocs(collection(firebaseDb, 'artifacts', appId, 'public', 'data', 'trades'));
+          oldTrades.forEach(d => delPromises.push(deleteDoc(d.ref)));
+
+          await Promise.all(delPromises);
+        } catch (e) {}
+      }
+
+      liveTradesList = [];
+      livePublicProfilesMap = {};
+
+      if (currentUserState && currentUserState.discord) {
+        const freshProfile = currentUserState.discord;
+        currentUserState = createDefaultUserState(freshProfile);
+        saveCurrentUserState();
+        updateCreditsUI();
+        updateAlbumStatsUI();
+        renderWeeklyPass();
+        renderAlbum();
+        renderTradesTab();
+        renderArenaAndDuplicates();
+        renderLeaderboard();
+      }
+      showToast('Tutte le carte e tutti gli account sono stati resettati!', 'success');
+    }
+
+    function setupRealtimeListeners() {
+      if (!firebaseDb || !firebaseUser) return;
+
+      // 1. Listener in tempo reale Bacheca Scambi (tutti i browser vedono subito ogni scambio)
+      onSnapshot(
+        collection(firebaseDb, 'artifacts', appId, 'public', 'data', 'trades'),
+        (snapshot) => {
+          const trades = [];
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data && data.id) trades.push(data);
+          });
+          trades.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          liveTradesList = trades;
+          renderTradesTab();
+        },
+        (err) => console.warn('Errore listener scambi:', err)
+      );
+
+      // 2. Listener in tempo reale Classifica & Profili Pubblici Discord
+      onSnapshot(
+        collection(firebaseDb, 'artifacts', appId, 'public', 'data', 'public_profiles'),
+        (snapshot) => {
+          const map = {};
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data && data.discord && data.discord.id) {
+              map[data.discord.id] = data;
+            }
+          });
+          livePublicProfilesMap = map;
+          renderLeaderboard();
+        },
+        (err) => console.warn('Errore listener classifica:', err)
+      );
+
+      // 3. Listener in tempo reale Foto Giocatori caricate dall'Admin
+      onSnapshot(
+        doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'admin_assets', 'card_photos'),
+        (docSnap) => {
+          if (docSnap.exists() && docSnap.data().photos) {
+            customCardPhotos = docSnap.data().photos;
+            try {
+              localStorage.setItem(CUSTOM_PHOTOS_KEY, JSON.stringify(customCardPhotos));
+            } catch (e) {}
+            renderAlbum();
+            renderLineupSection();
+          }
+        },
+        (err) => console.warn('Errore listener foto:', err)
+      );
+    }
+
+    // Controlla se un altro player ha accettato un nostro scambio mentre eravamo su un altro browser/sessione
+    function setupPendingTradeCreditsListener(discordId) {
+      if (!firebaseDb || !firebaseUser || !discordId) return;
+      onSnapshot(
+        collection(firebaseDb, 'artifacts', appId, 'public', 'data', 'trade_deliveries'),
+        async (snapshot) => {
+          if (!currentUserState || currentUserState.discord.id !== discordId) return;
+          let receivedAny = false;
+          for (const docSnap of snapshot.docs) {
+            const d = docSnap.data();
+            if (d && d.recipientId === discordId && d.cardId) {
+              currentUserState.owned[d.cardId] = (currentUserState.owned[d.cardId] || 0) + 1;
+              currentUserState.wishlist = (currentUserState.wishlist || []).filter(id => id !== d.cardId);
+              receivedAny = true;
+              try {
+                await deleteDoc(docSnap.ref);
+              } catch (e) {}
+            }
+          }
+          if (receivedAny) {
+            checkTeamCompletions(true);
+            saveCurrentUserState();
+            updateAlbumStatsUI();
+            renderAlbum();
+            renderTradesTab();
+            renderArenaAndDuplicates();
+            playSound('legend');
+            showToast('Uno scambio pubblicato è stato accettato! Figurina ricevuta nell\'album!', 'success');
+          }
+        },
+        (err) => console.warn('Errore listener consegne scambi:', err)
+      );
     }
 
     async function saveCustomCardPhoto(cardId, photoDataUrl) {
@@ -1638,6 +1801,7 @@
     }
 
     async function initCloudBackend() {
+      const badge = document.getElementById('cloud-sync-badge');
       try {
         if (typeof __firebase_config !== 'undefined' && __firebase_config) {
           const firebaseConfig = JSON.parse(__firebase_config);
@@ -1654,13 +1818,23 @@
           }
 
           if (firebaseUser) {
-            const badge = document.getElementById('cloud-sync-badge');
-            if (badge) badge.classList.remove('hidden');
-            await loadCloudCustomPhotos();
+            await executeCleanResetIfNeeded();
+            setupRealtimeListeners();
+            if (badge) {
+              badge.className = 'inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30';
+              badge.innerHTML = '<i class="fa-solid fa-cloud-check"></i> Cloud Live (Sync Attivo)';
+            }
+            return;
           }
         }
       } catch (e) {
-        console.warn('Modalità locale attiva (Cloud non disponibile):', e);
+        console.warn('Errore inizializzazione Cloud:', e);
+      }
+
+      await executeCleanResetIfNeeded();
+      if (badge) {
+        badge.className = 'inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-700/60 text-slate-300 border border-slate-600';
+        badge.innerHTML = '<i class="fa-solid fa-hard-drive"></i> Modalità Locale';
       }
     }
 
@@ -1690,8 +1864,32 @@
     let adminUnlocked = false;
     let dayOffsetForTesting = 0;
 
-    function getUserStorageKey(discordId) {
-      return `lnp_a2_user_data_${discordId}_v4`;
+    function buildPublicSummary(state) {
+      const uniqueOwned = ALL_CARDS.filter(c => (state.owned && state.owned[c.id] > 0)).length;
+      const pct = Math.round((uniqueOwned / TOTAL_CARDS_COUNT) * 100);
+      const clubs100 = Array.isArray(state.completedTeams) ? state.completedTeams.length : 0;
+
+      let lineupAvg = 0;
+      if (state.lineupSlots) {
+        const ids = Object.values(state.lineupSlots).filter(Boolean);
+        if (ids.length > 0) {
+          const sum = ids.reduce((acc, cid) => {
+            const card = ALL_CARDS.find(c => c.id === cid);
+            return acc + (card ? card.ovr : 0);
+          }, 0);
+          lineupAvg = Math.round(sum / ids.length);
+        }
+      }
+
+      return {
+        discord: state.discord,
+        uniqueOwned,
+        pct,
+        clubs100,
+        lineupAvg,
+        wins: state.matchWins || 0,
+        updatedAt: Date.now()
+      };
     }
 
     function saveCurrentUserState() {
@@ -1710,9 +1908,9 @@
 
       if (firebaseDb && firebaseUser) {
         try {
-          setDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'discord_profiles', dId), {
-            state: currentUserState,
-            updatedAt: Date.now()
+          setDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'public_profiles', dId), {
+            ...buildPublicSummary(currentUserState),
+            fullState: currentUserState
           }, { merge: true });
         } catch (e) {}
       }
@@ -1724,9 +1922,9 @@
 
       if (firebaseDb && firebaseUser) {
         try {
-          const snap = await getDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'discord_profiles', dId));
-          if (snap.exists() && snap.data().state) {
-            loaded = snap.data().state;
+          const snap = await getDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'public_profiles', dId));
+          if (snap.exists() && snap.data().fullState) {
+            loaded = snap.data().fullState;
           }
         } catch (e) {}
       }
@@ -1752,6 +1950,7 @@
         currentUserState = createDefaultUserState(discordProfile);
       }
 
+      setupPendingTradeCreditsListener(dId);
       evaluatePassStreakIntegrity(true);
       checkTeamCompletions(false);
       saveCurrentUserState();
@@ -1767,7 +1966,7 @@
       renderArenaAndDuplicates();
       renderLeaderboard();
 
-      showToast(`Benvenuto ${discordProfile.username}! Profilo Discord sincronizzato.`, 'success');
+      showToast(`Benvenuto ${discordProfile.username}! Profilo Discord connesso.`, 'success');
     }
 
     function generateDiscordAvatarUrl(seed, colorHex = '5865F2') {
@@ -1817,15 +2016,20 @@
     function renderSavedAccountsList() {
       try {
         const raw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
-        if (!raw) return;
-        const map = JSON.parse(raw);
-        const accounts = Object.values(map);
-        if (accounts.length === 0) return;
-
         const box = document.getElementById('saved-accounts-box');
         const list = document.getElementById('saved-accounts-list');
-        box.classList.remove('hidden');
+        if (!raw) {
+          box.classList.add('hidden');
+          return;
+        }
+        const map = JSON.parse(raw);
+        const accounts = Object.values(map);
+        if (accounts.length === 0) {
+          box.classList.add('hidden');
+          return;
+        }
 
+        box.classList.remove('hidden');
         list.innerHTML = accounts.map(acc => `
           <button type="button" data-action="login-saved-account" data-account-id="${acc.id}"
                   class="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-[#5865F2] px-3 py-1.5 rounded-xl text-xs font-bold text-white transition active:scale-95">
@@ -2662,69 +2866,32 @@
     }
 
     /**
-     * 8B. SCAMBI PLAYER & WISHLIST (SYNC CLOUD FIRESTORE + FALLBACK LOCALE)
+     * 8B. SCAMBI PLAYER & WISHLIST (SYNC CLOUD REAL-TIME ONSNAPSHOT)
      */
-    function getLocalTrades() {
-      try {
-        const raw = localStorage.getItem(LOCAL_TRADES_KEY);
-        return raw ? JSON.parse(raw) : [];
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function saveLocalTrades(trades) {
-      try {
-        localStorage.setItem(LOCAL_TRADES_KEY, JSON.stringify(trades));
-      } catch (e) {}
-    }
-
-    async function fetchAllOpenTrades() {
-      let trades = getLocalTrades();
-      if (firebaseDb && firebaseUser) {
-        try {
-          const snap = await getDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'trades_board', 'active_offers'));
-          if (snap.exists() && Array.isArray(snap.data().offers)) {
-            trades = snap.data().offers;
-            saveLocalTrades(trades);
-          }
-        } catch (e) {}
-      }
-      return trades;
-    }
-
-    async function persistAllOpenTrades(trades) {
-      saveLocalTrades(trades);
-      if (firebaseDb && firebaseUser) {
-        try {
-          await setDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'trades_board', 'active_offers'), {
-            offers: trades,
-            updatedAt: Date.now()
-          }, { merge: true });
-        } catch (e) {}
-      }
-    }
-
-    async function renderTradesTab() {
+    function renderTradesTab() {
       if (!currentUserState) return;
       document.getElementById('wishlist-count-label').textContent = `${(currentUserState.wishlist || []).length} Figurine`;
 
       const offerSelect = document.getElementById('trade-offer-select');
+      const prevOfferVal = offerSelect.value;
       const ownedCards = ALL_CARDS.filter(c => (currentUserState.owned[c.id] || 0) > 0);
       offerSelect.innerHTML = `<option value="">Seleziona carta da offrire...</option>` + ownedCards.map(c => {
         const copies = currentUserState.owned[c.id] || 0;
         return `<option value="${c.id}">#${c.num} ${c.name} (${c.teamShort}) • Possedute: ${copies}</option>`;
       }).join('');
+      if (prevOfferVal) offerSelect.value = prevOfferVal;
 
       const reqSelect = document.getElementById('trade-request-select');
+      const prevReqVal = reqSelect.value;
       const wishlistSet = new Set(currentUserState.wishlist || []);
       const sortedReq = [...ALL_CARDS].sort((a, b) => (wishlistSet.has(b.id) ? 1 : 0) - (wishlistSet.has(a.id) ? 1 : 0));
       reqSelect.innerHTML = `<option value="">Seleziona carta desiderata...</option>` + sortedReq.map(c => {
         const heart = wishlistSet.has(c.id) ? '♥ [WISHLIST] ' : '';
         return `<option value="${c.id}">${heart}#${c.num} ${c.name} (${c.teamShort} • OVR ${c.ovr})</option>`;
       }).join('');
+      if (prevReqVal) reqSelect.value = prevReqVal;
 
-      const trades = await fetchAllOpenTrades();
+      const trades = liveTradesList;
       document.getElementById('nav-trades-badge').textContent = trades.length;
 
       const listEl = document.getElementById('trades-board-list');
@@ -2811,36 +2978,67 @@
         return;
       }
 
-      const trades = await fetchAllOpenTrades();
-      trades.unshift({
-        id: `tr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      // Scaliamo temporaneamente la carta offerta dall'inventario del mittente finché l'offerta è pubblicata
+      currentUserState.owned[offeredId] -= 1;
+      if (currentUserState.owned[offeredId] <= 0) {
+        delete currentUserState.owned[offeredId];
+      }
+      saveCurrentUserState();
+      updateAlbumStatsUI();
+      renderAlbum();
+
+      const tradeId = `tr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const newTradeObj = {
+        id: tradeId,
         creatorId: currentUserState.discord.id,
         creatorName: currentUserState.discord.username,
         creatorAvatar: currentUserState.discord.avatarUrl,
         offeredCardId: offeredId,
         requestedCardId: requestedId,
         createdAt: Date.now()
-      });
+      };
 
-      await persistAllOpenTrades(trades);
+      if (firebaseDb && firebaseUser) {
+        try {
+          await setDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'trades', tradeId), newTradeObj);
+        } catch (e) {
+          liveTradesList.unshift(newTradeObj);
+        }
+      } else {
+        liveTradesList.unshift(newTradeObj);
+      }
+
       playSound('coin');
-      showToast('Offerta di scambio pubblicata sulla bacheca Discord!', 'success');
+      showToast('Offerta di scambio pubblicata live su tutti i browser!', 'success');
       renderTradesTab();
     }
 
     async function cancelTradeOffer(tradeId) {
       if (!currentUserState) return;
-      const trades = await fetchAllOpenTrades();
-      const updated = trades.filter(t => t.id !== tradeId);
-      await persistAllOpenTrades(updated);
-      showToast('Offerta di scambio annullata.', 'info');
+      const trade = liveTradesList.find(t => t.id === tradeId);
+      if (!trade || trade.creatorId !== currentUserState.discord.id) return;
+
+      // Restituiamo la figurina al mittente
+      currentUserState.owned[trade.offeredCardId] = (currentUserState.owned[trade.offeredCardId] || 0) + 1;
+      saveCurrentUserState();
+      updateAlbumStatsUI();
+      renderAlbum();
+
+      if (firebaseDb && firebaseUser) {
+        try {
+          await deleteDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'trades', tradeId));
+        } catch (e) {}
+      } else {
+        liveTradesList = liveTradesList.filter(t => t.id !== tradeId);
+      }
+
+      showToast('Offerta annullata e figurina restituita.', 'info');
       renderTradesTab();
     }
 
     async function acceptTradeOffer(tradeId) {
       if (!currentUserState) return;
-      const trades = await fetchAllOpenTrades();
-      const trade = trades.find(t => t.id === tradeId);
+      const trade = liveTradesList.find(t => t.id === tradeId);
       if (!trade) {
         showToast('Questa offerta non è più disponibile.', 'error');
         renderTradesTab();
@@ -2852,6 +3050,7 @@
         return;
       }
 
+      // 1. Aggiorna inventario di chi accetta
       currentUserState.owned[trade.requestedCardId] -= 1;
       if (currentUserState.owned[trade.requestedCardId] <= 0) {
         delete currentUserState.owned[trade.requestedCardId];
@@ -2859,39 +3058,21 @@
       currentUserState.owned[trade.offeredCardId] = (currentUserState.owned[trade.offeredCardId] || 0) + 1;
       currentUserState.wishlist = (currentUserState.wishlist || []).filter(id => id !== trade.offeredCardId);
 
-      try {
-        const creatorLocalRaw = localStorage.getItem(getUserStorageKey(trade.creatorId));
-        if (creatorLocalRaw) {
-          const creatorData = JSON.parse(creatorLocalRaw);
-          if ((creatorData.owned[trade.offeredCardId] || 0) > 0) {
-            creatorData.owned[trade.offeredCardId] -= 1;
-            if (creatorData.owned[trade.offeredCardId] <= 0) delete creatorData.owned[trade.offeredCardId];
-          }
-          creatorData.owned[trade.requestedCardId] = (creatorData.owned[trade.requestedCardId] || 0) + 1;
-          localStorage.setItem(getUserStorageKey(trade.creatorId), JSON.stringify(creatorData));
-        }
-      } catch (e) {}
-
+      // 2. Rimuovi scambio dalla bacheca live e crea consegna cloud per il creatore
       if (firebaseDb && firebaseUser) {
         try {
-          const creatorSnap = await getDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'discord_profiles', trade.creatorId));
-          if (creatorSnap.exists() && creatorSnap.data().state) {
-            const cState = creatorSnap.data().state;
-            if ((cState.owned[trade.offeredCardId] || 0) > 0) {
-              cState.owned[trade.offeredCardId] -= 1;
-              if (cState.owned[trade.offeredCardId] <= 0) delete cState.owned[trade.offeredCardId];
-            }
-            cState.owned[trade.requestedCardId] = (cState.owned[trade.requestedCardId] || 0) + 1;
-            await setDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'discord_profiles', trade.creatorId), {
-              state: cState,
-              updatedAt: Date.now()
-            }, { merge: true });
-          }
+          await deleteDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'trades', tradeId));
+          const deliveryId = `del_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+          await setDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'trade_deliveries', deliveryId), {
+            recipientId: trade.creatorId,
+            cardId: trade.requestedCardId,
+            fromUsername: currentUserState.discord.username,
+            createdAt: Date.now()
+          });
         } catch (e) {}
+      } else {
+        liveTradesList = liveTradesList.filter(t => t.id !== tradeId);
       }
-
-      const remaining = trades.filter(t => t.id !== tradeId);
-      await persistAllOpenTrades(remaining);
 
       checkTeamCompletions(true);
       saveCurrentUserState();
@@ -3342,7 +3523,8 @@
       if (myScore === cpuScore) cpuScore -= 1;
 
       const won = myScore > cpuScore;
-      const prize = won ? 50 : 10;
+      // Vittoria = +50 Crediti, Sconfitta = 0 Crediti
+      const prize = won ? 50 : 0;
 
       currentUserState.dailyMatches.dayNum = getCurrentDayNumber();
       currentUserState.dailyMatches.count += 1;
@@ -3381,74 +3563,47 @@
           </div>
         </div>
         <p class="text-xs text-slate-300">
-          MVP: <strong class="text-amber-300">${mvp.name}</strong> (${mvpPts} punti) • Premio: <strong class="text-emerald-400">+${prize} Crediti</strong> • Partite oggi: <strong>${currentUserState.dailyMatches.count}/10</strong>
+          MVP: <strong class="text-amber-300">${mvp.name}</strong> (${mvpPts} punti) • Premio: <strong class="${won ? 'text-emerald-400' : 'text-rose-400'}">+${prize} Crediti</strong> • Partite oggi: <strong>${currentUserState.dailyMatches.count}/10</strong>
         </p>
       `;
     }
 
     /**
-     * 9B. CLASSIFICA LIVE COLLEZIONISTI DISCORD
+     * 9B. CLASSIFICA LIVE COLLEZIONISTI DISCORD (SINCRONIZZATA REAL-TIME)
      */
-    async function renderLeaderboard() {
+    function renderLeaderboard() {
       const tbody = document.getElementById('leaderboard-tbody');
       if (!tbody) return;
 
       const sortMode = document.getElementById('leaderboard-sort-select')?.value || 'album';
-      const profilesMap = {};
+      const mergedMap = { ...livePublicProfilesMap };
 
+      // Fallback locale se offline
       try {
         const idxRaw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
         const accounts = idxRaw ? JSON.parse(idxRaw) : {};
         Object.keys(accounts).forEach(dId => {
-          const uRaw = localStorage.getItem(getUserStorageKey(dId));
-          if (uRaw) profilesMap[dId] = JSON.parse(uRaw);
+          if (!mergedMap[dId]) {
+            const uRaw = localStorage.getItem(getUserStorageKey(dId));
+            if (uRaw) mergedMap[dId] = buildPublicSummary(JSON.parse(uRaw));
+          }
         });
       } catch (e) {}
 
-      if (firebaseDb && firebaseUser) {
-        try {
-          const snap = await getDocs(collection(firebaseDb, 'artifacts', appId, 'public', 'data', 'discord_profiles'));
-          snap.forEach(docSnap => {
-            const data = docSnap.data();
-            if (data && data.state && data.state.discord) {
-              profilesMap[data.state.discord.id] = data.state;
-            }
-          });
-        } catch (e) {}
-      }
-
       if (currentUserState && currentUserState.discord) {
-        profilesMap[currentUserState.discord.id] = currentUserState;
+        mergedMap[currentUserState.discord.id] = buildPublicSummary(currentUserState);
       }
 
-      const rows = Object.values(profilesMap).map(u => {
-        const uniqueOwned = ALL_CARDS.filter(c => (u.owned && u.owned[c.id] > 0)).length;
-        const pct = Math.round((uniqueOwned / TOTAL_CARDS_COUNT) * 100);
-        const clubs100 = Array.isArray(u.completedTeams) ? u.completedTeams.length : 0;
-
-        let lineupAvg = 0;
-        if (u.lineupSlots) {
-          const ids = Object.values(u.lineupSlots).filter(Boolean);
-          if (ids.length > 0) {
-            const sum = ids.reduce((acc, cid) => {
-              const card = ALL_CARDS.find(c => c.id === cid);
-              return acc + (card ? card.ovr : 0);
-            }, 0);
-            lineupAvg = Math.round(sum / ids.length);
-          }
-        }
-
-        return {
-          id: u.discord.id,
-          username: u.discord.username,
-          avatar: u.discord.avatarUrl,
-          uniqueOwned,
-          pct,
-          clubs100,
-          lineupAvg,
-          wins: u.matchWins || 0
-        };
-      }).sort((a, b) => {
+      const rows = Object.values(mergedMap).map(u => ({
+        id: u.discord.id,
+        username: u.discord.username,
+        avatar: u.discord.avatarUrl,
+        uniqueOwned: u.uniqueOwned || 0,
+        pct: u.pct || 0,
+        clubs100: u.clubs100 || 0,
+        lineupAvg: u.lineupAvg || 0,
+        wins: u.wins || 0
+      })).sort((a, b) => {
         if (sortMode === 'clubs') {
           if (b.clubs100 !== a.clubs100) return b.clubs100 - a.clubs100;
           return b.uniqueOwned - a.uniqueOwned;
@@ -3994,13 +4149,17 @@
           dayOffsetForTesting += 1;
           evaluatePassStreakIntegrity(true);
           renderWeeklyPass();
-          showToast('Simulato +1 giorno consecutivo! Puoi riscattare il giorno successivo.', 'info');
+          showToast('Simulato +1 giorno consecutivo!', 'info');
           break;
         case 'admin-sim-skip-day':
           if (!adminUnlocked) return;
           dayOffsetForTesting += 2;
           evaluatePassStreakIntegrity(true);
           renderWeeklyPass();
+          break;
+        case 'admin-global-reset':
+          if (!adminUnlocked) return;
+          forceGlobalResetFromAdmin();
           break;
       }
     });
@@ -4041,6 +4200,11 @@
     (async function bootstrapApp() {
       populateTeamDropdowns();
       await initCloudBackend();
+
+      try {
+        const savedPhotos = localStorage.getItem(CUSTOM_PHOTOS_KEY);
+        if (savedPhotos) customCardPhotos = { ...customCardPhotos, ...JSON.parse(savedPhotos) };
+      } catch (e) {}
 
       const loggedViaHash = await checkDiscordOAuthHashCallback();
       if (loggedViaHash) return;
