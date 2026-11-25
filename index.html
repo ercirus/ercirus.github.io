@@ -1000,7 +1000,7 @@
             <i class="fa-solid fa-camera mr-1"></i> Gestione Foto Ufficiali Giocatori
           </span>
           <p class="text-[11px] text-slate-400">
-            Seleziona una figurina e carica una foto reale che riempirà l'intero riquadro:
+            Seleziona una figurina (oppure cliccaci sopra direttamente nell'Album) e inserisci l'URL o un file:
           </p>
           <select id="admin-photo-card-select" class="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-lg px-2.5 py-2 focus:outline-none focus:border-cyan-400">
             <option value="">Seleziona giocatore/figurina...</option>
@@ -1331,6 +1331,7 @@
           { num: '44', name: 'Marquis Barnett', role: 'Guardia/Ala', dob: '03/05/2003', height: 194, weight: 85, nat: 'USA', ovr: 86 }
         ]
       },
+    
       {
         id: 'pesaro',
         name: 'CMT Orange Tools Pesaro',
@@ -2902,6 +2903,7 @@
               ${filteredCards.map(card => {
                 const count = currentUserState.owned[card.id] || 0;
                 const isWished = (currentUserState.wishlist || []).includes(card.id);
+                const customPhoto = getCustomPhotoForCard(card);
                 if (count > 0) {
                   return `
                     <div class="relative w-full flex justify-center">
@@ -2923,9 +2925,13 @@
                         </button>
                       </div>
                       <div data-action="inspect-card" data-card-id="${card.id}" class="cursor-pointer my-auto flex flex-col items-center">
-                        <div class="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-500 mb-2 pointer-events-none">
-                          <i class="fa-solid ${card.type === 'logo' ? 'fa-shield-halved' : 'fa-user'} text-xl"></i>
-                        </div>
+                        ${customPhoto ? `
+                          <img src="${customPhoto}" alt="${card.name}" class="w-14 h-14 rounded-full object-cover object-top border-2 border-cyan-400/70 mb-2 pointer-events-none" />
+                        ` : `
+                          <div class="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-500 mb-2 pointer-events-none">
+                            <i class="fa-solid ${card.type === 'logo' ? 'fa-shield-halved' : 'fa-user'} text-xl"></i>
+                          </div>
+                        `}
                         <span class="text-xs font-bold text-slate-300 line-clamp-2 pointer-events-none">${card.type === 'player' ? `#${card.jerseyNum} ` : ''}${card.name}</span>
                         <span class="text-[10px] text-slate-500 mt-0.5 pointer-events-none">OVR ${card.ovr} • ${card.role}</span>
                       </div>
@@ -3387,7 +3393,7 @@
       if (ownedPlayers.length === 0) {
         pickerEl.innerHTML = `
           <div class="col-span-full py-6 text-center text-xs text-slate-500">
-            Non possiedi ancora giocatori. Apri una bustina nello Store per formare il tuo quintetto!
+            Apri qualche bustina per sbloccare giocatori da schierare nei 5 ruoli!
           </div>
         `;
       } else {
@@ -3395,14 +3401,14 @@
           const isSelected = selectedIds.has(p.id);
           const natRole = getNaturalRoleCode(p.role);
           return `
-            <button type="button" data-action="assign-player-slot" data-card-id="${p.id}"
-                    class="text-left p-2 rounded-xl border transition active:scale-95 ${isSelected ? 'bg-[#ff6b00]/20 border-[#ff6b00]' : 'bg-slate-900 border-slate-700 hover:border-slate-500'}">
-              <div class="flex justify-between items-center pointer-events-none">
-                <span class="font-display text-lg font-bold text-amber-400 leading-none">${p.ovr}</span>
-                <span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">${natRole}</span>
+            <button type="button" data-action="assign-player-to-lineup" data-card-id="${p.id}"
+                    class="text-left p-2.5 rounded-xl border transition active:scale-95 ${isSelected ? 'bg-[#ff6b00]/20 border-[#ff6b00]' : 'bg-slate-900 border-slate-700 hover:border-slate-500'}">
+              <div class="flex justify-between items-center text-[10px] font-bold pointer-events-none">
+                <span class="text-amber-400">OVR ${p.ovr}</span>
+                <span class="text-slate-300 bg-slate-800 px-1.5 rounded">${natRole}</span>
               </div>
               <div class="font-bold text-xs text-white truncate mt-0.5 pointer-events-none">${p.name}</div>
-              <div class="text-[9px] text-slate-400 truncate pointer-events-none">${p.teamShort}</div>
+              <div class="text-[10px] text-slate-400 truncate pointer-events-none">${p.teamShort}</div>
             </button>
           `;
         }).join('');
@@ -3414,35 +3420,41 @@
       const card = ALL_CARDS.find(c => c.id === cardId);
       if (!card) return;
 
-      const slots = currentUserState.lineupSlots;
       for (const r of LINEUP_ROLES) {
-        if (slots[r] === cardId) {
-          slots[r] = null;
+        if (currentUserState.lineupSlots[r] === cardId) {
+          currentUserState.lineupSlots[r] = null;
+          activeSlotRole = null;
           saveCurrentUserState();
           renderLineupSection();
           return;
         }
       }
 
-      let targetRole = activeSlotRole;
-      if (!targetRole) {
-        const nat = getNaturalRoleCode(card.role);
-        if (!slots[nat]) {
-          targetRole = nat;
-        } else {
-          const compatEmpty = LINEUP_ROLES.find(r => !slots[r] && isPlayerCompatibleWithSlot(card, r));
-          targetRole = compatEmpty || LINEUP_ROLES.find(r => !slots[r]) || nat;
+      if (activeSlotRole) {
+        currentUserState.lineupSlots[activeSlotRole] = cardId;
+        activeSlotRole = null;
+        saveCurrentUserState();
+        playSound('flip');
+        renderLineupSection();
+        return;
+      }
+
+      const nat = getNaturalRoleCode(card.role);
+      const priorityOrder = [nat, ...LINEUP_ROLES.filter(r => r !== nat)];
+      for (const r of priorityOrder) {
+        if (!currentUserState.lineupSlots[r]) {
+          currentUserState.lineupSlots[r] = cardId;
+          saveCurrentUserState();
+          playSound('flip');
+          renderLineupSection();
+          return;
         }
       }
 
-      slots[targetRole] = cardId;
-      activeSlotRole = null;
-      playSound('flip');
-      saveCurrentUserState();
-      renderLineupSection();
+      showToast('Tutti i 5 ruoli sono occupati! Rimuovi prima un giocatore o clicca su uno slot.', 'error');
     }
 
-    function autoSelectBestLineup() {
+    function autoPickBestLineup() {
       if (!currentUserState) return;
       const ownedPlayers = ALL_CARDS
         .filter(c => c.type === 'player' && (currentUserState.owned[c.id] || 0) > 0)
@@ -3453,33 +3465,33 @@
         return;
       }
 
-      const slots = { PG: null, SG: null, SF: null, PF: null, C: null };
-      const used = new Set();
+      const usedIds = new Set();
+      const newSlots = { PG: null, SG: null, SF: null, PF: null, C: null };
 
       LINEUP_ROLES.forEach(role => {
-        const bestMatch = ownedPlayers.find(p => !used.has(p.id) && isPlayerCompatibleWithSlot(p, role));
+        const bestMatch = ownedPlayers.find(p => !usedIds.has(p.id) && isPlayerCompatibleWithSlot(p, role));
         if (bestMatch) {
-          slots[role] = bestMatch.id;
-          used.add(bestMatch.id);
+          newSlots[role] = bestMatch.id;
+          usedIds.add(bestMatch.id);
         }
       });
 
       LINEUP_ROLES.forEach(role => {
-        if (!slots[role]) {
-          const fallback = ownedPlayers.find(p => !used.has(p.id));
+        if (!newSlots[role]) {
+          const fallback = ownedPlayers.find(p => !usedIds.has(p.id));
           if (fallback) {
-            slots[role] = fallback.id;
-            used.add(fallback.id);
+            newSlots[role] = fallback.id;
+            usedIds.add(fallback.id);
           }
         }
       });
 
-      currentUserState.lineupSlots = slots;
+      currentUserState.lineupSlots = newSlots;
       activeSlotRole = null;
       saveCurrentUserState();
       playSound('coin');
       renderLineupSection();
-      showToast('Miglior quintetto per ruoli schierato sul parquet!', 'success');
+      showToast('Miglior quintetto per ruoli schierato!', 'success');
     }
 
     function clearLineup() {
@@ -3490,141 +3502,114 @@
       renderLineupSection();
     }
 
-    const MAX_DAILY_MATCHES = 10;
-
-    function getTodayMatchesCount() {
-      if (!currentUserState) return 0;
+    function updateDailyMatchesBadge() {
+      if (!currentUserState) return;
       const todayNum = getCurrentDayNumber();
       if (!currentUserState.dailyMatches || currentUserState.dailyMatches.dayNum !== todayNum) {
         currentUserState.dailyMatches = { dayNum: todayNum, count: 0 };
       }
-      return currentUserState.dailyMatches.count;
+      const badge = document.getElementById('daily-matches-badge');
+      if (badge) {
+        badge.textContent = `Partite oggi: ${currentUserState.dailyMatches.count} / 10`;
+      }
     }
 
-    function updateDailyMatchesBadge() {
-      const used = getTodayMatchesCount();
-      const badge = document.getElementById('daily-matches-badge');
-      const btn = document.getElementById('btn-start-tactical-match');
-      if (badge) {
-        badge.textContent = `Partite oggi: ${used} / ${MAX_DAILY_MATCHES}`;
-        badge.className = used >= MAX_DAILY_MATCHES
-          ? 'text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-rose-950 border border-rose-500 text-rose-300'
-          : 'text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-slate-900 border border-amber-400/50 text-amber-300';
-      }
-      if (btn) {
-        btn.disabled = used >= MAX_DAILY_MATCHES;
-        if (used >= MAX_DAILY_MATCHES) {
-          btn.classList.add('opacity-50', 'cursor-not-allowed');
-        } else {
-          btn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-      }
+    function computeTacticalPower(cardsByRole, tactic, chemBonus) {
+      let total = 0;
+      LINEUP_ROLES.forEach(role => {
+        const c = cardsByRole[role];
+        const effOvr = getEffectivePlayerOvr(c, role);
+        let tacBonus = 0;
+        if (tactic === 'pace') tacBonus = (c.stats.att + c.stats.tir - 160) * 0.25;
+        else if (tactic === 'defense') tacBonus = (c.stats.dif + c.stats.reg - 160) * 0.25;
+        else tacBonus = (c.stats.reg + c.stats.att - 160) * 0.25;
+        total += effOvr + tacBonus;
+      });
+      return (total / 5) + (chemBonus * 0.6);
     }
 
     function startTacticalMatch() {
       if (!currentUserState) return;
-      const usedToday = getTodayMatchesCount();
-      if (usedToday >= MAX_DAILY_MATCHES) {
-        showToast('Hai raggiunto il limite giornaliero di 10 partite! Torna domani per giocare ancora.', 'error');
-        return;
-      }
+      const { count, chemBonus, cardsByRole } = computeLineupMetrics();
 
-      const { count, effectiveAvg, chemBonus, cardsByRole } = computeLineupMetrics();
       if (count < 5) {
-        showToast('Completa tutti e 5 i ruoli del quintetto (PG, SG, SF, PF, C) prima di scendere in campo!', 'error');
+        showToast('Devi schierare tutti i 5 ruoli (PG, SG, SF, PF, C) prima di scendere in campo!', 'error');
         return;
       }
 
-      currentUserState.dailyMatches.count = usedToday + 1;
+      const todayNum = getCurrentDayNumber();
+      if (!currentUserState.dailyMatches || currentUserState.dailyMatches.dayNum !== todayNum) {
+        currentUserState.dailyMatches = { dayNum: todayNum, count: 0 };
+      }
+
+      if (currentUserState.dailyMatches.count >= 10) {
+        showToast('Hai raggiunto il limite massimo di 10 partite giornaliere! Torna domani.', 'error');
+        return;
+      }
+
+      currentUserState.dailyMatches.count += 1;
       saveCurrentUserState();
       updateDailyMatchesBadge();
 
       const opponentTeam = TEAMS_DATA[Math.floor(Math.random() * TEAMS_DATA.length)];
-      const oppOvr = Math.floor(77 + Math.random() * 11);
+      const oppOvr = 79 + Math.floor(Math.random() * 8);
+      const userPower = computeTacticalPower(cardsByRole, currentUserState.tactic, chemBonus);
 
-      const lineupCards = Object.values(cardsByRole);
-      let tacticBonus = 0;
-      if (currentUserState.tactic === 'pace') {
-        const avgTir = lineupCards.reduce((s, c) => s + c.stats.tir, 0) / 5;
-        tacticBonus = avgTir >= 84 ? 3 : 1;
-      } else if (currentUserState.tactic === 'defense') {
-        const avgDif = lineupCards.reduce((s, c) => s + c.stats.dif, 0) / 5;
-        tacticBonus = avgDif >= 83 ? 3 : 1;
-      } else {
-        const avgReg = lineupCards.reduce((s, c) => s + c.stats.reg, 0) / 5;
-        tacticBonus = avgReg >= 83 ? 3 : 1;
-      }
-
-      const halfUserPts = Math.max(32, Math.round((effectiveAvg * 0.48) + tacticBonus + (Math.random() * 10 - 3)));
-      const halfOppPts = Math.max(30, Math.round((oppOvr * 0.48) + (Math.random() * 10 - 3)));
-
-      const starPlayer = lineupCards.sort((a, b) => b.ovr - a.ovr)[0];
+      const userH1 = Math.max(32, Math.round((userPower * 0.5) + (Math.random() * 10 - 4)));
+      const oppH1 = Math.max(32, Math.round((oppOvr * 0.5) + (Math.random() * 10 - 4)));
 
       activeTacticalMatchState = {
         opponentTeam,
         oppOvr,
-        effectiveAvg,
-        chemBonus,
-        halfUserPts,
-        halfOppPts,
-        starPlayer
+        userPower,
+        userH1,
+        oppH1,
+        cardsByRole
       };
 
+      document.getElementById('btn-start-tactical-match').classList.add('hidden');
+      const resultBox = document.getElementById('match-result-box');
+      resultBox.classList.remove('hidden');
+
       playSound('flip');
-      const resBox = document.getElementById('match-result-box');
-      resBox.classList.remove('hidden');
-      resBox.innerHTML = `
+      resultBox.innerHTML = `
         <div class="text-xs font-extrabold uppercase tracking-widest text-amber-400">
-          <i class="fa-solid fa-stopwatch mr-1"></i> INTERVALLO • FINE 2° QUARTO (Partita ${currentUserState.dailyMatches.count}/${MAX_DAILY_MATCHES} oggi)
+          Intervallo • Fine 2° Quarto vs ${opponentTeam.shortName}
         </div>
-        <div class="flex items-center justify-center gap-6 py-2">
-          <div class="text-right">
-            <span class="block text-xs text-slate-400">IL TUO QUINTETTO (OVR ${effectiveAvg})</span>
-            <span class="font-display text-4xl font-bold text-white">${halfUserPts}</span>
-          </div>
-          <span class="font-display text-2xl font-bold text-slate-500">VS</span>
-          <div class="text-left">
-            <span class="block text-xs text-slate-400">${opponentTeam.shortName.toUpperCase()} (OVR ${oppOvr})</span>
-            <span class="font-display text-4xl font-bold text-white">${halfOppPts}</span>
-          </div>
+        <div class="font-display text-4xl sm:text-5xl font-bold text-white tracking-wider">
+          TU <span class="text-amber-400">${userH1}</span> — <span class="text-slate-300">${oppH1}</span> ${opponentTeam.code}
         </div>
         <p class="text-xs text-slate-300">
-          Ottimo primo tempo guidato da <strong>${starPlayer.name}</strong>! Chiama il <strong>Timeout Tattico</strong> per decidere la strategia del 2° tempo:
+          Sei negli spogliatoi! Scegli la chiamata tattica per il 2° Tempo:
         </p>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
-          <button type="button" data-action="finish-tactical-match" data-adj="three" class="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
-            <i class="fa-solid fa-fire mr-1 pointer-events-none"></i> Tiro da 3 & Ritmo Alto
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+          <button type="button" data-action="finish-match-halftime" data-call="press" class="py-2.5 px-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs transition active:scale-95">
+            <i class="fa-solid fa-fire mr-1 pointer-events-none"></i> Pressing Tutto Campo
           </button>
-          <button type="button" data-action="finish-tactical-match" data-adj="lockdown" class="py-2.5 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
-            <i class="fa-solid fa-shield mr-1 pointer-events-none"></i> Difesa a Uomo Aggressiva
+          <button type="button" data-action="finish-match-halftime" data-call="iso" class="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
+            <i class="fa-solid fa-star mr-1 pointer-events-none"></i> Palla al Top Scorer
           </button>
-          <button type="button" data-action="finish-tactical-match" data-adj="star" class="py-2.5 px-3 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-extrabold text-xs transition active:scale-95">
-            <i class="fa-solid fa-star mr-1 pointer-events-none"></i> Palla a ${starPlayer.name.split(' ').pop()}
+          <button type="button" data-action="finish-match-halftime" data-call="zone" class="py-2.5 px-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-xs transition active:scale-95">
+            <i class="fa-solid fa-shield mr-1 pointer-events-none"></i> Difesa a Zona
           </button>
         </div>
       `;
     }
 
-    function finishTacticalMatch(halftimeAdj) {
-      if (!currentUserState || !activeTacticalMatchState) return;
+    function finishTacticalMatch(halftimeCall) {
+      if (!activeTacticalMatchState || !currentUserState) return;
       const st = activeTacticalMatchState;
-      activeTacticalMatchState = null;
 
-      let secondHalfBonus = 0;
-      let tacticalNote = '';
-      if (halftimeAdj === 'three') {
-        secondHalfBonus = st.starPlayer.stats.tir >= 84 ? 5 : 1;
-        tacticalNote = 'Le triple nel quarto quarto spaccano la partita!';
-      } else if (halftimeAdj === 'lockdown') {
-        secondHalfBonus = st.effectiveAvg >= st.oppOvr ? 4 : 2;
-        tacticalNote = 'Difesa asfissiante negli ultimi 2 minuti!';
-      } else {
-        secondHalfBonus = st.starPlayer.ovr >= 86 ? 6 : 2;
-        tacticalNote = `${st.starPlayer.name} domina i possessi decisivi!`;
-      }
+      let callBonus = 0;
+      if (halftimeCall === 'press') callBonus = (Math.random() * 6) - 1;
+      else if (halftimeCall === 'iso') callBonus = 2.2;
+      else callBonus = (st.userH1 >= st.oppH1) ? 3.2 : 1.0;
 
-      let finalUser = st.halfUserPts + Math.max(32, Math.round((st.effectiveAvg * 0.48) + secondHalfBonus + (Math.random() * 11 - 4)));
-      let finalOpp = st.halfOppPts + Math.max(30, Math.round((st.oppOvr * 0.48) + (Math.random() * 11 - 4)));
+      const userH2 = Math.max(34, Math.round(((st.userPower + callBonus) * 0.52) + (Math.random() * 11 - 4)));
+      const oppH2 = Math.max(34, Math.round((st.oppOvr * 0.52) + (Math.random() * 11 - 4)));
+
+      let finalUser = st.userH1 + userH2;
+      let finalOpp = st.oppH1 + oppH2;
       if (finalUser === finalOpp) finalUser += 2;
 
       const won = finalUser > finalOpp;
@@ -3633,7 +3618,7 @@
       if (won) {
         currentUserState.credits += reward;
         currentUserState.matchWins = (currentUserState.matchWins || 0) + 1;
-        playSound('legend');
+        playSound('coin');
         spawnConfettiBurst();
       } else {
         playSound('flip');
@@ -3643,43 +3628,49 @@
       updateCreditsUI();
       renderLeaderboard();
 
-      const resBox = document.getElementById('match-result-box');
-      resBox.innerHTML = `
+      const cardsArr = Object.values(st.cardsByRole);
+      const mvpCard = cardsArr.sort((a, b) => b.ovr - a.ovr)[0];
+
+      activeTacticalMatchState = null;
+      document.getElementById('btn-start-tactical-match').classList.remove('hidden');
+
+      const resultBox = document.getElementById('match-result-box');
+      resultBox.innerHTML = `
         <div class="text-xs font-extrabold uppercase tracking-widest ${won ? 'text-emerald-400' : 'text-rose-400'}">
-          ${won ? 'FINALE • VITTORIA ALLA SIRENA!' : 'FINALE • SCONFITTA AL FOTOFINISH'}
+          ${won ? 'FINALE • VITTORIA SUL PARQUET!' : 'FINALE • SCONFITTA DI MISURA'}
         </div>
-        <div class="flex items-center justify-center gap-6 py-2">
-          <div class="text-right">
-            <span class="block text-xs text-slate-400">IL TUO QUINTETTO (OVR ${st.effectiveAvg})</span>
-            <span class="font-display text-4xl font-bold text-white">${finalUser}</span>
-          </div>
-          <span class="font-display text-2xl font-bold text-slate-500">VS</span>
-          <div class="text-left">
-            <span class="block text-xs text-slate-400">${st.opponentTeam.shortName.toUpperCase()} (OVR ${st.oppOvr})</span>
-            <span class="font-display text-4xl font-bold text-white">${finalOpp}</span>
-          </div>
+        <div class="font-display text-4xl sm:text-5xl font-bold text-white tracking-wider">
+          TU <span class="text-amber-400">${finalUser}</span> — <span class="text-slate-300">${finalOpp}</span> ${st.opponentTeam.code}
         </div>
-        <p class="text-xs text-slate-300">${tacticalNote} MVP: <strong>${st.starPlayer.name}</strong> (OVR ${st.starPlayer.ovr}).</p>
-        <div class="inline-flex items-center gap-2 ${won ? 'bg-amber-500/20 border-amber-400/50 text-amber-300' : 'bg-rose-950/70 border-rose-500/50 text-rose-300'} border px-4 py-1.5 rounded-full font-extrabold text-sm">
+        <p class="text-xs text-slate-300">
+          MVP del Match: <strong class="text-white">${mvpCard.name}</strong> (OVR ${mvpCard.ovr})
+        </p>
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full ${won ? 'bg-emerald-500/20 border border-emerald-400/50 text-emerald-300' : 'bg-rose-500/20 border border-rose-400/50 text-rose-300'} font-extrabold text-sm">
           <i class="fa-solid fa-coins"></i> ${won ? '+50 Crediti vinti!' : '0 Crediti (nessun premio in caso di sconfitta)'}
         </div>
       `;
     }
 
     /**
-     * 10. CLASSIFICA LIVE COLLEZIONISTI & ISPEZIONE CARTE DI UN ALTRO PLAYER
+     * 10. CLASSIFICA LIVE MULTI-BROWSER & ISPEZIONE COLLEZIONE ALTRI UTENTI
      */
     function renderLeaderboard() {
       if (!currentUserState) return;
       const sortMode = document.getElementById('leaderboard-sort-select').value;
 
-      const mergedMap = { ...livePublicProfilesMap };
-      mergedMap[currentUserState.discord.id] = buildPublicSummary(currentUserState);
+      const entriesMap = { ...livePublicProfilesMap };
+      entriesMap[currentUserState.discord.id] = buildPublicSummary(currentUserState);
 
-      const entries = Object.values(mergedMap).sort((a, b) => {
-        if (sortMode === 'clubs') return (b.clubs100 - a.clubs100) || (b.uniqueOwned - a.uniqueOwned);
-        if (sortMode === 'ovr') return (b.lineupAvg - a.lineupAvg) || (b.uniqueOwned - a.uniqueOwned);
-        if (sortMode === 'wins') return (b.wins - a.wins) || (b.uniqueOwned - a.uniqueOwned);
+      const entries = Object.values(entriesMap);
+
+      entries.sort((a, b) => {
+        if (sortMode === 'clubs') {
+          return (b.clubs100 - a.clubs100) || (b.uniqueOwned - a.uniqueOwned);
+        } else if (sortMode === 'ovr') {
+          return (b.lineupAvg - a.lineupAvg) || (b.uniqueOwned - a.uniqueOwned);
+        } else if (sortMode === 'wins') {
+          return ((b.wins || 0) - (a.wins || 0)) || (b.uniqueOwned - a.uniqueOwned);
+        }
         return (b.uniqueOwned - a.uniqueOwned) || (b.clubs100 - a.clubs100);
       });
 
@@ -3688,58 +3679,58 @@
         tbody.innerHTML = `
           <tr>
             <td colspan="7" class="py-8 text-center text-xs text-slate-400">
-              Nessun utente registrato in classifica al momento.
+              Nessun collezionista registrato al momento.
             </td>
           </tr>
         `;
         return;
       }
 
-      tbody.innerHTML = entries.map((entry, idx) => {
+      tbody.innerHTML = entries.map((row, idx) => {
         const rank = idx + 1;
-        const isMe = entry.discord.id === currentUserState.discord.id;
-        let rankBadge = `<span class="font-extrabold text-slate-400">#${rank}</span>`;
-        if (rank === 1) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-400 text-slate-950 font-black text-xs shadow">1</span>`;
-        if (rank === 2) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-300 text-slate-950 font-black text-xs shadow">2</span>`;
-        if (rank === 3) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600 text-white font-black text-xs shadow">3</span>`;
+        const isMe = row.discord.id === currentUserState.discord.id;
+        let medalHtml = `<span class="font-bold text-slate-400">#${rank}</span>`;
+        if (rank === 1) medalHtml = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-400 text-slate-950 font-black text-xs shadow"><i class="fa-solid fa-trophy"></i></span>`;
+        else if (rank === 2) medalHtml = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-300 text-slate-950 font-black text-xs shadow">2</span>`;
+        else if (rank === 3) medalHtml = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600 text-white font-black text-xs shadow">3</span>`;
 
         return `
           <tr class="${isMe ? 'bg-[#5865F2]/20' : 'hover:bg-slate-900/60'} transition">
-            <td class="py-3.5 px-4">${rankBadge}</td>
+            <td class="py-3.5 px-4">${medalHtml}</td>
             <td class="py-3.5 px-4">
               <div class="flex items-center gap-2.5">
-                <img src="${entry.discord.avatarUrl}" alt="" class="w-8 h-8 rounded-full border border-indigo-400/60 object-cover" />
+                <img src="${row.discord.avatarUrl}" alt="" class="w-8 h-8 rounded-full border border-indigo-400 object-cover" />
                 <div>
                   <div class="font-extrabold text-white flex items-center gap-1.5">
-                    <span>${entry.discord.username}</span>
-                    ${isMe ? '<span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-[#5865F2] text-white">TU</span>' : ''}
+                    <span>${row.discord.username}</span>
+                    ${isMe ? '<span class="text-[9px] bg-[#5865F2] text-white px-1.5 py-0.5 rounded uppercase">Tu</span>' : ''}
                   </div>
-                  <span class="text-[10px] text-slate-400">${entry.discord.favTeamShort || 'LNP Fan'}</span>
+                  <span class="text-[10px] text-slate-400">${row.discord.favTeamShort || 'LNP Fan'}</span>
                 </div>
               </div>
             </td>
             <td class="py-3.5 px-4">
               <div class="flex items-center gap-2">
-                <div class="w-24 h-2 bg-slate-800 rounded-full overflow-hidden">
-                  <div class="h-full bg-gradient-to-r from-[#ff6b00] to-amber-400" style="width: ${entry.pct}%"></div>
+                <div class="w-24 h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-700">
+                  <div class="h-full bg-gradient-to-r from-[#ff6b00] to-amber-400" style="width: ${row.pct}%"></div>
                 </div>
-                <span class="font-extrabold text-amber-300 text-xs">${entry.uniqueOwned}/${TOTAL_CARDS_COUNT} (${entry.pct}%)</span>
+                <span class="font-extrabold text-amber-400 text-xs">${row.uniqueOwned}/${TOTAL_CARDS_COUNT} (${row.pct}%)</span>
               </div>
             </td>
-            <td class="py-3.5 px-4 text-center font-extrabold text-emerald-400">
-              ${entry.clubs100}/20
+            <td class="py-3.5 px-4 text-center">
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold ${row.clubs100 > 0 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40' : 'bg-slate-900 text-slate-500'}">
+                <i class="fa-solid fa-shield-halved text-[10px]"></i> ${row.clubs100}/20
+              </span>
             </td>
             <td class="py-3.5 px-4 text-center font-display text-xl font-bold text-cyan-300">
-              ${entry.lineupAvg || '-'}
+              ${row.lineupAvg || '-'}
             </td>
-            <td class="py-3.5 px-4 text-center font-bold text-slate-300">
-              ${entry.wins}
+            <td class="py-3.5 px-4 text-center font-extrabold text-emerald-400">
+              ${row.wins || 0}
             </td>
             <td class="py-3.5 px-4 text-right">
-              <button type="button" data-action="view-user-collection" data-user-id="${entry.discord.id}"
-                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${isMe ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600' : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow'} font-extrabold text-xs transition active:scale-95">
-                <i class="fa-solid fa-eye pointer-events-none"></i>
-                <span class="pointer-events-none">${isMe ? 'Tue Carte' : 'Vedi Carte'}</span>
+              <button type="button" data-action="view-user-collection" data-user-id="${row.discord.id}" class="px-3 py-1.5 rounded-xl bg-cyan-600/25 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/50 font-bold text-xs transition active:scale-95">
+                <i class="fa-solid fa-eye mr-1 pointer-events-none"></i> Vedi Carte
               </button>
             </td>
           </tr>
@@ -3747,85 +3738,81 @@
       }).join('');
     }
 
-    function openUserCollectionModal(userId) {
-      if (!currentUserState) return;
-      currentlyViewedUserId = userId;
+    function openUserCollectionModal(targetUserId) {
+      currentlyViewedUserId = targetUserId;
       document.getElementById('viewer-team-filter').value = 'ALL';
       document.getElementById('viewer-rarity-filter').value = 'ALL';
       document.getElementById('viewer-copies-filter').value = 'ALL';
-
-      renderUserCollectionModalContent(userId);
+      renderUserCollectionModalContent(targetUserId);
       document.getElementById('user-collection-modal').classList.remove('hidden');
     }
 
-function renderUserCollectionModalContent(userId) {
+    function renderUserCollectionModalContent(targetUserId) {
       if (!currentUserState) return;
-      const targetProfile = userId === currentUserState.discord.id
+      const targetProfile = targetUserId === currentUserState.discord.id
         ? buildPublicSummary(currentUserState)
-        : livePublicProfilesMap[userId];
+        : livePublicProfilesMap[targetUserId];
 
       if (!targetProfile) {
-        showToast('Profilo giocatore non trovato.', 'error');
+        showToast('Impossibile caricare la collezione di questo utente.', 'error');
         return;
       }
 
-      const isMe = userId === currentUserState.discord.id;
-      const targetOwnedMap = targetProfile.owned || (targetProfile.fullState && targetProfile.fullState.owned) || {};
+      document.getElementById('viewer-user-avatar').src = targetProfile.discord.avatarUrl;
+      document.getElementById('viewer-user-name').textContent = `Album di ${targetProfile.discord.username}`;
+      document.getElementById('viewer-user-badge').textContent = `${targetProfile.uniqueOwned} / ${TOTAL_CARDS_COUNT} (${targetProfile.pct}%)`;
+
+      const isMe = targetUserId === currentUserState.discord.id;
+      document.getElementById('viewer-user-subtitle').textContent = isMe
+        ? 'Questa è la tua collezione pubblica visibile agli altri utenti Discord.'
+        : `Esplora le carte di ${targetProfile.discord.username} e clicca "Proponi Scambio" sulle carte che ti servono!`;
+
       const teamFilter = document.getElementById('viewer-team-filter').value;
       const rarityFilter = document.getElementById('viewer-rarity-filter').value;
       const copiesFilter = document.getElementById('viewer-copies-filter').value;
 
-      const actualUniqueCount = ALL_CARDS.filter(c => Number(targetOwnedMap[c.id] || 0) > 0).length;
-      const actualPct = Math.round((actualUniqueCount / TOTAL_CARDS_COUNT) * 100);
+      const targetOwnedMap = targetProfile.owned || {};
+      const myOwnedMap = currentUserState.owned || {};
 
-      document.getElementById('viewer-user-avatar').src = targetProfile.discord.avatarUrl;
-      document.getElementById('viewer-user-name').textContent = isMe
-        ? `La Tua Collezione (${targetProfile.discord.username})`
-        : `Carte di ${targetProfile.discord.username}`;
-      document.getElementById('viewer-user-badge').textContent = `${actualUniqueCount} / ${TOTAL_CARDS_COUNT} (${actualPct}%)`;
-      document.getElementById('viewer-user-subtitle').textContent = isMe
-        ? 'Stai visualizzando il tuo inventario completo.'
-        : 'Le figurine che non hai ancora sono evidenziate in verde: clicca "Proponi Scambio" per richiederle!';
-
-      const userCards = ALL_CARDS.filter(card => {
-        const theirCopies = Number(targetOwnedMap[card.id] || 0);
-        if (theirCopies <= 0) return false;
+      const matchingCards = ALL_CARDS.filter(card => {
+        const theirCount = targetOwnedMap[card.id] || 0;
+        if (theirCount <= 0) return false;
         if (teamFilter !== 'ALL' && card.teamId !== teamFilter) return false;
         if (rarityFilter !== 'ALL' && card.rarity !== rarityFilter) return false;
-        if (copiesFilter === 'DUPS_ONLY' && theirCopies < 2) return false;
-        if (copiesFilter === 'MISSING_FOR_ME' && Number(currentUserState.owned[card.id] || 0) > 0) return false;
+        if (copiesFilter === 'DUPS_ONLY' && theirCount < 2) return false;
+        if (copiesFilter === 'MISSING_FOR_ME' && (myOwnedMap[card.id] || 0) > 0) return false;
         return true;
       });
 
       const grid = document.getElementById('viewer-cards-grid');
-      if (userCards.length === 0) {
+      if (matchingCards.length === 0) {
         grid.innerHTML = `
-          <div class="col-span-full py-12 text-center text-sm text-slate-400">
-            Nessuna figurina trovata con i filtri selezionati nella collezione di <strong>${targetProfile.discord.username}</strong>.
+          <div class="col-span-full py-12 text-center text-xs text-slate-400">
+            Nessuna figurina trovata con i filtri selezionati nella collezione di ${targetProfile.discord.username}.
           </div>
         `;
         return;
       }
 
-      grid.innerHTML = userCards.map(card => {
-        const theirCopies = Number(targetOwnedMap[card.id] || 0);
-        const iOwnIt = Number(currentUserState.owned[card.id] || 0) > 0;
-        const badgeType = (!isMe && !iOwnIt) ? 'NEEDED' : null;
+      grid.innerHTML = matchingCards.map(card => {
+        const theirCount = targetOwnedMap[card.id] || 0;
+        const iMissIt = !isMe && (myOwnedMap[card.id] || 0) === 0;
 
         return `
-          <div class="w-full max-w-[215px] flex flex-col gap-2">
+          <div class="flex flex-col items-center gap-2 w-full max-w-[215px]">
             <div class="relative w-full flex justify-center">
-              ${renderCardHTML(card, { showBadge: badgeType, clickable: true })}
-              <span class="absolute bottom-2 right-2 z-10 bg-slate-950/95 text-cyan-300 border border-cyan-400/60 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow pointer-events-none">
-                Ha x${theirCopies}
+              ${renderCardHTML(card, {
+                showBadge: iMissIt ? 'NEEDED' : null,
+                clickable: true
+              })}
+              <span class="absolute bottom-2 right-2 z-10 bg-slate-950/90 text-cyan-300 border border-cyan-400/50 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow pointer-events-none">
+                Possiede: x${theirCount}
               </span>
             </div>
-
             ${!isMe ? `
-              <button type="button" data-action="propose-trade-for-card" data-card-id="${card.id}"
-                      class="w-full py-2 px-2.5 rounded-xl ${!iOwnIt ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md' : 'bg-slate-800 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-slate-700'} font-extrabold text-[11px] flex items-center justify-center gap-1.5 transition active:scale-95">
-                <i class="fa-solid fa-right-left pointer-events-none"></i>
-                <span class="pointer-events-none">Proponi Scambio</span>
+              <button type="button" data-action="quick-propose-trade" data-card-id="${card.id}"
+                      class="w-full py-1.5 px-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-[11px] shadow transition active:scale-95">
+                <i class="fa-solid fa-right-left mr-1 pointer-events-none"></i> Proponi Scambio
               </button>
             ` : ''}
           </div>
@@ -3833,161 +3820,29 @@ function renderUserCollectionModalContent(userId) {
       }).join('');
     }
 
-    function proposeTradeForSpecificCard(requestedCardId) {
+    function quickProposeTradeForCard(requestedCardId) {
       document.getElementById('user-collection-modal').classList.add('hidden');
-      currentlyViewedUserId = null;
-
       switchTab('trades');
       const reqSelect = document.getElementById('trade-request-select');
       if (reqSelect) {
         reqSelect.value = requestedCardId;
       }
       const card = ALL_CARDS.find(c => c.id === requestedCardId);
-      showToast(`Figurina "${card ? card.name : ''}" impostata come carta richiesta! Scegli cosa offrire e pubblica.`, 'info');
+      showToast(`Seleziona ora quale tua carta offrire in cambio di ${card ? card.name : 'questa figurina'}!`, 'info');
     }
 
     /**
-     * 11. MODAL ISPEZIONE FIGURINA + WISHLIST + CARICAMENTO FOTO ADMIN
-     */
-    function inspectCard(cardId) {
-      if (!currentUserState) return;
-      const card = ALL_CARDS.find(c => c.id === cardId);
-      if (!card) return;
-
-      const count = currentUserState.owned[card.id] || 0;
-      const isWished = (currentUserState.wishlist || []).includes(card.id);
-      const modal = document.getElementById('card-inspect-modal');
-      document.getElementById('inspect-card-container').innerHTML = renderCardHTML(card, { clickable: false });
-
-      const detailsBox = document.getElementById('inspect-details-box');
-      const bioRows = card.type === 'player'
-        ? `
-          <div class="grid grid-cols-2 gap-2 bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-[11px]">
-            <div><span class="text-slate-400">Nazionalità:</span> <strong class="text-white">${card.nat}</strong></div>
-            <div><span class="text-slate-400">Nascita:</span> <strong class="text-white">${card.dob}</strong></div>
-            <div><span class="text-slate-400">Altezza:</span> <strong class="text-white">${card.height} cm</strong></div>
-            <div><span class="text-slate-400">Peso:</span> <strong class="text-white">${card.weight} kg</strong></div>
-          </div>
-        `
-        : `<div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-[11px] text-slate-300">Stemma Ufficiale <strong>${card.fullName}</strong> • Stagione LNP 2026/27</div>`;
-
-      const adminQuickUpload = adminUnlocked ? `
-        <div class="pt-2 border-t border-slate-700 space-y-2">
-          <span class="block text-[10px] font-extrabold uppercase text-cyan-300">
-            <i class="fa-solid fa-camera mr-1"></i> Controllo Admin: Carica Foto Ufficiale
-          </span>
-          <div class="flex gap-2">
-            <label class="flex-1 cursor-pointer py-2 px-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-center font-bold text-xs transition">
-              <i class="fa-solid fa-upload mr-1"></i> Scegli Foto Reale
-              <input type="file" accept="image/*" data-action="inspect-upload-photo" data-card-id="${card.id}" class="hidden" />
-            </label>
-            ${getCustomPhotoForCard(card) ? `
-              <button type="button" data-action="inspect-remove-photo" data-card-id="${card.id}" class="px-3 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white font-bold text-xs">
-                Rimuovi
-              </button>
-            ` : ''}
-          </div>
-        </div>
-      ` : '';
-
-      detailsBox.innerHTML = `
-        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-          <span class="font-bold text-white text-sm">${card.teamName}</span>
-          <span class="text-amber-400 font-extrabold">Possedute: ${count}</span>
-        </div>
-        ${bioRows}
-        <button type="button" data-action="toggle-wishlist-inspect" data-card-id="${card.id}" class="w-full py-2.5 rounded-xl font-extrabold text-xs transition active:scale-95 ${isWished ? 'bg-rose-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-rose-300 border border-rose-500/40'}">
-          <i class="fa-solid fa-heart mr-1.5 pointer-events-none"></i>
-          <span class="pointer-events-none">${isWished ? 'Rimuovi dalla Lista Desideri (Wishlist)' : 'Aggiungi alla Lista Desideri (Wishlist)'}</span>
-        </button>
-        ${adminQuickUpload}
-      `;
-
-      modal.classList.remove('hidden');
-    }
-
-    function closeInspectModal() {
-      document.getElementById('card-inspect-modal').classList.add('hidden');
-    }
-
-    /**
-     * 12. PANNELLO SEGRETO ADMIN (CTRL + SHIFT + A -> PASSWORD "bananabella")
-     */
-    const SECRET_ADMIN_PASS = 'bananabella';
-
-    function openAdminModal() {
-      const modal = document.getElementById('admin-secret-modal');
-      modal.classList.remove('hidden');
-
-      if (adminUnlocked) {
-        document.getElementById('admin-login-box').classList.add('hidden');
-        document.getElementById('admin-controls-box').classList.remove('hidden');
-        updateAdminToggleBtnUI();
-      } else {
-        document.getElementById('admin-login-box').classList.remove('hidden');
-        document.getElementById('admin-controls-box').classList.add('hidden');
-        const input = document.getElementById('admin-password-input');
-        input.value = '';
-        setTimeout(() => input.focus(), 60);
-      }
-    }
-
-    function closeAdminModal() {
-      document.getElementById('admin-secret-modal').classList.add('hidden');
-    }
-
-    function verifyAdminPassword() {
-      const val = document.getElementById('admin-password-input').value.trim();
-      if (val === SECRET_ADMIN_PASS) {
-        adminUnlocked = true;
-        document.getElementById('admin-login-box').classList.add('hidden');
-        document.getElementById('admin-controls-box').classList.remove('hidden');
-        updateAdminToggleBtnUI();
-        playSound('legend');
-        showToast('Accesso Admin sbloccato!', 'success');
-      } else {
-        showToast('Password errata!', 'error');
-      }
-    }
-
-    function toggleInfiniteCredits() {
-      tempInfiniteCredits = !tempInfiniteCredits;
-      updateCreditsUI();
-      updateAdminToggleBtnUI();
-      playSound('coin');
-      showToast(
-        tempInfiniteCredits
-          ? 'Crediti Infiniti Temporanei (∞) ATTIVATI!'
-          : 'Crediti Infiniti Temporanei disattivati.',
-        tempInfiniteCredits ? 'success' : 'info'
-      );
-    }
-
-    function updateAdminToggleBtnUI() {
-      const btn = document.getElementById('btn-toggle-inf-credits');
-      if (!btn) return;
-      if (tempInfiniteCredits) {
-        btn.textContent = 'DISATTIVA ∞';
-        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-rose-600 text-white';
-      } else {
-        btn.textContent = 'ATTIVA ∞';
-        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-emerald-600 text-white';
-      }
-    }
-
-    /**
-     * 13. AGGIORNAMENTO STATISTICHE HEADER & NAVIGAZIONE TAB
+     * 11. STATISTICHE ALBUM & NAVIGAZIONE TABS
      */
     function updateAlbumStatsUI() {
       if (!currentUserState) return;
-      const uniqueOwned = ALL_CARDS.filter(c => (currentUserState.owned[c.id] || 0) > 0).length;
-      const pct = Math.round((uniqueOwned / TOTAL_CARDS_COUNT) * 100);
+      const ownedUnique = ALL_CARDS.filter(c => (currentUserState.owned[c.id] || 0) > 0).length;
+      const pct = Math.round((ownedUnique / TOTAL_CARDS_COUNT) * 100);
 
-      document.getElementById('header-progress-text').textContent = `${uniqueOwned}/${TOTAL_CARDS_COUNT} (${pct}%)`;
+      document.getElementById('header-progress-text').textContent = `${ownedUnique}/${TOTAL_CARDS_COUNT} (${pct}%)`;
       document.getElementById('header-progress-bar').style.width = `${pct}%`;
-      document.getElementById('nav-album-badge').textContent = `${uniqueOwned}/${TOTAL_CARDS_COUNT}`;
-
-      document.getElementById('album-stats-label').textContent = `${uniqueOwned} / ${TOTAL_CARDS_COUNT} (${pct}%)`;
+      document.getElementById('nav-album-badge').textContent = `${ownedUnique}/${TOTAL_CARDS_COUNT}`;
+      document.getElementById('album-stats-label').textContent = `${ownedUnique} / ${TOTAL_CARDS_COUNT} (${pct}%)`;
       document.getElementById('album-stats-bar').style.width = `${pct}%`;
     }
 
@@ -4013,133 +3868,127 @@ function renderUserCollectionModalContent(userId) {
     }
 
     /**
-     * 14. EFFETTI SONORI WEB AUDIO API & CONFETTI
+     * 12. MODAL ISPEZIONE FIGURINA + WISHLIST + CARICAMENTO FOTO ADMIN (URL O FILE)
      */
-    let audioCtx = null;
+    function inspectCard(cardId) {
+      const card = ALL_CARDS.find(c => c.id === cardId);
+      if (!card || !currentUserState) return;
 
-    function playSound(type) {
-      if (!currentUserState || !currentUserState.audioEnabled) return;
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+      document.getElementById('inspect-card-container').innerHTML = renderCardHTML(card, { clickable: false });
+      const count = currentUserState.owned[card.id] || 0;
+      const isWished = (currentUserState.wishlist || []).includes(card.id);
 
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        if (type === 'tear') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(190, now);
-          osc.frequency.exponentialRampToValueAtTime(55, now + 0.28);
-          gain.gain.setValueAtTime(0.18, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
-          osc.start(now);
-          osc.stop(now + 0.28);
-        } else if (type === 'flip') {
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(420, now);
-          osc.frequency.exponentialRampToValueAtTime(760, now + 0.14);
-          gain.gain.setValueAtTime(0.14, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
-          osc.start(now);
-          osc.stop(now + 0.14);
-        } else if (type === 'legend') {
-          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            o.type = 'triangle';
-            o.frequency.setValueAtTime(freq, now + i * 0.08);
-            g.gain.setValueAtTime(0.15, now + i * 0.08);
-            g.gain.exponentialRampToValueAtTime(0.005, now + i * 0.08 + 0.35);
-            o.connect(g);
-            g.connect(audioCtx.destination);
-            o.start(now + i * 0.08);
-            o.stop(now + i * 0.08 + 0.35);
-          });
-        } else if (type === 'coin') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(880, now);
-          osc.frequency.setValueAtTime(1174.66, now + 0.09);
-          gain.gain.setValueAtTime(0.14, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.24);
-          osc.start(now);
-          osc.stop(now + 0.24);
-        }
-      } catch (e) {}
-    }
-
-    function updateAudioIcon() {
-      if (!currentUserState) return;
-      const icon = document.getElementById('audio-icon');
-      icon.className = currentUserState.audioEnabled
-        ? 'fa-solid fa-volume-high text-sm text-amber-400 pointer-events-none'
-        : 'fa-solid fa-volume-xmark text-sm text-slate-500 pointer-events-none';
-    }
-
-    function toggleAudio() {
-      if (!currentUserState) return;
-      currentUserState.audioEnabled = !currentUserState.audioEnabled;
-      saveCurrentUserState();
-      updateAudioIcon();
-      showToast(currentUserState.audioEnabled ? 'Effetti sonori attivati' : 'Effetti sonori disattivati', 'info');
-    }
-
-    function spawnConfettiBurst() {
-      const colors = ['#ff6b00', '#ffd700', '#38bdf8', '#10b981', '#f43f5e', '#ffffff'];
-      for (let i = 0; i < 36; i++) {
-        const el = document.createElement('div');
-        el.className = 'confetti-piece';
-        el.style.left = `${50 + (Math.random() * 20 - 10)}vw`;
-        el.style.top = `${42 + (Math.random() * 10 - 5)}vh`;
-        el.style.backgroundColor = colors[i % colors.length];
-        el.style.setProperty('--tx', `${(Math.random() - 0.5) * 340}px`);
-        el.style.setProperty('--ty', `${(Math.random() - 0.7) * 320}px`);
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 1450);
-      }
-    }
-
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      const bgMap = {
-        success: 'bg-emerald-950/95 border-emerald-500 text-emerald-100',
-        error: 'bg-rose-950/95 border-rose-500 text-rose-100',
-        info: 'bg-slate-900/95 border-amber-400/60 text-slate-100'
-      };
-      const iconMap = {
-        success: 'fa-circle-check text-emerald-400',
-        error: 'fa-circle-exclamation text-rose-400',
-        info: 'fa-basketball text-amber-400'
-      };
-      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-2xl text-xs sm:text-sm font-bold ${bgMap[type] || bgMap.info} sticker-reveal-anim`;
-      toast.innerHTML = `<i class="fa-solid ${iconMap[type] || iconMap.info}"></i> <span>${message}</span>`;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.25s';
-        setTimeout(() => toast.remove(), 260);
-      }, 3400);
+      const detailsHtml = `
+        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+          <span class="font-extrabold text-sm text-white">${card.name}</span>
+          <span class="text-amber-400 font-bold">Possedute: ${count}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-300">
+          <div><span class="text-slate-400">Squadra:</span> ${card.teamName}</div>
+          <div><span class="text-slate-400">Ruolo:</span> ${card.role}</div>
+          <div><span class="text-slate-400">Nascita:</span> ${card.dob}</div>
+          <div><span class="text-slate-400">Nazionalità:</span> ${card.nat}</div>
+          ${card.height ? `<div><span class="text-slate-400">Altezza / Peso:</span> ${card.height} cm • ${card.weight} kg</div>` : ''}
+        </div>
+        ${count === 0 ? `
+          <button type="button" data-action="toggle-wishlist-inspect" data-card-id="${card.id}" class="w-full py-2 rounded-xl ${isWished ? 'bg-rose-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-rose-300 border border-rose-500/40'} font-extrabold text-xs transition active:scale-95">
+            <i class="fa-solid fa-heart mr-1.5 pointer-events-none"></i> ${isWished ? 'Rimuovi dalla Wishlist' : 'Aggiungi alla Wishlist Scambi'}
+          </button>
+        ` : ''}
+        ${adminUnlocked ? `
+          <div class="border-t border-cyan-500/40 pt-2.5 mt-1 space-y-2">
+            <span class="block text-[10px] font-extrabold uppercase text-cyan-300">
+              <i class="fa-solid fa-camera mr-1"></i> Admin: Cambia Foto Figurina
+            </span>
+            <div class="flex gap-1.5">
+              <input id="inspect-admin-photo-url" type="url" value="${getCustomPhotoForCard(card) || ''}" placeholder="Incolla URL immagine (https://...)" class="flex-1 bg-slate-950 border border-slate-700 focus:border-cyan-400 rounded-lg px-2.5 py-1.5 text-[11px] text-white focus:outline-none" />
+              <button type="button" data-action="inspect-save-photo-url" data-card-id="${card.id}" class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[11px] transition active:scale-95">
+                Salva URL
+              </button>
+            </div>
+            <label class="block w-full cursor-pointer py-2 px-3 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/70 border border-cyan-500/50 text-center text-[11px] font-bold text-cyan-200 transition">
+              <i class="fa-solid fa-upload mr-1"></i> Oppure Carica File Foto Locale
+              <input type="file" accept="image/*" data-inspect-photo-card="${card.id}" class="hidden" />
+            </label>
+          </div>
+        ` : ''}
+      `;
+      document.getElementById('inspect-details-box').innerHTML = detailsHtml;
+      document.getElementById('card-inspect-modal').classList.remove('hidden');
     }
 
     /**
-     * 15. EVENT DELEGATION GLOBALE + SCORCIATOIA SEGRETA CTRL + SHIFT + A
+     * 13. CONSOLE SEGRETA ADMIN (CTRL + SHIFT + A -> PASSWORD "bananabella")
      */
-    function handleImageFileToDataUrl(file, callback) {
-      if (!file) return;
+    function openAdminSecretModal() {
+      const modal = document.getElementById('admin-secret-modal');
+      modal.classList.remove('hidden');
+
+      if (adminUnlocked) {
+        document.getElementById('admin-login-box').classList.add('hidden');
+        document.getElementById('admin-controls-box').classList.remove('hidden');
+      } else {
+        document.getElementById('admin-login-box').classList.remove('hidden');
+        document.getElementById('admin-controls-box').classList.add('hidden');
+        const input = document.getElementById('admin-password-input');
+        input.value = '';
+        setTimeout(() => input.focus(), 50);
+      }
+    }
+
+    function verifyAdminPassword() {
+      const val = document.getElementById('admin-password-input').value.trim();
+      if (val === 'bananabella') {
+        adminUnlocked = true;
+        document.getElementById('admin-login-box').classList.add('hidden');
+        document.getElementById('admin-controls-box').classList.remove('hidden');
+        updateAdminInfiniteBtnUI();
+        showToast('Console Admin sbloccata! Ora puoi caricare foto anche cliccando sulle carte nell\'album.', 'success');
+      } else {
+        showToast('Password segreta errata!', 'error');
+      }
+    }
+
+    function toggleInfiniteCredits() {
+      if (!adminUnlocked) return;
+      tempInfiniteCredits = !tempInfiniteCredits;
+      updateCreditsUI();
+      updateAdminInfiniteBtnUI();
+      showToast(
+        tempInfiniteCredits
+          ? 'Crediti Infiniti (∞) attivati per questa sessione!'
+          : 'Crediti Infiniti disattivati. Saldo reale ripristinato.',
+        'info'
+      );
+    }
+
+    function updateAdminInfiniteBtnUI() {
+      const btn = document.getElementById('btn-toggle-inf-credits');
+      if (!btn) return;
+      if (tempInfiniteCredits) {
+        btn.textContent = 'DISATTIVA ∞';
+        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-rose-600 text-white';
+      } else {
+        btn.textContent = 'ATTIVA ∞';
+        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-emerald-600 text-white';
+      }
+    }
+
+    function processImageFileToDataUrl(file, callback) {
       const reader = new FileReader();
       reader.onload = (ev) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const maxDim = 480;
+          const maxDim = 260;
           let w = img.width;
           let h = img.height;
-          if (w > maxDim || h > maxDim) {
-            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-            else { w = Math.round(w * maxDim / h); h = maxDim; }
+          if (w > h && w > maxDim) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else if (h > maxDim) {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
           }
           canvas.width = w;
           canvas.height = h;
@@ -4152,25 +4001,146 @@ function renderUserCollectionModalContent(userId) {
       reader.readAsDataURL(file);
     }
 
-    function initApp() {
+    /**
+     * 14. EFFETTI SONORI (WEB AUDIO API) + CORIANDOLI + TOAST
+     */
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!currentUserState || !currentUserState.audioEnabled) return;
       try {
-        const savedPhotosRaw = localStorage.getItem(CUSTOM_PHOTOS_KEY);
-        if (savedPhotosRaw) customCardPhotos = JSON.parse(savedPhotosRaw);
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        if (ctx.state === 'suspended') ctx.resume();
+
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'flip') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(640, now + 0.09);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          osc.start(now);
+          osc.stop(now + 0.11);
+        } else if (type === 'tear') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.exponentialRampToValueAtTime(520, now + 0.25);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.start(now);
+          osc.stop(now + 0.29);
+        } else if (type === 'coin') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(987, now);
+          osc.frequency.setValueAtTime(1318, now + 0.08);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.26);
+        } else if (type === 'legend') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.1);
+          osc.frequency.setValueAtTime(783.99, now + 0.2);
+          osc.frequency.setValueAtTime(1046.5, now + 0.3);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+          osc.start(now);
+          osc.stop(now + 0.66);
+        }
       } catch (e) {}
+    }
 
-      populateTeamDropdowns();
-      renderSavedAccountsList();
+    function toggleAudio() {
+      if (!currentUserState) return;
+      currentUserState.audioEnabled = !currentUserState.audioEnabled;
+      saveCurrentUserState();
+      updateAudioIcon();
+      showToast(currentUserState.audioEnabled ? 'Effetti sonori attivati' : 'Audio disattivato', 'info');
+    }
 
+    function updateAudioIcon() {
+      const icon = document.getElementById('audio-icon');
+      if (!icon || !currentUserState) return;
+      icon.className = currentUserState.audioEnabled
+        ? 'fa-solid fa-volume-high text-sm text-amber-400 pointer-events-none'
+        : 'fa-solid fa-volume-xmark text-sm text-slate-500 pointer-events-none';
+    }
+
+    function spawnConfettiBurst() {
+      const colors = ['#ff6b00', '#ffd700', '#38bdf8', '#10b981', '#f43f5e', '#ffffff'];
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+
+      for (let i = 0; i < 36; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = `${cx}px`;
+        piece.style.top = `${cy}px`;
+        piece.style.backgroundColor = colors[i % colors.length];
+
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 90 + Math.random() * 240;
+        piece.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+        piece.style.setProperty('--ty', `${Math.sin(angle) * dist + 70}px`);
+
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 1450);
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+
+      const styleMap = {
+        success: 'bg-emerald-950/95 border-emerald-400 text-emerald-100',
+        error: 'bg-rose-950/95 border-rose-400 text-rose-100',
+        info: 'bg-slate-900/95 border-amber-400/70 text-slate-100'
+      };
+      const iconMap = {
+        success: 'fa-circle-check text-emerald-400',
+        error: 'fa-circle-exclamation text-rose-400',
+        info: 'fa-basketball text-[#ff6b00]'
+      };
+
+      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-2xl text-xs sm:text-sm font-bold max-w-sm ${styleMap[type] || styleMap.info}`;
+      toast.innerHTML = `<i class="fa-solid ${iconMap[type] || iconMap.info}"></i><span>${message}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s';
+        setTimeout(() => toast.remove(), 260);
+      }, 3400);
+    }
+
+    /**
+     * 15. EVENT DELEGATION GLOBALE & SCORCIATOIA ADMIN CTRL + SHIFT + A
+     */
+    function bindGlobalEvents() {
       document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.shiftKey && e.key && e.key.toLowerCase() === 'a') {
+        if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
           e.preventDefault();
-          openAdminModal();
+          openAdminSecretModal();
         }
         if (e.key === 'Escape') {
-          closeInspectModal();
-          closeAdminModal();
+          document.getElementById('card-inspect-modal').classList.add('hidden');
+          document.getElementById('admin-secret-modal').classList.add('hidden');
           document.getElementById('user-collection-modal').classList.add('hidden');
-          currentlyViewedUserId = null;
         }
       });
 
@@ -4178,225 +4148,196 @@ function renderUserCollectionModalContent(userId) {
         if (e.key === 'Enter') verifyAdminPassword();
       });
 
-      document.addEventListener('change', async (e) => {
+      document.addEventListener('change', (e) => {
         if (e.target.id === 'admin-photo-file-input') {
+          if (!adminUnlocked) return;
           const cardId = document.getElementById('admin-photo-card-select').value;
           if (!cardId) {
-            showToast('Seleziona prima un giocatore dal menu a tendina!', 'error');
+            showToast('Seleziona prima una figurina dal menu a tendina!', 'error');
+            e.target.value = '';
             return;
           }
-          handleImageFileToDataUrl(e.target.files[0], async (dataUrl) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          processImageFileToDataUrl(file, async (dataUrl) => {
             await saveCustomCardPhoto(cardId, dataUrl);
             renderAlbum();
             renderLineupSection();
-            showToast('Foto giocatore caricata e sincronizzata!', 'success');
+            showToast('Foto giocatore salvata in tempo reale per tutti gli utenti!', 'success');
           });
-        } else if (e.target.dataset && e.target.dataset.action === 'inspect-upload-photo') {
-          const cardId = e.target.dataset.cardId;
-          handleImageFileToDataUrl(e.target.files[0], async (dataUrl) => {
-            await saveCustomCardPhoto(cardId, dataUrl);
-            inspectCard(cardId);
+          e.target.value = '';
+          return;
+        }
+
+        const inspectCardId = e.target.getAttribute('data-inspect-photo-card');
+        if (inspectCardId && adminUnlocked) {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          processImageFileToDataUrl(file, async (dataUrl) => {
+            await saveCustomCardPhoto(inspectCardId, dataUrl);
+            inspectCard(inspectCardId);
             renderAlbum();
             renderLineupSection();
-            showToast('Foto ufficiale applicata alla figurina!', 'success');
+            showToast('Foto figurina aggiornata in diretta!', 'success');
           });
+          e.target.value = '';
         }
       });
 
       document.addEventListener('click', (e) => {
-        const targetEl = e.target.closest('[data-action]');
-        if (!targetEl) return;
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
 
-        const action = targetEl.dataset.action;
+        const action = target.getAttribute('data-action');
 
-        if (action === 'close-inspect' && targetEl.id === 'card-inspect-modal' && e.target.id !== 'card-inspect-modal') {
-          return;
-        }
-        if (action === 'close-admin' && targetEl.id === 'admin-secret-modal' && e.target.id !== 'admin-secret-modal') {
-          return;
-        }
-        if (action === 'close-user-collection' && targetEl.id === 'user-collection-modal' && e.target.id !== 'user-collection-modal') {
-          return;
-        }
-
-        switch (action) {
-          case 'discord-bot-oauth':
-            handleDiscordBotOAuth();
-            break;
-          case 'login-saved-account': {
-            const accId = targetEl.dataset.accountId;
-            const idxRaw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
-            if (idxRaw) {
-              const map = JSON.parse(idxRaw);
-              if (map[accId]) loginWithDiscordProfile(map[accId]);
-            }
-            break;
+        if (action === 'discord-bot-oauth') {
+          handleDiscordBotOAuth();
+        } else if (action === 'login-saved-account') {
+          const accId = target.getAttribute('data-account-id');
+          try {
+            const raw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
+            const map = raw ? JSON.parse(raw) : {};
+            if (map[accId]) loginWithDiscordProfile(map[accId]);
+          } catch (err) {}
+        } else if (action === 'switch-discord-user') {
+          renderSavedAccountsList();
+          document.getElementById('discord-auth-screen').classList.remove('hidden');
+        } else if (action === 'switch-tab') {
+          switchTab(target.getAttribute('data-tab'));
+        } else if (action === 'toggle-audio') {
+          toggleAudio();
+        } else if (action === 'buy-pack') {
+          buyAndOpenPack(target.getAttribute('data-pack'));
+        } else if (action === 'tear-pack') {
+          tearPackAction();
+        } else if (action === 'flip-card') {
+          flipSinglePackCard(Number(target.getAttribute('data-index')));
+        } else if (action === 'flip-all') {
+          flipAllPackCards();
+        } else if (action === 'close-stage') {
+          closePackStage();
+        } else if (action === 'claim-daily-pass') {
+          claimDailyPassReward();
+        } else if (action === 'album-status') {
+          setAlbumStatusFilter(target.getAttribute('data-status'));
+        } else if (action === 'toggle-wishlist') {
+          toggleWishlistCard(target.getAttribute('data-card-id'));
+        } else if (action === 'toggle-wishlist-inspect') {
+          const cid = target.getAttribute('data-card-id');
+          toggleWishlistCard(cid);
+          inspectCard(cid);
+        } else if (action === 'inspect-card') {
+          inspectCard(target.getAttribute('data-card-id'));
+        } else if (action === 'close-inspect') {
+          if (e.target.id === 'card-inspect-modal' || target.tagName === 'BUTTON') {
+            document.getElementById('card-inspect-modal').classList.add('hidden');
           }
-          case 'switch-discord-user':
-            renderSavedAccountsList();
-            document.getElementById('discord-auth-screen').classList.remove('hidden');
-            break;
-          case 'switch-tab':
-            switchTab(targetEl.dataset.tab);
-            break;
-          case 'toggle-audio':
-            toggleAudio();
-            break;
-          case 'buy-pack':
-            buyAndOpenPack(targetEl.dataset.pack);
-            break;
-          case 'tear-pack':
-            tearPackAction();
-            break;
-          case 'flip-card':
-            flipSinglePackCard(Number(targetEl.dataset.index));
-            break;
-          case 'flip-all':
-            flipAllPackCards();
-            break;
-          case 'close-stage':
-            closePackStage();
-            break;
-          case 'claim-daily-pass':
-            claimDailyPassReward();
-            break;
-          case 'album-status':
-            setAlbumStatusFilter(targetEl.dataset.status);
-            break;
-          case 'toggle-wishlist':
-            toggleWishlistCard(targetEl.dataset.cardId);
-            break;
-          case 'toggle-wishlist-inspect':
-            toggleWishlistCard(targetEl.dataset.cardId);
-            inspectCard(targetEl.dataset.cardId);
-            break;
-          case 'inspect-remove-photo': {
-            const cid = targetEl.dataset.cardId;
-            saveCustomCardPhoto(cid, null);
-            inspectCard(cid);
-            renderAlbum();
-            showToast('Foto personalizzata rimossa.', 'info');
-            break;
-          }
-          case 'create-trade-offer':
-            createTradeOffer();
-            break;
-          case 'cancel-trade-offer':
-            cancelTradeOffer(targetEl.dataset.tradeId);
-            break;
-          case 'accept-trade-offer':
-            acceptTradeOffer(targetEl.dataset.tradeId);
-            break;
-          case 'refresh-trades':
-            renderTradesTab();
-            showToast('Bacheca scambi sincronizzata.', 'info');
-            break;
-          case 'discard-single-dup':
-            discardSingleDuplicate(targetEl.dataset.cardId);
-            break;
-          case 'discard-all-dups':
-            discardAllDuplicates();
-            break;
-          case 'auto-lineup':
-            autoSelectBestLineup();
-            break;
-          case 'clear-lineup':
-            clearLineup();
-            break;
-          case 'focus-role-slot':
-            activeSlotRole = (activeSlotRole === targetEl.dataset.role) ? null : targetEl.dataset.role;
-            renderLineupSection();
-            break;
-          case 'clear-role-slot':
-            if (currentUserState && currentUserState.lineupSlots) {
-              currentUserState.lineupSlots[targetEl.dataset.role] = null;
-              saveCurrentUserState();
-              renderLineupSection();
-            }
-            break;
-          case 'assign-player-slot':
-            assignPlayerToLineup(targetEl.dataset.cardId);
-            break;
-          case 'select-tactic':
-            if (currentUserState) {
-              currentUserState.tactic = targetEl.dataset.tactic;
-              saveCurrentUserState();
-              renderLineupSection();
-            }
-            break;
-          case 'play-match':
-            startTacticalMatch();
-            break;
-          case 'finish-tactical-match':
-            finishTacticalMatch(targetEl.dataset.adj);
-            break;
-          case 'refresh-leaderboard':
-            renderLeaderboard();
-            showToast('Classifica live aggiornata!', 'info');
-            break;
-          case 'view-user-collection':
-            openUserCollectionModal(targetEl.dataset.userId);
-            break;
-          case 'close-user-collection':
+        } else if (action === 'view-user-collection') {
+          openUserCollectionModal(target.getAttribute('data-user-id'));
+        } else if (action === 'close-user-collection') {
+          if (e.target.id === 'user-collection-modal' || target.tagName === 'BUTTON') {
             document.getElementById('user-collection-modal').classList.add('hidden');
-            currentlyViewedUserId = null;
-            break;
-          case 'propose-trade-for-card':
-            proposeTradeForSpecificCard(targetEl.dataset.cardId);
-            break;
-          case 'inspect-card':
-            inspectCard(targetEl.dataset.cardId);
-            break;
-          case 'close-inspect':
-            closeInspectModal();
-            break;
-          case 'close-admin':
-            closeAdminModal();
-            break;
-          case 'verify-admin-password':
-            verifyAdminPassword();
-            break;
-          case 'toggle-infinite-credits':
-            toggleInfiniteCredits();
-            break;
-          case 'admin-sim-next-day':
-            dayOffsetForTesting += 1;
-            renderWeeklyPass();
-            showToast('Avanzato di +1 giorno consecutivo nel Pass Settimanale!', 'info');
-            break;
-          case 'admin-sim-skip-day':
-            dayOffsetForTesting += 2;
-            evaluatePassStreakIntegrity(true);
-            renderWeeklyPass();
-            break;
-          case 'admin-save-photo-url': {
-            const cid = document.getElementById('admin-photo-card-select').value;
-            const url = document.getElementById('admin-photo-url-input').value.trim();
-            if (!cid || !url) {
-              showToast('Seleziona un giocatore e incolla un URL valido!', 'error');
-              break;
-            }
-            saveCustomCardPhoto(cid, url);
-            renderAlbum();
-            renderLineupSection();
-            showToast('URL foto salvato e sincronizzato!', 'success');
-            break;
           }
-          case 'admin-remove-photo': {
-            const cid = document.getElementById('admin-photo-card-select').value;
-            if (!cid) {
-              showToast('Seleziona prima un giocatore!', 'error');
-              break;
-            }
-            saveCustomCardPhoto(cid, null);
-            renderAlbum();
+        } else if (action === 'quick-propose-trade') {
+          quickProposeTradeForCard(target.getAttribute('data-card-id'));
+        } else if (action === 'create-trade-offer') {
+          createTradeOffer();
+        } else if (action === 'cancel-trade-offer') {
+          cancelTradeOffer(target.getAttribute('data-trade-id'));
+        } else if (action === 'accept-trade-offer') {
+          acceptTradeOffer(target.getAttribute('data-trade-id'));
+        } else if (action === 'refresh-trades') {
+          renderTradesTab();
+          showToast('Bacheca scambi aggiornata!', 'info');
+        } else if (action === 'discard-single-dup') {
+          discardSingleDuplicate(target.getAttribute('data-card-id'));
+        } else if (action === 'discard-all-dups') {
+          discardAllDuplicates();
+        } else if (action === 'focus-role-slot') {
+          activeSlotRole = target.getAttribute('data-role');
+          renderLineupSection();
+        } else if (action === 'clear-role-slot') {
+          const r = target.getAttribute('data-role');
+          if (currentUserState && currentUserState.lineupSlots) {
+            currentUserState.lineupSlots[r] = null;
+            saveCurrentUserState();
             renderLineupSection();
-            showToast('Foto giocatore rimossa.', 'info');
-            break;
           }
-          case 'admin-global-reset':
-            forceGlobalResetFromAdmin();
-            break;
+        } else if (action === 'assign-player-to-lineup') {
+          assignPlayerToLineup(target.getAttribute('data-card-id'));
+        } else if (action === 'select-tactic') {
+          if (currentUserState) {
+            currentUserState.tactic = target.getAttribute('data-tactic');
+            saveCurrentUserState();
+            renderLineupSection();
+          }
+        } else if (action === 'auto-lineup') {
+          autoPickBestLineup();
+        } else if (action === 'clear-lineup') {
+          clearLineup();
+        } else if (action === 'play-match') {
+          startTacticalMatch();
+        } else if (action === 'finish-match-halftime') {
+          finishTacticalMatch(target.getAttribute('data-call'));
+        } else if (action === 'refresh-leaderboard') {
+          renderLeaderboard();
+          showToast('Classifica live aggiornata!', 'info');
+        } else if (action === 'close-admin') {
+          if (e.target.id === 'admin-secret-modal' || target.tagName === 'BUTTON') {
+            document.getElementById('admin-secret-modal').classList.add('hidden');
+          }
+        } else if (action === 'verify-admin-password') {
+          verifyAdminPassword();
+        } else if (action === 'toggle-infinite-credits') {
+          toggleInfiniteCredits();
+        } else if (action === 'admin-sim-next-day') {
+          if (!adminUnlocked) return;
+          dayOffsetForTesting += 1;
+          evaluatePassStreakIntegrity(true);
+          renderWeeklyPass();
+          showToast(`Simulazione Admin: +1 giorno consecutivo applicato (Offset: +${dayOffsetForTesting}g).`, 'info');
+        } else if (action === 'admin-sim-skip-day') {
+          if (!adminUnlocked) return;
+          dayOffsetForTesting += 2;
+          evaluatePassStreakIntegrity(true);
+          renderWeeklyPass();
+        } else if (action === 'admin-save-photo-url') {
+          if (!adminUnlocked) return;
+          const cardId = document.getElementById('admin-photo-card-select').value;
+          const urlVal = document.getElementById('admin-photo-url-input').value.trim();
+          if (!cardId || !urlVal) {
+            showToast('Seleziona una figurina e inserisci un URL valido!', 'error');
+            return;
+          }
+          saveCustomCardPhoto(cardId, urlVal);
+          renderAlbum();
+          renderLineupSection();
+          showToast('URL foto salvato per tutti gli utenti!', 'success');
+        } else if (action === 'inspect-save-photo-url') {
+          if (!adminUnlocked) return;
+          const cardId = target.getAttribute('data-card-id');
+          const urlInput = document.getElementById('inspect-admin-photo-url');
+          const urlVal = urlInput ? urlInput.value.trim() : '';
+          if (!cardId || !urlVal) {
+            showToast('Inserisci un URL immagine valido!', 'error');
+            return;
+          }
+          saveCustomCardPhoto(cardId, urlVal);
+          inspectCard(cardId);
+          renderAlbum();
+          renderLineupSection();
+          showToast('URL foto figurina aggiornato in diretta!', 'success');
+        } else if (action === 'admin-remove-photo') {
+          if (!adminUnlocked) return;
+          const cardId = document.getElementById('admin-photo-card-select').value;
+          if (!cardId) return;
+          saveCustomCardPhoto(cardId, null);
+          renderAlbum();
+          renderLineupSection();
+          showToast('Foto personalizzata rimossa.', 'info');
+        } else if (action === 'admin-global-reset') {
+          if (!adminUnlocked) return;
+          forceGlobalResetFromAdmin();
         }
       });
 
@@ -4413,25 +4354,42 @@ function renderUserCollectionModalContent(userId) {
       document.getElementById('viewer-copies-filter').addEventListener('change', () => {
         if (currentlyViewedUserId) renderUserCollectionModalContent(currentlyViewedUserId);
       });
-
-      initCloudBackend().then(async () => {
-        const loggedFromOAuth = await checkDiscordOAuthHashCallback();
-        if (!loggedFromOAuth) {
-          try {
-            const activeId = localStorage.getItem(ACTIVE_ACCOUNT_KEY);
-            const idxRaw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
-            if (activeId && idxRaw) {
-              const map = JSON.parse(idxRaw);
-              if (map[activeId]) {
-                await loginWithDiscordProfile(map[activeId]);
-              }
-            }
-          } catch (e) {}
-        }
-      });
     }
 
-    initApp();
+    /**
+     * 16. INIZIALIZZAZIONE APPLICAZIONE
+     */
+    async function initApp() {
+      try {
+        const savedPhotosRaw = localStorage.getItem(CUSTOM_PHOTOS_KEY);
+        if (savedPhotosRaw) customCardPhotos = JSON.parse(savedPhotosRaw);
+      } catch (e) {}
+
+      populateTeamDropdowns();
+      bindGlobalEvents();
+      await initCloudBackend();
+      renderSavedAccountsList();
+
+      const loggedFromOAuth = await checkDiscordOAuthHashCallback();
+      if (loggedFromOAuth) return;
+
+      try {
+        const activeId = localStorage.getItem(ACTIVE_ACCOUNT_KEY);
+        const raw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
+        if (activeId && raw) {
+          const map = JSON.parse(raw);
+          if (map[activeId]) {
+            await loginWithDiscordProfile(map[activeId]);
+          }
+        }
+      } catch (e) {}
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
   </script>
 </body>
 </html>
