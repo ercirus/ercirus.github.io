@@ -66,13 +66,21 @@
     /* =========================================================
        STILI CARTE RIDISEGNATI (CLEAN PANINI / TOPPS PRO STYLE)
        ========================================================= */
+/* =========================================================
+       STILI CARTE CON EFFETTI INTERNI DETTAGLIATI
+       ========================================================= */
     .card-shell {
       position: relative;
       border-radius: 16px;
       padding: 6px;
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
     }
+    .card-shell:hover {
+      transform: translateY(-4px) scale(1.015);
+    }
+
     .card-inner {
+      position: relative;
       background: linear-gradient(180deg, #131c33 0%, #0b1121 100%);
       border-radius: 11px;
       overflow: hidden;
@@ -82,56 +90,117 @@
       justify-content: space-between;
     }
 
-    /* Comune: Cornice Argento/Acciaio Pulito */
+    /* 1. COMUNE: Acciaio pulito con micro-puntinatura interna */
     .rarity-common {
       background: linear-gradient(145deg, #94a3b8 0%, #475569 50%, #cbd5e1 100%);
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
     }
+    .rarity-common .card-inner {
+      background: 
+        radial-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+        linear-gradient(180deg, #162038 0%, #0b1121 100%);
+      background-size: 14px 14px, 100% 100%;
+    }
 
-    /* Rara: Cornice Oro Satinato */
+    /* 2. RARA: Oro satinato + Trama diagonale e bagliore centrale */
     .rarity-rare {
       background: linear-gradient(145deg, #fde68a 0%, #d97706 48%, #fef3c7 100%);
-      box-shadow: 0 10px 22px rgba(217, 119, 6, 0.28);
+      box-shadow: 0 10px 22px rgba(217, 119, 6, 0.35);
+    }
+    .rarity-rare .card-inner {
+      background: 
+        radial-gradient(circle at 50% 25%, rgba(251, 191, 36, 0.25), transparent 60%),
+        repeating-linear-gradient(45deg, rgba(253, 230, 138, 0.04) 0px, rgba(253, 230, 138, 0.04) 2px, transparent 2px, transparent 10px),
+        linear-gradient(180deg, #271a0c 0%, #0d0f1a 100%);
     }
 
-    /* Epica All-Star: Cornice Blu Elettrico & Viola */
+    /* 3. EPICA ALL-STAR: Blu Elettrico & Viola + Griglia cyber olografica */
     .rarity-epic {
       background: linear-gradient(145deg, #7dd3fc 0%, #4f46e5 50%, #c084fc 100%);
-      box-shadow: 0 10px 24px rgba(79, 70, 229, 0.35);
+      box-shadow: 0 10px 26px rgba(79, 70, 229, 0.45);
+    }
+    .rarity-epic .card-inner {
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.3), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(192, 132, 252, 0.3), transparent 50%),
+        linear-gradient(rgba(125, 211, 252, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(125, 211, 252, 0.06) 1px, transparent 1px),
+        linear-gradient(180deg, #1b1442 0%, #0b091f 100%);
+      background-size: 100% 100%, 100% 100%, 18px 18px, 18px 18px, 100% 100%;
     }
 
-    /* Signature: Cornice Rosso Rubino & Platino */
+    /* 4. SIGNATURE: Rosso Rubino & Platino + Fasci di luce incrociati */
     .rarity-signature {
       background: linear-gradient(145deg, #fda4af 0%, #be123c 50%, #fecdd3 100%);
-      box-shadow: 0 10px 26px rgba(190, 18, 60, 0.38);
+      box-shadow: 0 10px 28px rgba(190, 18, 60, 0.48);
+    }
+    .rarity-signature .card-inner {
+      background: 
+        linear-gradient(125deg, rgba(244, 63, 94, 0.25) 0%, transparent 45%),
+        linear-gradient(235deg, rgba(254, 205, 211, 0.18) 0%, transparent 45%),
+        repeating-linear-gradient(-45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 7px),
+        linear-gradient(180deg, #2b0915 0%, #0f060a 100%);
     }
 
-    /* Leggenda: Cornice Nero & Oro Reale */
+    /* 5. LEGGENDA: Nero & Oro Reale + Raggi solari dal centro */
     .rarity-legend {
       background: linear-gradient(145deg, #ffd700 0%, #78350f 45%, #fef08a 75%, #b45309 100%);
-      box-shadow: 0 12px 28px rgba(255, 215, 0, 0.35);
+      box-shadow: 0 12px 30px rgba(255, 215, 0, 0.45);
+    }
+    .rarity-legend .card-inner {
+      background: 
+        radial-gradient(circle at 50% 35%, rgba(255, 215, 0, 0.32), transparent 65%),
+        repeating-conic-gradient(from 0deg at 50% 35%, rgba(254, 240, 138, 0.07) 0deg 10deg, transparent 10deg 20deg),
+        linear-gradient(180deg, #261905 0%, #0d0902 100%);
     }
 
-    /* MVP Icona: Cornice Smeraldo & Oro Bianco */
+    /* 6. MVP ICONA: Smeraldo & Oro Bianco + Prisma cristallino */
     .rarity-icon {
       background: linear-gradient(145deg, #5eead4 0%, #0f766e 48%, #fef08a 100%);
-      box-shadow: 0 12px 30px rgba(20, 184, 166, 0.38);
+      box-shadow: 0 12px 32px rgba(20, 184, 166, 0.48);
+    }
+    .rarity-icon .card-inner {
+      background: 
+        radial-gradient(circle at 50% 20%, rgba(94, 234, 212, 0.35), transparent 55%),
+        radial-gradient(circle at 50% 85%, rgba(254, 240, 138, 0.2), transparent 50%),
+        repeating-linear-gradient(60deg, rgba(94, 234, 212, 0.05) 0px, rgba(94, 234, 212, 0.05) 2px, transparent 2px, transparent 14px),
+        repeating-linear-gradient(-60deg, rgba(254, 240, 138, 0.04) 0px, rgba(254, 240, 138, 0.04) 2px, transparent 2px, transparent 14px),
+        linear-gradient(180deg, #072926 0%, #041211 100%);
     }
 
-    /* Limited Edition 99: Cornice Nero Ossidiana & Oro Specchiato Ultra-Clean */
+    /* 7. LIMITED EDITION 99: Ossidiana + Fulmini elettrici interni animati */
     .rarity-limited {
       background: linear-gradient(135deg, #fffbeb 0%, #f59e0b 25%, #18181b 50%, #fbbf24 75%, #fef3c7 100%);
-      box-shadow: 0 0 24px rgba(251, 191, 36, 0.45), 0 14px 32px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 0 28px rgba(251, 191, 36, 0.6), 0 14px 34px rgba(0, 0, 0, 0.8);
     }
     .rarity-limited .card-inner {
-      background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
+      background: 
+        radial-gradient(circle at 50% 40%, rgba(250, 204, 21, 0.28), transparent 65%),
+        linear-gradient(180deg, #1f1908 0%, #09090b 100%);
+      box-shadow: inset 0 0 22px rgba(245, 158, 11, 0.35);
+    }
+    /* Fulmini SVG disegnati dentro la carta Limited */
+    .rarity-limited .card-inner::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'%3E%3Cpath d='M115 0 L85 95 L125 95 L65 215 L100 130 L60 130 Z' fill='none' stroke='%23fde047' stroke-width='1.8' opacity='0.5'/%3E%3Cpath d='M165 40 L140 120 L172 120 L125 250' fill='none' stroke='%23fef08a' stroke-width='1.2' opacity='0.35'/%3E%3Cpath d='M35 90 L15 170 L48 170 L12 290' fill='none' stroke='%23f59e0b' stroke-width='1.4' opacity='0.4'/%3E%3C/svg%3E");
+      background-size: cover;
+      mix-blend-mode: screen;
+      animation: lightningFlash 2.2s infinite alternate ease-in-out;
+      pointer-events: none;
+      z-index: 1;
     }
 
-    /* Riflesso olografico discreto e raffinato */
-    .holo-shimmer {
-      position: relative;
-      overflow: hidden;
+    @keyframes lightningFlash {
+      0% { opacity: 0.35; filter: drop-shadow(0 0 3px #facc15); }
+      45% { opacity: 0.95; filter: drop-shadow(0 0 8px #fef08a); }
+      65% { opacity: 0.4; }
+      100% { opacity: 1; filter: drop-shadow(0 0 12px #fde047); }
     }
+
+    /* Riflesso olografico applicato direttamente sull'interno della carta */
+    .holo-shimmer .card-inner::after,
     .holo-shimmer::after {
       content: "";
       position: absolute;
@@ -142,12 +211,13 @@
       background: linear-gradient(
         to right,
         rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.16) 50%,
+        rgba(255, 255, 255, 0.22) 50%,
         rgba(255, 255, 255, 0) 100%
       );
       transform: rotate(25deg);
-      animation: shimmerSweep 4.6s infinite linear;
+      animation: shimmerSweep 4.2s infinite linear;
       pointer-events: none;
+      z-index: 2;
     }
     @keyframes shimmerSweep {
       0% { left: -65%; }
