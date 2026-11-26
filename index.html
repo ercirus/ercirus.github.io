@@ -169,12 +169,14 @@
     }
 
 /* =========================================================
-       7. LIMITED EDITION FULL-ART (SOLO ILLUSTRAZIONE + STATS)
+       7. LIMITED EDITION FULL-ART (PROPORZIONE FISSA + SOLO STATS)
        ========================================================= */
     .rarity-limited {
       background: linear-gradient(135deg, #fef08a 0%, #d97706 30%, #fef3c7 50%, #b45309 75%, #fde047 100%) !important;
       padding: 7px !important;
       box-shadow: 0 0 30px rgba(250, 204, 21, 0.6), 0 15px 35px rgba(0, 0, 0, 0.85) !important;
+      aspect-ratio: 3 / 4.2 !important; /* Mantiene la forma rettangolare da carta */
+      min-height: 290px !important;
     }
 
     .rarity-limited .card-inner {
@@ -183,12 +185,13 @@
       border-radius: 10px !important;
       overflow: hidden !important;
       padding: 10px !important;
+      height: 100% !important;
       display: flex !important;
       flex-direction: column !important;
-      justify-content: flex-end !important; /* Spinge le stats in basso */
+      justify-content: flex-end !important;
     }
 
-    /* Sblocca i contenitori interni per l'immagine full-art */
+    /* Sblocca i contenitori della foto */
     .rarity-limited .card-inner > div:not(:last-child),
     .rarity-limited .card-inner > div:not(:last-child) div {
       position: static !important;
@@ -210,53 +213,52 @@
       z-index: 1 !important;
     }
 
-    /* Leggera sfumatura nera solo in basso dietro le stats */
+    /* Sfumatura nera in basso dietro alle stats */
     .rarity-limited .card-inner::before {
       content: "";
       position: absolute;
       inset: 0;
       background: linear-gradient(
         180deg,
-        rgba(0, 0, 0, 0) 60%,
-        rgba(9, 9, 11, 0.75) 85%,
-        rgba(9, 9, 11, 0.95) 100%
+        rgba(0, 0, 0, 0) 58%,
+        rgba(9, 9, 11, 0.80) 82%,
+        rgba(9, 9, 11, 0.96) 100%
       );
       z-index: 2;
       pointer-events: none;
     }
 
-    /* NASCONDE intestazione in alto, nome, squadra, ruolo e numero carta */
+    /* Nasconde SOLO intestazione in alto, nome (h3), squadra e ruolo (p) */
     .rarity-limited .card-inner > div:first-child,
     .rarity-limited .card-inner h3,
     .rarity-limited .card-inner p,
-    .rarity-limited .card-inner > div:last-child > div:not(.grid),
-    .rarity-limited .card-inner span:not(.grid span) {
+    .rarity-limited .card-inner > div:last-child > div:first-child:not(:only-child) {
       display: none !important;
     }
 
-    /* Mantiene visibile SOLO il contenitore delle stats in basso */
+    /* Mantiene visibile il blocco in basso con le 4 stats */
     .rarity-limited .card-inner > div:last-child {
       position: relative !important;
       z-index: 3 !important;
       width: 100% !important;
     }
 
-    /* Box Statistiche ATT / DIF / TIR / REG */
-    .rarity-limited .card-inner .grid {
+    /* Stile del box Statistiche */
+    .rarity-limited .card-inner > div:last-child > div:last-child {
       display: grid !important;
-      background: rgba(12, 12, 16, 0.85) !important;
+      background: rgba(12, 12, 16, 0.88) !important;
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
       border: 1px solid rgba(250, 204, 21, 0.55) !important;
       border-radius: 10px !important;
       padding: 6px 4px !important;
     }
-    .rarity-limited .card-inner .grid > div {
+    .rarity-limited .card-inner > div:last-child > div:last-child > div {
       background: transparent !important;
       border: none !important;
       box-shadow: none !important;
     }
-    .rarity-limited .card-inner .grid span {
+    .rarity-limited .card-inner > div:last-child span {
       display: block !important;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 1) !important;
     }
