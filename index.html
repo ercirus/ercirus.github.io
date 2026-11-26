@@ -94,7 +94,15 @@
       border: 2.5px solid #5eead4;
       box-shadow: 0 12px 32px rgba(45, 212, 191, 0.55);
     }
-
+.rarity-limited {
+  background: linear-gradient(135deg, #090d16 0%, #3b0764 28%, #ff6b00 62%, #ffd700 86%, #0b132b 100%);
+  border: 2.5px solid #ffd700;
+  box-shadow: 0 12px 36px rgba(255, 107, 0, 0.7), inset 0 0 16px rgba(255, 215, 0, 0.4);
+}
+.pack-glow-limited {
+  box-shadow: 0 0 65px rgba(255, 215, 0, 1), 0 0 125px rgba(255, 107, 0, 0.9) !important;
+  border-color: #ffd700 !important;
+}
     .holo-shimmer {
       position: relative;
       overflow: hidden;
@@ -1829,7 +1837,55 @@
         }
       });
     });
+const LIMITED_EDITION_PLAYERS = new Set([
+  "Tariq Owens",
+  "Paulius Sorokas",
+  "Andrea Cinciarini",
+  "Domenico D'Argenzio",
+  "Stacy Davis IV",
+  "Lucio Redivo",
+  "Justin Robinson",
+  "Raphael Gaspardo",
+  "Matthew James Tiby",
+  "Hasan Varence",
+  "Alessandro Gentile",
+  "Marquis Barnett",
+  "Andrea De Nicolao",
+  "Matteo Tambone",
+  "Devonte Green",
+  "Pierpaolo Marini",
+  "Jazz Johnson",
+  "Jeff Brooks",
+  "Terry Allen",
+  "Deshawn Freeman"
+]);
 
+if (LIMITED_EDITION_PLAYERS.has(player.name)) {
+  const serialNum = String(((idx * 7 + player.ovr) % 25) + 1).padStart(2, '0');
+  ALL_CARDS.push({
+    id: `${team.id}_p_${idx}_limited`,
+    num: String(cardNumberCounter++).padStart(3, '0'),
+    type: 'player',
+    variant: 'limited',
+    serialTag: `${serialNum}/25`,
+    name: `${player.name} (LIMITED 99)`,
+    basePlayerName: player.name,
+    teamId: team.id,
+    teamName: team.name,
+    teamShort: team.shortName,
+    teamCode: team.code,
+    colors: team.colors,
+    role: player.role,
+    dob: player.dob,
+    height: player.height,
+    weight: player.weight,
+    nat: player.nat,
+    ovr: 99,
+    rarity: 'limited',
+    stats: { att: 99, dif: 99, tir: 99, reg: 99 },
+    jerseyNum: player.num
+  });
+}
     const TOTAL_CARDS_COUNT = ALL_CARDS.length;
 
     /**
@@ -2684,32 +2740,32 @@
     /**
      * 6. ECONOMIA BUSTINE (200 / 700 / 1500 CREDITI) + RARITÀ SIGNATURE & ICONA
      */
-    const PACK_CONFIGS = {
-      base: {
-        name: 'Bustina Base A2',
-        price: 200,
-        count: 5,
-        foilClass: 'pack-foil-base',
-        weights: { common: 70, rare: 22, epic: 4.5, signature: 2, legend: 1, icon: 0.5 },
-        guaranteedMinRarity: null
-      },
-      gold: {
-        name: 'Gold Pack OWW',
-        price: 700,
-        count: 5,
-        foilClass: 'pack-foil-gold',
-        weights: { common: 38, rare: 40, epic: 12, signature: 5, legend: 3.5, icon: 1.5 },
-        guaranteedMinRarity: 'rare'
-      },
-      mvp: {
-        name: 'Mega Pack MVP',
-        price: 1500,
-        count: 7,
-        foilClass: 'pack-foil-mvp',
-        weights: { common: 16, rare: 28, epic: 22, signature: 14, legend: 12, icon: 8 },
-        guaranteedMinRarity: 'epic'
-      }
-    };
+const PACK_CONFIGS = {
+  base: {
+    name: 'Bustina Base A2',
+    price: 250,
+    count: 4, // 2 bustine = 8 carte giornaliere consigliate
+    foilClass: 'pack-foil-base',
+    weights: { common: 69, rare: 22.85, epic: 5, signature: 2, legend: 0.7, icon: 0.3, limited: 0.15 },
+    guaranteedMinRarity: null
+  },
+  gold: {
+    name: 'Gold Pack OWW',
+    price: 750,
+    count: 4,
+    foilClass: 'pack-foil-gold',
+    weights: { common: 38, rare: 40, epic: 13, signature: 5, legend: 2.5, icon: 1.0, limited: 0.5 },
+    guaranteedMinRarity: 'rare'
+  },
+  mvp: {
+    name: 'Mega Pack MVP',
+    price: 1600,
+    count: 5,
+    foilClass: 'pack-foil-mvp',
+    weights: { common: 16, rare: 28, epic: 24, signature: 14, legend: 10.5, icon: 5.5, limited: 2.0 },
+    guaranteedMinRarity: 'epic'
+  }
+};
 
     let currentOpenedPackCards = [];
 
