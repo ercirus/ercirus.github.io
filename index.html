@@ -42,7 +42,7 @@
     body {
       background-color: #0b132b;
       background-image:
-        radial-gradient(circle at 50% 0%, rgba(255, 107, 0, 0.16) 0%, transparent 55%),
+        radial-gradient(circle at 50% 0%, rgba(255, 107, 0, 0.14) 0%, transparent 55%),
         repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 2px, transparent 2px, transparent 48px);
       color: #f8fafc;
       overflow-x: hidden;
@@ -59,60 +59,75 @@
       animation: stickerPop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     @keyframes stickerPop {
-      0% { opacity: 0; transform: scale(0.82) translateY(10px); }
+      0% { opacity: 0; transform: scale(0.84) translateY(10px); }
       100% { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    /* Stili Rarità Figurine */
+    /* =========================================================
+       STILI CARTE RIDISEGNATI (CLEAN PANINI / TOPPS PRO STYLE)
+       ========================================================= */
+    .card-shell {
+      position: relative;
+      border-radius: 16px;
+      padding: 6px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .card-inner {
+      background: linear-gradient(180deg, #131c33 0%, #0b1121 100%);
+      border-radius: 11px;
+      overflow: hidden;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Comune: Cornice Argento/Acciaio Pulito */
     .rarity-common {
-      background: linear-gradient(145deg, #334155 0%, #1e293b 50%, #475569 100%);
-      border: 2px solid #94a3b8;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+      background: linear-gradient(145deg, #94a3b8 0%, #475569 50%, #cbd5e1 100%);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
     }
+
+    /* Rara: Cornice Oro Satinato */
     .rarity-rare {
-      background: linear-gradient(135deg, #78350f 0%, #b45309 35%, #f59e0b 70%, #78350f 100%);
-      border: 2px solid #fcd34d;
-      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+      background: linear-gradient(145deg, #fde68a 0%, #d97706 48%, #fef3c7 100%);
+      box-shadow: 0 10px 22px rgba(217, 119, 6, 0.28);
     }
+
+    /* Epica All-Star: Cornice Blu Elettrico & Viola */
     .rarity-epic {
-      background: linear-gradient(135deg, #3b0764 0%, #6d28d9 40%, #06b6d4 80%, #4c1d95 100%);
-      border: 2px solid #38bdf8;
-      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.45);
+      background: linear-gradient(145deg, #7dd3fc 0%, #4f46e5 50%, #c084fc 100%);
+      box-shadow: 0 10px 24px rgba(79, 70, 229, 0.35);
     }
+
+    /* Signature: Cornice Rosso Rubino & Platino */
     .rarity-signature {
-      background: linear-gradient(135deg, #881337 0%, #e11d48 38%, #f43f5e 65%, #fb7185 88%, #4c0519 100%);
-      border: 2.5px solid #fda4af;
-      box-shadow: 0 10px 26px rgba(244, 63, 94, 0.5);
+      background: linear-gradient(145deg, #fda4af 0%, #be123c 50%, #fecdd3 100%);
+      box-shadow: 0 10px 26px rgba(190, 18, 60, 0.38);
     }
+
+    /* Leggenda: Cornice Nero & Oro Reale */
     .rarity-legend {
-      background: linear-gradient(135deg, #090d16 0%, #1e1b18 35%, #b45309 65%, #ffd700 85%, #111827 100%);
-      border: 2.5px solid #ffd700;
-      box-shadow: 0 10px 28px rgba(255, 215, 0, 0.5);
+      background: linear-gradient(145deg, #ffd700 0%, #78350f 45%, #fef08a 75%, #b45309 100%);
+      box-shadow: 0 12px 28px rgba(255, 215, 0, 0.35);
     }
+
+    /* MVP Icona: Cornice Smeraldo & Oro Bianco */
     .rarity-icon {
-      background: linear-gradient(135deg, #042f2e 0%, #0f766e 35%, #2dd4bf 62%, #fef08a 85%, #022c22 100%);
-      border: 2.5px solid #5eead4;
-      box-shadow: 0 12px 32px rgba(45, 212, 191, 0.55);
+      background: linear-gradient(145deg, #5eead4 0%, #0f766e 48%, #fef08a 100%);
+      box-shadow: 0 12px 30px rgba(20, 184, 166, 0.38);
     }
+
+    /* Limited Edition 99: Cornice Nero Ossidiana & Oro Specchiato Ultra-Clean */
     .rarity-limited {
-      background: linear-gradient(135deg, #090d16 0%, #311042 25%, #be123c 50%, #f59e0b 75%, #06b6d4 100%);
-      border: 3px solid #fde047;
-      box-shadow: 0 0 28px rgba(253, 224, 71, 0.65), 0 12px 34px rgba(244, 63, 94, 0.6);
-      animation: limitedBorderPulse 2.8s infinite alternate ease-in-out;
+      background: linear-gradient(135deg, #fffbeb 0%, #f59e0b 25%, #18181b 50%, #fbbf24 75%, #fef3c7 100%);
+      box-shadow: 0 0 24px rgba(251, 191, 36, 0.45), 0 14px 32px rgba(0, 0, 0, 0.7);
     }
-    @keyframes limitedBorderPulse {
-      0% { border-color: #fde047; box-shadow: 0 0 20px rgba(253, 224, 71, 0.6); }
-      50% { border-color: #38bdf8; box-shadow: 0 0 28px rgba(56, 189, 248, 0.75); }
-      100% { border-color: #fb7185; box-shadow: 0 0 24px rgba(251, 113, 133, 0.75); }
+    .rarity-limited .card-inner {
+      background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
     }
 
-    /* Dettagli grafici aggiuntivi sulle carte */
-    .card-foil-pattern {
-      background-image:
-        radial-gradient(circle at 85% 15%, rgba(255,255,255,0.16) 0%, transparent 45%),
-        repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 3px, transparent 3px, transparent 9px);
-    }
-
+    /* Riflesso olografico discreto e raffinato */
     .holo-shimmer {
       position: relative;
       overflow: hidden;
@@ -121,23 +136,23 @@
       content: "";
       position: absolute;
       top: -50%;
-      left: -60%;
-      width: 45%;
+      left: -65%;
+      width: 38%;
       height: 200%;
       background: linear-gradient(
         to right,
         rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0.16) 50%,
         rgba(255, 255, 255, 0) 100%
       );
       transform: rotate(25deg);
-      animation: shimmerSweep 3.8s infinite linear;
+      animation: shimmerSweep 4.6s infinite linear;
       pointer-events: none;
     }
     @keyframes shimmerSweep {
-      0% { left: -60%; }
-      45% { left: 140%; }
-      100% { left: 140%; }
+      0% { left: -65%; }
+      40% { left: 145%; }
+      100% { left: 145%; }
     }
 
     @keyframes packShake {
@@ -246,23 +261,9 @@
       border-color: #5eead4 !important;
     }
     .pack-glow-limited {
-      box-shadow: 0 0 65px rgba(253, 224, 71, 1), 0 0 120px rgba(244, 63, 94, 0.95) !important;
+      box-shadow: 0 0 60px rgba(253, 224, 71, 0.95), 0 0 110px rgba(245, 158, 11, 0.85) !important;
       border-color: #fde047 !important;
     }
-
-    /* Ruota della Fortuna */
-    .wheel-pointer {
-      width: 0;
-      height: 0;
-      border-left: 14px solid transparent;
-      border-right: 14px solid transparent;
-      border-top: 26px solid #ffd700;
-      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.7));
-    }
-    .wheel-disc {
-      transition: transform 4.2s cubic-bezier(0.12, 0.85, 0.18, 1);
-    }
-
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -333,7 +334,7 @@
   </div>
 
   <!-- =========================================================
-       HEADER PRINCIPALE
+       HEADER PRINCIPALE (PULITO E SENZA TIMER)
        ========================================================= -->
   <header class="sticky top-0 z-30 bg-[#0b132b]/95 backdrop-blur-md border-b border-slate-800 shadow-lg">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
@@ -355,24 +356,15 @@
         </div>
       </div>
 
-      <!-- Barra Progresso + Bonus Tempo + Crediti + Profilo Discord -->
+      <!-- Barra Progresso + Crediti + Profilo Discord -->
       <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-        <!-- Bonus Tempo sul Parquet (Sessione Attiva) -->
-        <button type="button" id="session-bonus-pill" data-action="claim-session-bonus" title="Resta attivo sul sito per sbloccare premi fedeltà!" class="hidden md:flex items-center gap-2 bg-slate-900/90 border border-cyan-500/40 px-3 py-1.5 rounded-xl hover:border-cyan-400 transition active:scale-95">
-          <i class="fa-solid fa-stopwatch text-cyan-400 text-xs pointer-events-none"></i>
-          <div class="text-left leading-tight pointer-events-none">
-            <span id="session-timer-label" class="block text-[10px] font-extrabold text-cyan-300">00:00 sul sito</span>
-            <span id="session-next-reward-label" class="block text-[9px] text-slate-400">Prossimo premio: 5m</span>
-          </div>
-        </button>
-
         <!-- Progresso Album -->
-        <button type="button" data-action="switch-tab" data-tab="album" class="hidden lg:flex flex-col text-left bg-slate-900/90 border border-slate-700/80 px-3 py-1.5 rounded-xl hover:border-orange-500/50 transition active:scale-95">
+        <button type="button" data-action="switch-tab" data-tab="album" class="hidden md:flex flex-col text-left bg-slate-900/90 border border-slate-700/80 px-3.5 py-1.5 rounded-xl hover:border-orange-500/50 transition active:scale-95">
           <div class="flex justify-between text-[11px] font-semibold text-slate-300 gap-4 pointer-events-none">
             <span>ALBUM</span>
             <span id="header-progress-text" class="text-amber-400">0/372 (0%)</span>
           </div>
-          <div class="w-28 h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1 pointer-events-none">
+          <div class="w-32 h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1 pointer-events-none">
             <div id="header-progress-bar" class="h-full bg-gradient-to-r from-[#ff6b00] to-amber-400 transition-all duration-300" style="width: 0%"></div>
           </div>
         </button>
@@ -421,9 +413,9 @@
       </button>
 
       <button type="button" data-action="switch-tab" data-tab="missions" id="tab-btn-missions" class="shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition active:scale-95 bg-slate-800/90 text-slate-300 hover:bg-slate-700">
-        <i class="fa-solid fa-dharmachakra text-emerald-400 pointer-events-none"></i>
-        <span class="pointer-events-none">Ruota, Quiz & Sfide</span>
-        <span id="nav-missions-badge" class="text-[10px] bg-emerald-500 text-slate-950 font-black px-1.5 py-0.5 rounded-md pointer-events-none">GIRA!</span>
+        <i class="fa-solid fa-medal text-emerald-400 pointer-events-none"></i>
+        <span class="pointer-events-none">Obiettivi Settimanali</span>
+        <span id="nav-missions-badge" class="text-[10px] bg-slate-950/70 text-emerald-400 font-bold px-1.5 py-0.5 rounded-md pointer-events-none">0/8</span>
       </button>
 
       <button type="button" data-action="switch-tab" data-tab="album" id="tab-btn-album" class="shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition active:scale-95 bg-slate-800/90 text-slate-300 hover:bg-slate-700">
@@ -472,13 +464,13 @@
               Colleziona tutte le <span id="shop-total-cards-title">372</span> figurine della Serie A2
             </h2>
             <p class="text-sm text-slate-300 max-w-2xl mt-1">
-              Apri bustine senza limiti di quantità, dai la caccia alle rarissime <span class="text-yellow-300 font-bold">Limited Edition OVR 99</span>, gioca i Quiz LNP e le Partite Tattiche per guadagnare crediti ogni giorno!
+              Apri bustine senza limiti di quantità, dai la caccia alle rarissime <span class="text-amber-300 font-bold">Limited Edition OVR 99</span>, completa gli Obiettivi Settimanali e sfida gli altri club nell'Arena Tattica!
             </p>
           </div>
           <div class="flex flex-wrap gap-2 shrink-0">
             <button type="button" data-action="switch-tab" data-tab="missions" class="px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-200 font-bold text-xs sm:text-sm flex items-center gap-2 transition active:scale-95">
-              <i class="fa-solid fa-brain text-emerald-400 pointer-events-none"></i>
-              <span class="pointer-events-none">Quiz & Sfide Settimanali</span>
+              <i class="fa-solid fa-medal text-emerald-400 pointer-events-none"></i>
+              <span class="pointer-events-none">Obiettivi Settimanali</span>
             </button>
             <button type="button" data-action="switch-tab" data-tab="pass" class="px-4 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 font-bold text-xs sm:text-sm flex items-center gap-2 transition active:scale-95">
               <i class="fa-solid fa-fire text-orange-400 pointer-events-none"></i>
@@ -489,7 +481,7 @@
         <i class="fa-solid fa-basketball absolute -right-8 -bottom-10 text-[160px] text-white/[0.03] pointer-events-none"></i>
       </div>
 
-      <!-- SELEZIONE BUSTINE (NIENTE BLOCCO APERTURE, PREZZI CALIBRATI PER ~8 CARTE AL GIORNO) -->
+      <!-- SELEZIONE BUSTINE -->
       <div id="packs-store-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         <!-- BUSTINA 1: BASE (600 CREDITI • 4 CARTE) -->
@@ -518,7 +510,7 @@
             <div class="flex justify-between"><span>Comune:</span><span class="font-bold text-slate-300">72%</span></div>
             <div class="flex justify-between"><span>Rara (Oro):</span><span class="font-bold text-amber-400">21%</span></div>
             <div class="flex justify-between"><span>All-Star / Signature / Icona:</span><span class="font-bold text-cyan-400">6.85%</span></div>
-            <div class="flex justify-between"><span>Limited Edition 99:</span><span class="font-bold text-yellow-300">0.15%</span></div>
+            <div class="flex justify-between"><span>Limited Edition 99:</span><span class="font-bold text-amber-300">0.15%</span></div>
           </div>
 
           <button type="button" data-action="buy-pack" data-pack="base" class="mt-auto w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg transition active:scale-95">
@@ -559,7 +551,7 @@
             <div class="flex justify-between"><span>Comune:</span><span class="font-bold text-slate-300">40%</span></div>
             <div class="flex justify-between"><span>Rara (Oro):</span><span class="font-bold text-amber-400">40%</span></div>
             <div class="flex justify-between"><span>All-Star / Signature / Icona:</span><span class="font-bold text-rose-400">19.5%</span></div>
-            <div class="flex justify-between"><span>Limited Edition 99:</span><span class="font-bold text-yellow-300">0.50%</span></div>
+            <div class="flex justify-between"><span>Limited Edition 99:</span><span class="font-bold text-amber-300">0.50%</span></div>
           </div>
 
           <button type="button" data-action="buy-pack" data-pack="gold" class="mt-auto w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg transition active:scale-95">
@@ -600,7 +592,7 @@
             <div class="flex justify-between"><span>Comune / Rara:</span><span class="font-bold text-amber-400">45%</span></div>
             <div class="flex justify-between"><span>All-Star / Signature:</span><span class="font-bold text-rose-400">35.8%</span></div>
             <div class="flex justify-between"><span>Leggenda / MVP Icona:</span><span class="font-bold text-teal-300">18%</span></div>
-            <div class="flex justify-between"><span>Limited Edition 99:</span><span class="font-bold text-yellow-300">1.20%</span></div>
+            <div class="flex justify-between"><span>Limited Edition 99:</span><span class="font-bold text-amber-300">1.20%</span></div>
           </div>
 
           <button type="button" data-action="buy-pack" data-pack="mvp" class="mt-auto w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 via-orange-500 to-amber-400 hover:brightness-110 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg transition active:scale-95">
@@ -620,7 +612,6 @@
             Trascina la forbice da sinistra a destra per tagliare la bustina!
           </span>
           <div id="interactive-pack-wrapper" class="w-64 sm:w-72 h-88 rounded-2xl pack-foil-gold holo-shimmer flex flex-col items-center justify-between p-5 shadow-2xl transition-all duration-300 relative">
-            <!-- Barra di taglio interattiva -->
             <div id="pack-tear-track" class="tear-track-container">
               <div id="pack-tear-fill" class="tear-track-fill"></div>
               <div id="pack-tear-handle" class="tear-handle" title="Trascina verso destra">
@@ -718,127 +709,15 @@
     </section>
 
     <!-- =========================================================
-         TAB 2B: RUOTA DELLA FORTUNA, QUIZ LNP & OBIETTIVI SETTIMANALI
+         TAB 2B: OBIETTIVI SETTIMANALI (SOLO COLLEZIONE, PARTITE E SCAMBI)
          ========================================================= -->
-    <section id="section-missions" class="hidden space-y-8">
-      <!-- RUOTA DELLA FORTUNA GIORNALIERA -->
-      <div class="bg-gradient-to-r from-[#15203b] via-[#1c2847] to-[#15203b] border border-emerald-500/40 rounded-3xl p-5 sm:p-8 shadow-2xl">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div class="space-y-4">
-            <span class="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-widest text-emerald-400">
-              <i class="fa-solid fa-dharmachakra"></i> Bonus Quotidiano Gratuito
-            </span>
-            <h2 class="font-display text-3xl sm:text-4xl font-bold uppercase text-white tracking-wide">
-              Ruota della Fortuna LNP Serie A2
-            </h2>
-            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Hai <strong>1 giro gratuito ogni giorno</strong>! Gira la ruota per vincere subito crediti extra, bustine omaggio o il jackpot con <strong>Mega Pack MVP</strong>!
-            </p>
-
-            <div class="grid grid-cols-2 gap-2.5 text-xs">
-              <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-blue-500 shrink-0"></span>
-                <span class="text-slate-200 font-bold">+250 Crediti</span>
-              </div>
-              <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-emerald-500 shrink-0"></span>
-                <span class="text-slate-200 font-bold">Bustina Base Gratis</span>
-              </div>
-              <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-amber-500 shrink-0"></span>
-                <span class="text-slate-200 font-bold">+500 Crediti</span>
-              </div>
-              <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-purple-500 shrink-0"></span>
-                <span class="text-slate-200 font-bold">Gold Pack Gratis</span>
-              </div>
-              <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-rose-500 shrink-0"></span>
-                <span class="text-slate-200 font-bold">+900 Crediti</span>
-              </div>
-              <div class="bg-slate-900/90 border border-yellow-400/50 rounded-xl p-2.5 flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-yellow-400 shrink-0"></span>
-                <span class="text-yellow-300 font-extrabold">JACKPOT: Mega MVP!</span>
-              </div>
-            </div>
-
-            <div class="pt-2">
-              <button type="button" id="btn-spin-wheel" data-action="spin-daily-wheel" class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-black text-sm sm:text-base shadow-xl shadow-emerald-600/25 transition active:scale-95">
-                <i class="fa-solid fa-play mr-2 pointer-events-none"></i> <span id="spin-wheel-btn-label" class="pointer-events-none">GIRA LA RUOTA GRATIS!</span>
-              </button>
-              <p id="wheel-last-prize-msg" class="text-xs font-bold text-amber-300 mt-2.5 hidden"></p>
-            </div>
-          </div>
-
-          <!-- Grafica Ruota SVG -->
-          <div class="flex flex-col items-center justify-center relative py-2">
-            <div class="wheel-pointer z-20 -mb-3"></div>
-            <div class="relative w-64 h-64 sm:w-72 sm:h-72 rounded-full p-2 bg-gradient-to-b from-amber-300 via-amber-500 to-amber-700 shadow-2xl">
-              <div id="lucky-wheel-disc" class="wheel-disc w-full h-full rounded-full overflow-hidden relative bg-slate-900">
-                <svg viewBox="0 0 200 200" class="w-full h-full">
-                  <path d="M100,100 L100,0 A100,100 0 0,1 186.6,50 Z" fill="#2563eb" />
-                  <path d="M100,100 L186.6,50 A100,100 0 0,1 186.6,150 Z" fill="#059669" />
-                  <path d="M100,100 L186.6,150 A100,100 0 0,1 100,200 Z" fill="#d97706" />
-                  <path d="M100,100 L100,200 A100,100 0 0,1 13.4,150 Z" fill="#7c3aed" />
-                  <path d="M100,100 L13.4,150 A100,100 0 0,1 13.4,50 Z" fill="#e11d48" />
-                  <path d="M100,100 L13.4,50 A100,100 0 0,1 100,0 Z" fill="#eab308" />
-
-                  <text x="132" y="42" fill="#fff" font-size="10" font-weight="900" text-anchor="middle" transform="rotate(30 132 42)">+250 CR</text>
-                  <text x="162" y="103" fill="#fff" font-size="9" font-weight="900" text-anchor="middle" transform="rotate(90 162 103)">PACK BASE</text>
-                  <text x="132" y="162" fill="#fff" font-size="10" font-weight="900" text-anchor="middle" transform="rotate(150 132 162)">+500 CR</text>
-                  <text x="68" y="162" fill="#fff" font-size="9" font-weight="900" text-anchor="middle" transform="rotate(210 68 162)">GOLD PACK</text>
-                  <text x="38" y="103" fill="#fff" font-size="10" font-weight="900" text-anchor="middle" transform="rotate(270 38 103)">+900 CR</text>
-                  <text x="68" y="42" fill="#0f172a" font-size="9.5" font-weight="900" text-anchor="middle" transform="rotate(330 68 42)">MEGA MVP</text>
-                </svg>
-              </div>
-              <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div class="w-12 h-12 rounded-full bg-slate-950 border-4 border-amber-400 flex items-center justify-center shadow-lg">
-                  <i class="fa-solid fa-basketball text-[#ff6b00] text-lg"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- QUIZ TRIVIA ROSTER LNP SERIE A2 (PER INTRATTENIMENTO & CREDITI EXTRA) -->
-      <div class="bg-[#15203b] border border-cyan-500/40 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-          <div>
-            <span class="text-xs font-extrabold uppercase tracking-widest text-cyan-400">
-              <i class="fa-solid fa-brain mr-1"></i> Sfida Conoscenza Roster 2026/27
-            </span>
-            <h3 class="font-display text-3xl font-bold uppercase text-white tracking-wide">
-              Quiz Interattivo LNP Serie A2
-            </h3>
-            <p class="text-xs text-slate-400">Dimostra di conoscere i roster ufficiali delle 20 squadre! Ogni risposta esatta vale <span class="text-emerald-400 font-bold">+45 Crediti</span> (Serie consecutiva attiva per bonus extra).</p>
-          </div>
-          <div class="flex items-center gap-3 shrink-0">
-            <div class="bg-slate-950/80 border border-cyan-400/40 px-3.5 py-2 rounded-xl text-center">
-              <span class="block text-[9px] font-bold uppercase text-slate-400">Serie Quiz</span>
-              <span id="quiz-streak-display" class="font-display text-2xl font-bold text-cyan-300">0</span>
-            </div>
-            <div class="bg-slate-950/80 border border-slate-700 px-3.5 py-2 rounded-xl text-center">
-              <span class="block text-[9px] font-bold uppercase text-slate-400">Oggi</span>
-              <span id="quiz-daily-count-display" class="font-display text-2xl font-bold text-amber-400">0 / 15</span>
-            </div>
-          </div>
-        </div>
-
-        <div id="lnp-quiz-box" class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 sm:p-5 space-y-4">
-          <div id="quiz-question-text" class="text-sm sm:text-base font-extrabold text-white"></div>
-          <div id="quiz-options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
-          <div id="quiz-feedback-bar" class="hidden text-xs font-bold p-3 rounded-xl"></div>
-        </div>
-      </div>
-
-      <!-- MISSIONI & OBIETTIVI SETTIMANALI PIÙ DIFFICILI -->
+    <section id="section-missions" class="hidden space-y-6">
       <div class="bg-[#15203b] border border-slate-700/80 rounded-3xl p-5 sm:p-7 shadow-xl space-y-5">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
           <div>
             <div class="flex items-center gap-2 flex-wrap">
               <span class="text-xs font-extrabold uppercase tracking-widest text-amber-400">
-                <i class="fa-solid fa-medal mr-1"></i> Sfide Hardcore a Scadenza Settimanale
+                <i class="fa-solid fa-medal mr-1"></i> Sfide a Scadenza Settimanale
               </span>
               <span id="weekly-missions-timer-badge" class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-400/40">
                 <i class="fa-regular fa-clock mr-1"></i> Scade tra: 7g 00h
@@ -847,7 +726,7 @@
             <h2 class="font-display text-3xl font-bold uppercase text-white tracking-wide mt-1">
               Obiettivi Settimanali LNP
             </h2>
-            <p class="text-xs text-slate-400">Traguardi avanzati che si azzerano ogni 7 giorni: completali prima dello scadere del timer settimanale per incassare grandi premi in crediti!</p>
+            <p class="text-xs text-slate-400">Traguardi avanzati che si azzerano ogni 7 giorni: completali prima dello scadere della settimana per incassare grandi premi in crediti!</p>
           </div>
           <div class="bg-slate-950/80 border border-amber-400/40 px-4 py-2 rounded-xl text-center shrink-0">
             <span class="block text-[10px] font-bold uppercase text-slate-400">Obiettivi Riscattati</span>
@@ -869,7 +748,7 @@
             <h2 class="font-display text-3xl font-bold uppercase text-white tracking-wide">
               Album Ufficiale Serie A2 2026/27
             </h2>
-            <p class="text-xs text-slate-400">20 Club • Scudetti, Giocatori Base, <span class="text-rose-400 font-bold">Signature</span>, <span class="text-teal-300 font-bold">MVP Icona</span> & <span class="text-yellow-300 font-bold">Limited Edition 99</span> (<span id="album-subtitle-total">372</span> Figurine Totali)</p>
+            <p class="text-xs text-slate-400">20 Club • Scudetti, Giocatori Base, <span class="text-rose-400 font-bold">Signature</span>, <span class="text-teal-300 font-bold">MVP Icona</span> & <span class="text-amber-300 font-bold">Limited Edition 99</span> (<span id="album-subtitle-total">372</span> Figurine Totali)</p>
           </div>
 
           <div class="flex-1 max-w-md">
@@ -991,7 +870,7 @@
     </section>
 
     <!-- =========================================================
-         TAB 5: DOPPIONI, SFIDA TIRI LIBERI & PARTITE TATTICHE
+         TAB 5: DOPPIONI & PARTITE TATTICHE
          ========================================================= -->
     <section id="section-arena" class="hidden space-y-8">
       <!-- Sezione 1: Gestione Doppioni -->
@@ -1014,43 +893,6 @@
         </div>
 
         <div id="duplicates-list" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 max-h-72 overflow-y-auto pr-1"></div>
-      </div>
-
-      <!-- Sezione 1B: Minigioco Interattivo Tiri Liberi Clutch (Per intrattenimento & crediti extra) -->
-      <div class="bg-gradient-to-r from-[#15203b] via-[#1c294a] to-[#15203b] border border-amber-500/40 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <span class="text-xs font-extrabold uppercase tracking-widest text-amber-400">
-              <i class="fa-solid fa-bullseye mr-1"></i> Allenamento Arena • Sfida di Precisione
-            </span>
-            <h3 class="font-display text-3xl font-bold uppercase text-white tracking-wide">
-              Tiri Liberi Clutch (+35 Crediti a Canestro)
-            </h3>
-            <p class="text-xs text-slate-300">Ferma l'indicatore esattamente nella <strong>zona verde al centro del ferro</strong> per segnare il tiro libero decisivo! (Max 10 tentativi al giorno)</p>
-          </div>
-          <span id="freethrow-daily-badge" class="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-slate-950/80 border border-amber-400/40 text-amber-300 shrink-0">
-            Tiri oggi: 0 / 10
-          </span>
-        </div>
-
-        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 space-y-4">
-          <div class="relative h-8 w-full bg-slate-900 rounded-xl border border-slate-700 overflow-hidden">
-            <!-- Zona Verde Centro Canestro -->
-            <div class="absolute top-0 bottom-0 left-[42%] w-[16%] bg-emerald-500/35 border-x-2 border-emerald-400"></div>
-            <!-- Zona Gialla Ferro -->
-            <div class="absolute top-0 bottom-0 left-[32%] w-[10%] bg-amber-500/20"></div>
-            <div class="absolute top-0 bottom-0 left-[58%] w-[10%] bg-amber-500/20"></div>
-            <!-- Cursore Mobile -->
-            <div id="freethrow-cursor" class="absolute top-0 bottom-0 w-2 bg-white shadow-[0_0_12px_#fff] rounded" style="left: 0%"></div>
-          </div>
-
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <button type="button" id="btn-shoot-freethrow" data-action="shoot-freethrow" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:brightness-110 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition active:scale-95">
-              <i class="fa-solid fa-basketball mr-1.5 pointer-events-none"></i> TIRA ORA!
-            </button>
-            <span id="freethrow-result-text" class="text-xs font-bold text-slate-300">Premi "TIRA ORA!" quando il cursore attraversa la zona verde centrale!</span>
-          </div>
-        </div>
       </div>
 
       <!-- Sezione 2: Partite Tattiche Serie A2 (Max 10 al giorno, +80 Crediti a vittoria) -->
@@ -1801,7 +1643,6 @@
       }
     ];
 
-    // Lista esatta dei 18 giocatori con carta LIMITED EDITION OVR 99
     const LIMITED_99_PLAYERS = new Set([
       'Tariq Owens',
       'Paulius Sorokas',
@@ -2093,6 +1934,7 @@
         updateCreditsUI();
         updateAlbumStatsUI();
         renderWeeklyPass();
+        renderMissionsTab();
         renderAlbum();
         renderTradesTab();
         renderArenaAndDuplicates();
@@ -2247,7 +2089,6 @@
     }
 
     function getCurrentWeekIndex() {
-      const msPerWeek = 7 * 86400000;
       return Math.floor(getCurrentDayNumber() / 7);
     }
 
@@ -2261,25 +2102,16 @@
         lineupSlots: { PG: null, SG: null, SF: null, PF: null, C: null },
         tactic: 'pace',
         dailyMatches: { dayNum: null, count: 0 },
-        dailyQuiz: { dayNum: null, count: 0, streak: 0 },
-        dailyFreeThrows: { dayNum: null, count: 0 },
         matchWins: 0,
         audioEnabled: true,
         packsOpened: 0,
         tradesCompleted: 0,
-        lastWheelSpinDayNum: null,
         weeklyMissionsState: {
           weekIndex: getCurrentWeekIndex(),
           packsOpenedWeek: 0,
           tradesWeek: 0,
           winsWeek: 0,
-          quizCorrectWeek: 0,
           claimed: []
-        },
-        sessionActivity: {
-          dayNum: null,
-          activeSeconds: 0,
-          claimedMilestones: []
         },
         pass: {
           streak: 0,
@@ -2375,23 +2207,16 @@
         if (!loaded.lineupSlots) loaded.lineupSlots = { PG: null, SG: null, SF: null, PF: null, C: null };
         if (!loaded.tactic) loaded.tactic = 'pace';
         if (!loaded.dailyMatches) loaded.dailyMatches = { dayNum: null, count: 0 };
-        if (!loaded.dailyQuiz) loaded.dailyQuiz = { dayNum: null, count: 0, streak: 0 };
-        if (!loaded.dailyFreeThrows) loaded.dailyFreeThrows = { dayNum: null, count: 0 };
         if (typeof loaded.matchWins !== 'number') loaded.matchWins = 0;
         if (typeof loaded.tradesCompleted !== 'number') loaded.tradesCompleted = 0;
-        if (typeof loaded.lastWheelSpinDayNum === 'undefined') loaded.lastWheelSpinDayNum = null;
         if (!loaded.weeklyMissionsState) {
           loaded.weeklyMissionsState = {
             weekIndex: getCurrentWeekIndex(),
             packsOpenedWeek: 0,
             tradesWeek: 0,
             winsWeek: 0,
-            quizCorrectWeek: 0,
             claimed: []
           };
-        }
-        if (!loaded.sessionActivity) {
-          loaded.sessionActivity = { dayNum: getCurrentDayNumber(), activeSeconds: 0, claimedMilestones: [] };
         }
         currentUserState = loaded;
       } else {
@@ -2410,12 +2235,11 @@
       updateAlbumStatsUI();
       updateAudioIcon();
       renderWeeklyPass();
-      renderWheelAndMissionsTab();
+      renderMissionsTab();
       renderAlbum();
       renderTradesTab();
       renderArenaAndDuplicates();
       renderLeaderboard();
-      initNewQuizQuestion();
 
       showToast(`Benvenuto ${discordProfile.username}! Profilo connesso.`, 'success');
     }
@@ -2507,12 +2331,12 @@
      * 3. PASS SETTIMANALE CON REGOLA RIGOROSA DEI 7 GIORNI CONSECUTIVI DI FILA
      */
     const WEEKLY_PASS_REWARDS = [
-      { day: 1, title: 'Giorno 1', type: 'credits', amount: 250, label: '+250 Crediti', icon: 'fa-coins', special: false },
+      { day: 1, title: 'Giorno 1', type: 'credits', amount: 300, label: '+300 Crediti', icon: 'fa-coins', special: false },
       { day: 2, title: 'Giorno 2', type: 'pack', packType: 'base', label: '1 Bustina Base Gratis', icon: 'fa-box-open', special: false },
-      { day: 3, title: 'Giorno 3', type: 'credits', amount: 450, label: '+450 Crediti', icon: 'fa-coins', special: false },
+      { day: 3, title: 'Giorno 3', type: 'credits', amount: 500, label: '+500 Crediti', icon: 'fa-coins', special: false },
       { day: 4, title: 'Giorno 4', type: 'pack', packType: 'gold', label: '1 Gold Pack Gratis', icon: 'fa-star', special: false },
-      { day: 5, title: 'Giorno 5', type: 'credits', amount: 750, label: '+750 Crediti', icon: 'fa-sack-dollar', special: false },
-      { day: 6, title: 'Giorno 6', type: 'pack', packType: 'gold', label: '1 Gold Pack + 350 Crediti', bonusCredits: 350, icon: 'fa-gem', special: false },
+      { day: 5, title: 'Giorno 5', type: 'credits', amount: 800, label: '+800 Crediti', icon: 'fa-sack-dollar', special: false },
+      { day: 6, title: 'Giorno 6', type: 'pack', packType: 'gold', label: '1 Gold Pack + 400 Crediti', bonusCredits: 400, icon: 'fa-gem', special: false },
       {
         day: 7,
         title: 'Giorno 7 • FINE SETTIMANA',
@@ -2702,7 +2526,7 @@
     }
 
     /**
-     * 4. GENERATORE VOLTI GIOCATORI CON DETTAGLI PARQUET, MAGLIA E CORNICE
+     * 4. ARTWORK PULITO & MODERNO DELLE CARTE
      */
     function getSkinToneForPlayer(name) {
       const tones = ['#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#ffdbac'];
@@ -2733,15 +2557,12 @@
       if (card.type === 'logo') {
         return `
           <svg viewBox="0 0 180 130" preserveAspectRatio="xMidYMid slice" class="w-full h-full pointer-events-none">
-            <rect width="180" height="130" fill="${c1}" opacity="0.42"/>
-            <circle cx="90" cy="65" r="56" fill="none" stroke="${c2}" stroke-width="1" stroke-dasharray="4 4" opacity="0.25"/>
-            <path d="M42,10 L138,10 L138,64 C138,99 90,122 90,122 C90,122 42,99 42,64 Z"
-                  fill="${c1}" stroke="${c2}" stroke-width="4" />
-            <path d="M47,55 L133,28 L133,47 L47,74 Z" fill="${c2}" opacity="0.9" />
-            <circle cx="90" cy="33" r="13" fill="#ff6b00" stroke="#ffffff" stroke-width="1.5"/>
-            <path d="M78,33 L102,33 M90,20 L90,46" stroke="#ffffff" stroke-width="1.2"/>
-            <rect x="54" y="64" width="72" height="26" rx="6" fill="#0b132b" stroke="${c3}" stroke-width="1.5"/>
-            <text x="90" y="83" text-anchor="middle" fill="#ffffff" font-family="Teko, sans-serif" font-weight="700" font-size="23" letter-spacing="2">
+            <rect width="180" height="130" fill="${c1}" opacity="0.28"/>
+            <path d="M46,12 L134,12 L134,64 C134,96 90,118 90,118 C90,118 46,96 46,64 Z"
+                  fill="${c1}" stroke="${c2}" stroke-width="3.5" />
+            <path d="M50,54 L130,30 L130,46 L50,70 Z" fill="${c2}" opacity="0.92" />
+            <rect x="56" y="64" width="68" height="24" rx="5" fill="#090d16" stroke="${c3}" stroke-width="1.5"/>
+            <text x="90" y="81" text-anchor="middle" fill="#ffffff" font-family="Teko, sans-serif" font-weight="700" font-size="22" letter-spacing="2">
               ${card.teamCode}
             </text>
           </svg>
@@ -2754,156 +2575,133 @@
       return `
         <svg viewBox="0 0 180 135" preserveAspectRatio="xMidYMid slice" class="w-full h-full pointer-events-none">
           <defs>
-            <linearGradient id="bg_${card.id}" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="${isLimited ? '#be123c' : c1}" stop-opacity="0.9" />
-              <stop offset="55%" stop-color="${c1}" stop-opacity="0.88" />
-              <stop offset="100%" stop-color="#090d16" stop-opacity="0.98" />
+            <linearGradient id="bg_${card.id}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${isLimited ? '#27272a' : c1}" stop-opacity="0.95" />
+              <stop offset="100%" stop-color="#090d16" stop-opacity="1" />
             </linearGradient>
           </defs>
           <rect width="180" height="135" fill="url(#bg_${card.id})" />
-          <!-- Linee campo da basket sullo sfondo -->
-          <circle cx="90" cy="68" r="48" fill="none" stroke="${c2}" stroke-width="1.2" opacity="0.14" />
-          <line x1="0" y1="68" x2="180" y2="68" stroke="${c2}" stroke-width="1" opacity="0.12" />
-          <path d="M-10,135 L60,0 L110,0 L40,135 Z" fill="${c2}" opacity="0.09" />
-          <!-- Numero gigante in filigrana -->
-          <text x="148" y="46" text-anchor="middle" fill="${c2}" opacity="0.16" font-family="Teko, sans-serif" font-weight="700" font-size="52">
+          <!-- Fascia diagonale pulita con colori squadra -->
+          <polygon points="0,0 180,0 180,42 0,88" fill="${isLimited ? '#f59e0b' : c2}" opacity="${isLimited ? '0.14' : '0.12'}" />
+          <!-- Numero in filigrana sobrio -->
+          <text x="148" y="42" text-anchor="middle" fill="${isLimited ? '#fbbf24' : '#ffffff'}" opacity="0.16" font-family="Teko, sans-serif" font-weight="700" font-size="44">
             ${card.jerseyNum}
           </text>
           <!-- Canotta squadra -->
-          <path d="M22,135 C24,95 45,80 68,76 L112,76 C135,80 156,95 158,135 Z" fill="${c1}" stroke="${isLimited ? '#fde047' : c2}" stroke-width="3"/>
-          <path d="M70,76 Q90,96 110,76" fill="none" stroke="${isLimited ? '#fde047' : c2}" stroke-width="4"/>
-          <path d="M46,82 L52,135 M134,82 L128,135" stroke="${c3}" stroke-width="3" opacity="0.9"/>
+          <path d="M26,135 C28,96 48,82 70,78 L110,78 C132,82 152,96 154,135 Z" fill="${isLimited ? '#18181b' : c1}" stroke="${isLimited ? '#fbbf24' : c2}" stroke-width="2.5"/>
+          <path d="M72,78 Q90,96 108,78" fill="none" stroke="${isLimited ? '#fbbf24' : c2}" stroke-width="3.5"/>
           <!-- Collo e Testa -->
-          <rect x="81" y="63" width="18" height="16" rx="5" fill="${skinColor}" />
-          <circle cx="90" cy="45" r="23" fill="${skinColor}" stroke="#0f172a" stroke-width="1.5"/>
-          <path d="M67,40 C67,21 113,21 113,40 C108,32 72,32 67,40 Z" fill="#1e1b18"/>
-          <!-- Fascia tergisudore -->
-          <path d="M68,36 Q90,31 112,36 L112,41 Q90,36 68,41 Z" fill="${isLimited ? '#fde047' : c2}"/>
-          <circle cx="82" cy="45" r="2.2" fill="#0f172a"/>
-          <circle cx="98" cy="45" r="2.2" fill="#0f172a"/>
-          <path d="M77,40 Q82,38 87,40 M93,40 Q98,38 103,40" stroke="#0f172a" stroke-width="1.4" fill="none"/>
-          <path d="M84,54 Q90,59 96,54" stroke="#0f172a" stroke-width="1.7" fill="none" stroke-linecap="round"/>
-          <text x="90" y="120" text-anchor="middle" fill="${isLimited ? '#fde047' : c2}" font-family="Teko, sans-serif" font-weight="700" font-size="31" letter-spacing="1">
+          <rect x="81" y="64" width="18" height="15" rx="5" fill="${skinColor}" />
+          <circle cx="90" cy="46" r="22" fill="${skinColor}" stroke="#0f172a" stroke-width="1.5"/>
+          <path d="M68,41 C68,22 112,22 112,41 C107,33 73,33 68,41 Z" fill="#1e1b18"/>
+          <circle cx="82" cy="46" r="2.1" fill="#0f172a"/>
+          <circle cx="98" cy="46" r="2.1" fill="#0f172a"/>
+          <path d="M77,41 Q82,39 87,41 M93,41 Q98,39 103,41" stroke="#0f172a" stroke-width="1.3" fill="none"/>
+          <path d="M84,54 Q90,59 96,54" stroke="#0f172a" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+          <text x="90" y="121" text-anchor="middle" fill="${isLimited ? '#fbbf24' : c2}" font-family="Teko, sans-serif" font-weight="700" font-size="30" letter-spacing="1">
             #${card.jerseyNum}
           </text>
           ${card.variant === 'signature' ? `
-            <path d="M18,118 Q42,102 64,116 T112,110 T160,118" fill="none" stroke="#fda4af" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>
-          ` : ''}
-          ${card.variant === 'icon' ? `
-            <polygon points="90,8 94,16 103,17 96,23 98,32 90,27 82,32 84,23 77,17 86,16" fill="#fef08a" stroke="#0f766e" stroke-width="1"/>
-          ` : ''}
-          ${isLimited ? `
-            <polygon points="24,10 27,17 35,18 29,23 31,31 24,27 17,31 19,23 13,18 21,17" fill="#fde047" stroke="#be123c" stroke-width="1"/>
-            <text x="24" y="42" text-anchor="middle" fill="#fde047" font-family="Teko, sans-serif" font-weight="700" font-size="13">LE 99</text>
+            <path d="M22,118 Q44,104 66,116 T110,111 T156,118" fill="none" stroke="#fda4af" stroke-width="2" stroke-linecap="round" opacity="0.95"/>
           ` : ''}
         </svg>
       `;
     }
 
     /**
-     * 5. RENDERING FIGURINA SINGOLA CON DETTAGLI GRAFICI ARRICCHITI
+     * 5. RENDERING FIGURINA SINGOLA (DESIGN PULITO, MODERNO E LEGGIBILE)
      */
     function renderCardHTML(card, options = {}) {
       const { showBadge = null, clickable = true } = options;
 
       const rarityMap = {
-        common: { label: 'COMUNE', cls: 'rarity-common', textCls: 'text-slate-200', badgeBg: 'bg-slate-700 text-slate-200', stars: 1 },
-        rare: { label: 'RARA ORO', cls: 'rarity-rare holo-shimmer', textCls: 'text-amber-200', badgeBg: 'bg-amber-500 text-slate-950', stars: 2 },
-        epic: { label: 'ALL-STAR', cls: 'rarity-epic holo-shimmer', textCls: 'text-cyan-200', badgeBg: 'bg-cyan-400 text-slate-950', stars: 3 },
-        signature: { label: 'SIGNATURE', cls: 'rarity-signature holo-shimmer', textCls: 'text-rose-200', badgeBg: 'bg-rose-400 text-slate-950', stars: 4 },
-        legend: { label: 'MVP LEGGENDA', cls: 'rarity-legend holo-shimmer', textCls: 'text-yellow-300', badgeBg: 'bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950', stars: 5 },
-        icon: { label: 'MVP ICONA', cls: 'rarity-icon holo-shimmer', textCls: 'text-teal-200', badgeBg: 'bg-gradient-to-r from-teal-300 to-yellow-300 text-slate-950', stars: 5 },
-        limited: { label: 'LIMITED 99', cls: 'rarity-limited holo-shimmer', textCls: 'text-yellow-300', badgeBg: 'bg-gradient-to-r from-yellow-300 via-amber-400 to-rose-400 text-slate-950', stars: 6 }
+        common: { label: 'BASE', cls: 'rarity-common', ovrColor: 'text-slate-100', tagBg: 'bg-slate-800 text-slate-200 border-slate-600' },
+        rare: { label: 'RARA ORO', cls: 'rarity-rare holo-shimmer', ovrColor: 'text-amber-300', tagBg: 'bg-amber-500/20 text-amber-200 border-amber-400/50' },
+        epic: { label: 'ALL-STAR', cls: 'rarity-epic holo-shimmer', ovrColor: 'text-sky-300', tagBg: 'bg-indigo-500/25 text-sky-200 border-sky-400/50' },
+        signature: { label: 'SIGNATURE', cls: 'rarity-signature holo-shimmer', ovrColor: 'text-rose-300', tagBg: 'bg-rose-500/25 text-rose-200 border-rose-400/50' },
+        legend: { label: 'LEGGENDA', cls: 'rarity-legend holo-shimmer', ovrColor: 'text-yellow-300', tagBg: 'bg-yellow-500/20 text-yellow-200 border-yellow-400/50' },
+        icon: { label: 'MVP ICONA', cls: 'rarity-icon holo-shimmer', ovrColor: 'text-teal-300', tagBg: 'bg-teal-500/20 text-teal-200 border-teal-400/50' },
+        limited: { label: 'LIMITED 99', cls: 'rarity-limited holo-shimmer', ovrColor: 'text-amber-300', tagBg: 'bg-amber-400 text-zinc-950 border-amber-200 font-black' }
       };
 
       const rInfo = rarityMap[card.rarity] || rarityMap.common;
       const actionAttr = clickable ? `data-action="inspect-card" data-card-id="${card.id}"` : '';
-      const cursorCls = clickable ? 'cursor-pointer hover:-translate-y-1 transition-transform duration-150' : '';
+      const cursorCls = clickable ? 'cursor-pointer hover:-translate-y-1.5' : '';
 
       const bioTag = card.type === 'player'
-        ? `${card.nat} • ${card.height}cm • ${card.weight}kg`
-        : `${card.nat} • CLUB UFFICIALE`;
-
-      const starsHTML = Array.from({ length: rInfo.stars }, () => '<i class="fa-solid fa-star text-[7px] text-amber-300"></i>').join('');
+        ? `${card.nat} • ${card.height}cm`
+        : 'STEMMA CLUB';
 
       return `
-        <div ${actionAttr} class="relative w-full max-w-[215px] rounded-2xl p-2.5 ${rInfo.cls} card-foil-pattern ${cursorCls} flex flex-col justify-between select-none text-left">
+        <div ${actionAttr} class="card-shell w-full max-w-[215px] ${rInfo.cls} ${cursorCls} select-none text-left">
           ${showBadge === 'NEW' ? `
-            <span class="absolute -top-2.5 -right-2 z-10 bg-emerald-500 text-slate-950 font-black text-[10px] px-2.5 py-0.5 rounded-full shadow-lg border border-white pointer-events-none">
+            <span class="absolute -top-2.5 -right-2 z-20 bg-emerald-500 text-slate-950 font-black text-[10px] px-2.5 py-0.5 rounded-full shadow-lg border border-white pointer-events-none">
               NUOVA!
             </span>
           ` : ''}
           ${showBadge === 'DUP' ? `
-            <span class="absolute -top-2.5 -right-2 z-10 bg-slate-900 text-amber-300 font-extrabold text-[10px] px-2 py-0.5 rounded-full shadow-lg border border-amber-400/60 pointer-events-none">
+            <span class="absolute -top-2.5 -right-2 z-20 bg-slate-900 text-amber-300 font-extrabold text-[10px] px-2 py-0.5 rounded-full shadow-lg border border-amber-400/60 pointer-events-none">
               DOPPIONE
             </span>
           ` : ''}
           ${showBadge === 'NEEDED' ? `
-            <span class="absolute -top-2.5 -right-2 z-10 bg-emerald-500 text-slate-950 font-black text-[9px] px-2 py-0.5 rounded-full shadow-lg border border-white pointer-events-none">
+            <span class="absolute -top-2.5 -right-2 z-20 bg-emerald-500 text-slate-950 font-black text-[9px] px-2 py-0.5 rounded-full shadow-lg border border-white pointer-events-none">
               TI MANCA!
             </span>
           ` : ''}
 
-          <!-- Intestazione Carta -->
-          <div class="flex items-start justify-between gap-1 border-b border-white/20 pb-1.5 pointer-events-none">
-            <div class="flex items-center gap-1.5">
-              <div class="flex flex-col leading-none">
-                <span class="font-display text-2xl sm:text-3xl font-bold ${rInfo.textCls} leading-none drop-shadow">${card.ovr}</span>
-                <span class="text-[9px] font-extrabold uppercase tracking-wider text-white/80">${card.teamCode}</span>
+          <div class="card-inner p-2.5 pointer-events-none">
+            <!-- Header Carta -->
+            <div class="flex items-center justify-between gap-1.5 pb-1.5">
+              <div class="flex items-baseline gap-1.5">
+                <span class="font-display text-3xl font-bold ${rInfo.ovrColor} leading-none">${card.ovr}</span>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">${card.teamCode}</span>
               </div>
-              <div class="h-6 w-[1px] bg-white/15"></div>
-              <div class="flex flex-col leading-tight">
-                <span class="text-[8px] font-black uppercase tracking-widest text-white/60">LNP 26/27</span>
-                <div class="flex items-center gap-0.5 mt-0.5">${starsHTML}</div>
-              </div>
-            </div>
-            <div class="text-right flex flex-col items-end">
-              <span class="text-[9px] font-black px-1.5 py-0.5 rounded ${rInfo.badgeBg} uppercase tracking-wider shadow-sm">
+              <span class="text-[8.5px] font-extrabold px-2 py-0.5 rounded border ${rInfo.tagBg} uppercase tracking-wider">
                 ${rInfo.label}
               </span>
-              <span class="text-[10px] font-mono font-bold text-white/75 mt-0.5">#${card.num}</span>
             </div>
-          </div>
 
-          <!-- Immagine Giocatore / Stemma con Cornice Interna -->
-          <div class="my-1.5 h-28 sm:h-32 w-full rounded-xl bg-black/50 border border-white/25 overflow-hidden relative shadow-inner pointer-events-none">
-            ${generateCardArtworkHTML(card)}
-            <span class="absolute top-1 right-1 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-black/75 text-white/90 border border-white/15 z-20">
-              ${card.teamShort}
-            </span>
-            <span class="absolute bottom-1 left-1.5 text-[8.5px] font-bold bg-black/80 text-white/95 px-1.5 py-0.5 rounded border border-white/10 z-20">
-              ${bioTag}
-            </span>
-          </div>
+            <!-- Box Immagine Giocatore -->
+            <div class="h-28 sm:h-32 w-full rounded-lg overflow-hidden relative border border-white/10 bg-slate-950">
+              ${generateCardArtworkHTML(card)}
+              <span class="absolute top-1.5 left-1.5 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-black/75 text-slate-200">
+                #${card.num}
+              </span>
+              <span class="absolute bottom-1.5 right-1.5 text-[8.5px] font-bold px-1.5 py-0.5 rounded bg-black/75 text-slate-200">
+                ${bioTag}
+              </span>
+            </div>
 
-          <!-- Nome & Ruolo -->
-          <div class="mb-1.5 pointer-events-none">
-            <div class="font-extrabold text-xs sm:text-sm text-white truncate leading-tight drop-shadow-sm" title="${card.name}">
-              ${card.type === 'player' ? `#${card.jerseyNum} ` : ''}${card.name}
+            <!-- Nome, Squadra & Ruolo -->
+            <div class="pt-2 pb-1.5">
+              <div class="font-extrabold text-xs sm:text-[13px] text-white truncate leading-tight" title="${card.name}">
+                ${card.name}
+              </div>
+              <div class="flex items-center justify-between text-[10px] text-slate-400 font-semibold mt-0.5">
+                <span class="truncate text-slate-300">${card.teamShort}</span>
+                <span class="truncate ml-1">${card.role}</span>
+              </div>
             </div>
-            <div class="flex items-center justify-between text-[10px] font-semibold text-white/80 mt-0.5">
-              <span class="truncate">${card.role}</span>
-              <span class="text-[8px] font-mono uppercase tracking-wider text-white/50">OFFICIAL</span>
-            </div>
-          </div>
 
-          <!-- Statistiche -->
-          <div class="grid grid-cols-4 gap-1 bg-black/45 rounded-lg p-1.5 text-center border border-white/15 pointer-events-none">
-            <div>
-              <span class="block text-[8px] text-white/60 font-bold">ATT</span>
-              <span class="text-[11px] font-extrabold text-white">${card.stats.att}</span>
-            </div>
-            <div>
-              <span class="block text-[8px] text-white/60 font-bold">DIF</span>
-              <span class="text-[11px] font-extrabold text-white">${card.stats.dif}</span>
-            </div>
-            <div>
-              <span class="block text-[8px] text-white/60 font-bold">TIR</span>
-              <span class="text-[11px] font-extrabold text-white">${card.stats.tir}</span>
-            </div>
-            <div>
-              <span class="block text-[8px] text-white/60 font-bold">REG</span>
-              <span class="text-[11px] font-extrabold text-white">${card.stats.reg}</span>
+            <!-- Barra Statistiche Pulita -->
+            <div class="grid grid-cols-4 gap-1 bg-white/[0.04] rounded-lg py-1.5 px-1 text-center border border-white/[0.07]">
+              <div>
+                <span class="block text-[7.5px] text-slate-400 font-bold tracking-wider">ATT</span>
+                <span class="text-[11px] font-extrabold text-white">${card.stats.att}</span>
+              </div>
+              <div>
+                <span class="block text-[7.5px] text-slate-400 font-bold tracking-wider">DIF</span>
+                <span class="text-[11px] font-extrabold text-white">${card.stats.dif}</span>
+              </div>
+              <div>
+                <span class="block text-[7.5px] text-slate-400 font-bold tracking-wider">TIR</span>
+                <span class="text-[11px] font-extrabold text-white">${card.stats.tir}</span>
+              </div>
+              <div>
+                <span class="block text-[7.5px] text-slate-400 font-bold tracking-wider">REG</span>
+                <span class="text-[11px] font-extrabold text-white">${card.stats.reg}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -2911,7 +2709,7 @@
     }
 
     /**
-     * 6. ECONOMIA BUSTINE (CALIBRATA PER OTTENERE NATURALMENTE ~8 CARTE AL GIORNO SENZA BLOCCO)
+     * 6. ECONOMIA BUSTINE (~8 CARTE AL GIORNO SENZA LIMITI DI APERTURA)
      */
     const PACK_CONFIGS = {
       base: {
@@ -2979,7 +2777,7 @@
       if (!cfg) return;
 
       if (!tempInfiniteCredits && currentUserState.credits < cfg.price) {
-        showToast(`Crediti insufficienti! Servono ${cfg.price.toLocaleString('it-IT')} crediti. Gioca il Quiz LNP o le Partite Tattiche!`, 'error');
+        showToast(`Crediti insufficienti! Servono ${cfg.price.toLocaleString('it-IT')} crediti. Gioca le Partite Tattiche o riscatta il Pass!`, 'error');
         return;
       }
 
@@ -3034,7 +2832,7 @@
 
       checkTeamCompletions(true);
       saveCurrentUserState();
-      renderWheelAndMissionsTab();
+      renderMissionsTab();
       updateCreditsUI();
       updateAlbumStatsUI();
 
@@ -3165,7 +2963,7 @@
         }
 
         const backGlow = item.card.rarity === 'limited'
-          ? 'border-yellow-300 shadow-[0_0_25px_rgba(253,224,71,0.75)]'
+          ? 'border-amber-300 shadow-[0_0_22px_rgba(251,191,36,0.65)]'
           : (item.card.rarity === 'legend' || item.card.rarity === 'icon')
             ? 'border-yellow-400 shadow-yellow-500/40'
             : (item.card.rarity === 'epic' || item.card.rarity === 'signature')
@@ -3661,7 +3459,7 @@
       }
 
       playSound('coin');
-      showToast('Proposta di scambio pubblicata in tempo reale!', 'success');
+      showToast('Proposta di scambio pubblicata live!', 'success');
     }
 
     async function cancelTradeOffer(tradeId) {
@@ -3684,21 +3482,27 @@
         renderTradesTab();
       }
 
-      showToast("Proposta ritirata e figurina rimessa nell'album.", 'info');
+      showToast('Proposta ritirata e figurina restituita.', 'info');
     }
 
     async function acceptTradeOffer(tradeId) {
       if (!currentUserState) return;
       const tr = liveTradesList.find(t => t.id === tradeId);
-      if (!tr || tr.authorId === currentUserState.discord.id) return;
+      if (!tr) return;
 
       if ((currentUserState.owned[tr.requestCardId] || 0) <= 0) {
-        showToast('Non possiedi più la figurina richiesta!', 'error');
+        showToast('Non hai più la carta richiesta!', 'error');
         return;
       }
 
       currentUserState.owned[tr.requestCardId]--;
       if (currentUserState.owned[tr.requestCardId] <= 0) delete currentUserState.owned[tr.requestCardId];
+
+      Object.keys(currentUserState.lineupSlots).forEach(slot => {
+        if (currentUserState.lineupSlots[slot] === tr.requestCardId && !currentUserState.owned[tr.requestCardId]) {
+          currentUserState.lineupSlots[slot] = null;
+        }
+      });
 
       currentUserState.owned[tr.offerCardId] = (currentUserState.owned[tr.offerCardId] || 0) + 1;
       currentUserState.wishlist = currentUserState.wishlist.filter(id => id !== tr.offerCardId);
@@ -3710,6 +3514,7 @@
       if (firebaseDb && firebaseUser) {
         try {
           await deleteDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'trades', tradeId));
+
           const deliveryId = `deliv_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
           await setDoc(doc(firebaseDb, 'artifacts', appId, 'public', 'data', 'trade_deliveries', deliveryId), {
             recipientId: tr.authorId,
@@ -3725,208 +3530,69 @@
 
       checkTeamCompletions(true);
       saveCurrentUserState();
-      renderWheelAndMissionsTab();
       updateAlbumStatsUI();
+      renderMissionsTab();
       renderAlbum();
       renderArenaAndDuplicates();
       renderLeaderboard();
 
       playSound('legend');
       spawnConfettiBurst();
-      showToast('Scambio completato! Figurina ricevuta e aggiornata in classifica!', 'success');
+      showToast('Scambio completato! Nuova figurina incollata nell\'Album!', 'success');
     }
 
     /**
-     * 10. DOPPIONI (0 CREDITI ALLO SCARTO), TIRI LIBERI & PARTITE TATTICHE
+     * 10. GESTIONE DOPPIONI (ZERO CREDITI - SOLO SCAMBIO O SCARTO GRATUITO)
      */
-    const POSITION_SLOTS = [
-      { key: 'PG', label: 'Playmaker (PG)' },
-      { key: 'SG', label: 'Guardia (SG)' },
-      { key: 'SF', label: 'Ala Piccola (SF)' },
-      { key: 'PF', label: 'Ala Grande (PF)' },
-      { key: 'C', label: 'Centro (C)' }
-    ];
-
-    let selectedTargetSlot = null;
-    let pendingHalfTimeMatch = null;
-    let freeThrowAnimFrame = null;
-    let freeThrowCursorPos = 0;
-    let freeThrowDirection = 1;
-
-    function startFreeThrowCursorAnimation() {
-      const cursor = document.getElementById('freethrow-cursor');
-      if (!cursor) return;
-      const step = () => {
-        freeThrowCursorPos += freeThrowDirection * 1.45;
-        if (freeThrowCursorPos >= 98) {
-          freeThrowCursorPos = 98;
-          freeThrowDirection = -1;
-        } else if (freeThrowCursorPos <= 0) {
-          freeThrowCursorPos = 0;
-          freeThrowDirection = 1;
-        }
-        cursor.style.left = `${freeThrowCursorPos}%`;
-        freeThrowAnimFrame = requestAnimationFrame(step);
-      };
-      if (freeThrowAnimFrame) cancelAnimationFrame(freeThrowAnimFrame);
-      freeThrowAnimFrame = requestAnimationFrame(step);
-    }
-
-    function getTodayFreeThrowsCount() {
-      if (!currentUserState) return 0;
-      const todayNum = getCurrentDayNumber();
-      if (!currentUserState.dailyFreeThrows || currentUserState.dailyFreeThrows.dayNum !== todayNum) {
-        currentUserState.dailyFreeThrows = { dayNum: todayNum, count: 0 };
-      }
-      return currentUserState.dailyFreeThrows.count;
-    }
-
-    function updateFreeThrowsUI() {
-      const count = getTodayFreeThrowsCount();
-      const badge = document.getElementById('freethrow-daily-badge');
-      const btn = document.getElementById('btn-shoot-freethrow');
-      if (badge) badge.textContent = `Tiri oggi: ${count} / 10`;
-      if (btn) {
-        btn.disabled = count >= 10;
-        btn.className = count >= 10
-          ? 'px-6 py-2.5 rounded-xl bg-slate-800 text-slate-500 font-black text-xs sm:text-sm cursor-not-allowed'
-          : 'px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:brightness-110 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition active:scale-95';
-      }
-    }
-
-    function shootFreeThrowAction() {
-      if (!currentUserState) return;
-      const count = getTodayFreeThrowsCount();
-      if (count >= 10) {
-        showToast('Hai completato i 10 tiri liberi giornalieri! Torna domani.', 'info');
-        return;
-      }
-
-      currentUserState.dailyFreeThrows.count++;
-      const resEl = document.getElementById('freethrow-result-text');
-
-      if (freeThrowCursorPos >= 42 && freeThrowCursorPos <= 58) {
-        currentUserState.credits += 35;
-        playSound('coin');
-        spawnConfettiBurst();
-        if (resEl) {
-          resEl.className = 'text-xs font-extrabold text-emerald-400';
-          resEl.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> SOLO RETE! Canestro perfetto: +35 Crediti!';
-        }
-        showToast('SOLO RETE! +35 Crediti vinti ai tiri liberi!', 'success');
-      } else if (freeThrowCursorPos >= 32 && freeThrowCursorPos <= 68) {
-        currentUserState.credits += 10;
-        playSound('flip');
-        if (resEl) {
-          resEl.className = 'text-xs font-bold text-amber-300';
-          resEl.innerHTML = '<i class="fa-solid fa-basketball mr-1"></i> Ferro e dentro! Rimbalzo fortunato: +10 Crediti.';
-        }
-      } else {
-        if (resEl) {
-          resEl.className = 'text-xs font-bold text-rose-400';
-          resEl.innerHTML = '<i class="fa-solid fa-xmark mr-1"></i> Ferro esterno! Riprova al prossimo tiro.';
-        }
-      }
-
-      saveCurrentUserState();
-      updateCreditsUI();
-      updateFreeThrowsUI();
-    }
-
-    function getNaturalSlotsForCard(card) {
-      const r = (card.role || '').toLowerCase();
-      const slots = [];
-      if (r.includes('play')) slots.push('PG');
-      if (r.includes('guardia')) slots.push('SG');
-      if (r.includes('ala/centro')) {
-        slots.push('PF', 'C');
-      } else if (r.includes('ala')) {
-        slots.push('SF', 'PF');
-      } else if (r.includes('centro')) {
-        slots.push('C');
-      }
-      return slots.length > 0 ? slots : ['SG', 'SF'];
-    }
-
-    function getEffectivePlayerOvrInSlot(card, slotKey) {
-      const natural = getNaturalSlotsForCard(card);
-      return natural.includes(slotKey) ? card.ovr : Math.max(60, card.ovr - 5);
-    }
-
-    function getTodayMatchesCount() {
-      if (!currentUserState) return 0;
-      const todayNum = getCurrentDayNumber();
-      if (!currentUserState.dailyMatches || currentUserState.dailyMatches.dayNum !== todayNum) {
-        currentUserState.dailyMatches = { dayNum: todayNum, count: 0 };
-      }
-      return currentUserState.dailyMatches.count;
-    }
-
-    function updateDailyMatchesBadge() {
-      const count = getTodayMatchesCount();
-      const badge = document.getElementById('daily-matches-badge');
-      const btn = document.getElementById('btn-start-tactical-match');
-      if (badge) {
-        badge.textContent = `Partite oggi: ${count} / 10`;
-      }
-      if (btn) {
-        if (count >= 10) {
-          btn.disabled = true;
-          btn.className = 'px-8 py-3.5 rounded-2xl bg-slate-800 text-slate-500 font-extrabold text-base cursor-not-allowed';
-          btn.innerHTML = '<i class="fa-solid fa-lock mr-2 pointer-events-none"></i> Limite 10 Partite Raggiunto Oggi';
-        } else {
-          btn.disabled = false;
-          btn.className = 'px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#ff6b00] to-amber-500 hover:brightness-110 text-white font-extrabold text-base shadow-xl shadow-orange-600/30 transition active:scale-95';
-          btn.innerHTML = '<i class="fa-solid fa-basketball mr-2 pointer-events-none"></i> Gioca Partita Tattica (+80 Vittoria / 0 Sconfitta)';
-        }
-      }
-    }
-
     function renderArenaAndDuplicates() {
       if (!currentUserState) return;
       renderDuplicatesSection();
       renderLineupSection();
-      updateDailyMatchesBadge();
-      updateFreeThrowsUI();
     }
 
     function renderDuplicatesSection() {
-      const listEl = document.getElementById('duplicates-list');
+      const dupContainer = document.getElementById('duplicates-list');
       const discardAllBtn = document.getElementById('btn-discard-all-dups');
 
-      const dups = [];
+      const dupItems = [];
+      let totalExtraCards = 0;
+
       ALL_CARDS.forEach(card => {
         const count = currentUserState.owned[card.id] || 0;
         if (count > 1) {
           const extra = count - 1;
-          dups.push({ card, extra });
+          totalExtraCards += extra;
+          dupItems.push({ card, extra });
         }
       });
 
-      discardAllBtn.disabled = dups.length === 0;
+      discardAllBtn.disabled = totalExtraCards === 0;
 
-      if (dups.length === 0) {
-        listEl.innerHTML = `
+      if (dupItems.length === 0) {
+        dupContainer.innerHTML = `
           <div class="col-span-full text-center py-6 text-slate-400 text-xs">
-            Non hai doppioni al momento. Apri nuove bustine per ottenere figurine scambiabili!
+            Non hai doppioni disponibili al momento. Spacchetta nuove bustine per trovarne!
           </div>
         `;
         return;
       }
 
-      listEl.innerHTML = dups.map(({ card, extra }) => `
-        <div class="bg-slate-900/90 border border-slate-700 rounded-xl p-2.5 flex flex-col justify-between text-left">
-          <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 mb-1">
-            <span>#${card.num}</span>
-            <span class="bg-[#ff6b00]/20 text-[#ff6b00] px-1.5 py-0.5 rounded font-extrabold">x${extra}</span>
+      dupContainer.innerHTML = dupItems.map(({ card, extra }) => {
+        return `
+          <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-2.5 flex flex-col justify-between text-center">
+            <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 mb-1">
+              <span>#${card.num}</span>
+              <span class="bg-[#ff6b00]/20 text-[#ff6b00] px-1.5 py-0.5 rounded font-extrabold">x${extra} doppi</span>
+            </div>
+            <div class="font-bold text-xs text-white truncate" title="${card.name}">${card.name}</div>
+            <div class="text-[10px] text-slate-400 truncate mb-2">${card.teamShort} • OVR ${card.ovr}</div>
+            <button type="button" data-action="discard-one-dup" data-card-id="${card.id}"
+                    class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-rose-800 text-slate-300 hover:text-white font-bold text-[11px] transition active:scale-95">
+              Scarta x1 (0 Crediti)
+            </button>
           </div>
-          <div class="font-bold text-xs text-white truncate" title="${card.name}">${card.name}</div>
-          <div class="text-[10px] text-slate-400 truncate mb-2">${card.teamShort} • OVR ${card.ovr}</div>
-          <button type="button" data-action="discard-one-dup" data-card-id="${card.id}" class="w-full py-1.5 rounded-lg bg-rose-900/70 hover:bg-rose-800 text-rose-200 font-bold text-[11px] transition active:scale-95">
-            Scarta 1 (0 Crediti)
-          </button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function discardSingleDuplicate(cardId) {
@@ -3938,126 +3604,195 @@
       saveCurrentUserState();
       updateAlbumStatsUI();
       renderArenaAndDuplicates();
-      renderAlbum();
       renderTradesTab();
-      showToast('Doppione scartato (0 crediti assegnati).', 'info');
+      showToast('Doppione scartato dall\'inventario.', 'info');
     }
 
     function discardAllDuplicates() {
       if (!currentUserState) return;
-      let discardedCount = 0;
+      let removed = 0;
 
       ALL_CARDS.forEach(card => {
         const count = currentUserState.owned[card.id] || 0;
         if (count > 1) {
-          discardedCount += (count - 1);
+          removed += (count - 1);
           currentUserState.owned[card.id] = 1;
         }
       });
 
-      if (discardedCount === 0) return;
+      if (removed === 0) return;
 
       saveCurrentUserState();
       updateAlbumStatsUI();
       renderArenaAndDuplicates();
-      renderAlbum();
       renderTradesTab();
-      showToast(`Scartati ${discardedCount} doppioni (0 crediti assegnati).`, 'info');
+      showToast(`Scartati ${removed} doppioni dall'inventario.`, 'info');
     }
 
-    function selectTactic(tacticKey) {
-      if (!currentUserState) return;
-      currentUserState.tactic = tacticKey;
-      saveCurrentUserState();
+    /**
+     * 11. PARTITE TATTICHE CON RUOLI (PG, SG, SF, PF, C) + TIMEOUT INTERVALLO
+     * Max 10 partite al giorno, +80 Crediti a vittoria, 0 in caso di sconfitta
+     */
+    const LINEUP_ROLE_SLOTS = [
+      { key: 'PG', label: 'Playmaker (PG)' },
+      { key: 'SG', label: 'Guardia (SG)' },
+      { key: 'SF', label: 'Ala Piccola (SF)' },
+      { key: 'PF', label: 'Ala Grande (PF)' },
+      { key: 'C', label: 'Centro (C)' }
+    ];
+
+    let selectedLineupSlotKey = null;
+    let activeHalftimeMatch = null;
+
+    function getTodayMatchesCount() {
+      if (!currentUserState) return 0;
+      const todayNum = getCurrentDayNumber();
+      if (!currentUserState.dailyMatches || currentUserState.dailyMatches.dayNum !== todayNum) {
+        currentUserState.dailyMatches = { dayNum: todayNum, count: 0 };
+      }
+      return currentUserState.dailyMatches.count;
+    }
+
+    function incrementTodayMatchesCount() {
+      const todayNum = getCurrentDayNumber();
+      if (!currentUserState.dailyMatches || currentUserState.dailyMatches.dayNum !== todayNum) {
+        currentUserState.dailyMatches = { dayNum: todayNum, count: 0 };
+      }
+      currentUserState.dailyMatches.count++;
+    }
+
+    function doesPlayerFitRoleSlot(playerRoleStr, slotKey) {
+      const r = (playerRoleStr || '').toLowerCase();
+      if (slotKey === 'PG') return r.includes('play');
+      if (slotKey === 'SG') return r.includes('guardia');
+      if (slotKey === 'SF') return r.includes('ala') && !r.includes('centro');
+      if (slotKey === 'PF') return r.includes('ala');
+      if (slotKey === 'C') return r.includes('centro');
+      return false;
+    }
+
+    function getNaturalSlotsForRole(playerRoleStr) {
+      return LINEUP_ROLE_SLOTS.map(s => s.key).filter(k => doesPlayerFitRoleSlot(playerRoleStr, k));
+    }
+
+    function selectLineupSlot(slotKey) {
+      selectedLineupSlotKey = (selectedLineupSlotKey === slotKey) ? null : slotKey;
+      const hint = document.getElementById('selected-slot-hint');
+      if (hint) {
+        hint.textContent = selectedLineupSlotKey
+          ? `Slot selezionato: ${selectedLineupSlotKey} (clicca un giocatore sotto per inserirlo)`
+          : 'Assegnazione automatica al ruolo naturale';
+      }
       renderLineupSection();
     }
 
-    function computeLineupMetrics() {
-      const slots = currentUserState.lineupSlots || { PG: null, SG: null, SF: null, PF: null, C: null };
-      const cardsBySlot = {};
-      let sumEffOvr = 0;
-      let count = 0;
-      const teamCounts = {};
+    function setMatchTactic(tacticKey) {
+      if (!currentUserState) return;
+      currentUserState.tactic = tacticKey;
+      saveCurrentUserState();
 
-      POSITION_SLOTS.forEach(s => {
-        const cid = slots[s.key];
-        if (cid) {
-          const card = ALL_CARDS.find(c => c.id === cid);
-          if (card) {
-            const effOvr = getEffectivePlayerOvrInSlot(card, s.key);
-            cardsBySlot[s.key] = { card, effOvr, isNatural: effOvr === card.ovr };
-            sumEffOvr += effOvr;
-            count++;
-            teamCounts[card.teamId] = (teamCounts[card.teamId] || 0) + 1;
-          }
+      ['pace', 'defense', 'pickroll'].forEach(t => {
+        const btn = document.getElementById(`tactic-btn-${t}`);
+        if (!btn) return;
+        if (t === tacticKey) {
+          btn.className = 'p-3 rounded-xl border-2 border-[#ff6b00] bg-[#ff6b00]/15 text-left transition active:scale-95';
+        } else {
+          btn.className = 'p-3 rounded-xl border border-slate-700 bg-slate-900/90 text-left transition active:scale-95';
         }
       });
+    }
 
-      let chemBonus = 0;
+    function calculateLineupMetrics() {
+      const slots = currentUserState.lineupSlots || { PG: null, SG: null, SF: null, PF: null, C: null };
+      const entries = LINEUP_ROLE_SLOTS.map(s => {
+        const cid = slots[s.key];
+        const card = cid ? ALL_CARDS.find(c => c.id === cid) : null;
+        return { slotKey: s.key, card };
+      }).filter(e => e.card !== null);
+
+      if (entries.length === 0) {
+        return { count: 0, effectiveOvr: 0, chemistryBonus: 0, entries: [] };
+      }
+
+      const teamCounts = {};
+      entries.forEach(e => {
+        teamCounts[e.card.teamId] = (teamCounts[e.card.teamId] || 0) + 1;
+      });
+      let chemistryBonus = 0;
       Object.values(teamCounts).forEach(cnt => {
-        if (cnt >= 2) chemBonus += (cnt - 1);
+        if (cnt >= 2) chemistryBonus += (cnt - 1);
       });
 
-      const avgOvr = count > 0 ? Math.round((sumEffOvr / count) + (chemBonus * 0.6)) : 0;
-      return { cardsBySlot, count, chemBonus, avgOvr };
+      const tactic = currentUserState.tactic || 'pace';
+      let sumOvr = 0;
+      entries.forEach(e => {
+        const fit = doesPlayerFitRoleSlot(e.card.role, e.slotKey);
+        const rolePenalty = fit ? 0 : -5;
+        let tacticBonus = 0;
+        if (tactic === 'pace' && (e.card.stats.att + e.card.stats.tir) >= 170) tacticBonus = 2;
+        if (tactic === 'defense' && (e.card.stats.dif + e.card.stats.reg) >= 168) tacticBonus = 2;
+        if (tactic === 'pickroll' && (e.card.stats.reg + e.card.stats.att) >= 170) tacticBonus = 2;
+
+        sumOvr += Math.max(60, e.card.ovr + rolePenalty + tacticBonus);
+      });
+
+      const effectiveOvr = Math.round((sumOvr / entries.length) + chemistryBonus);
+      return { count: entries.length, effectiveOvr, chemistryBonus, entries };
     }
 
     function renderLineupSection() {
-      if (!currentUserState) return;
-      const slotsEl = document.getElementById('lineup-slots');
-      const pickerEl = document.getElementById('owned-players-picker');
+      const slotsContainer = document.getElementById('lineup-slots');
+      const pickerContainer = document.getElementById('owned-players-picker');
 
-      const { cardsBySlot, count, chemBonus, avgOvr } = computeLineupMetrics();
-
-      document.getElementById('lineup-count').textContent = count;
-      document.getElementById('lineup-chemistry-bonus').textContent = `+${chemBonus}`;
-      document.getElementById('lineup-avg-ovr').textContent = avgOvr;
-
-      ['pace', 'defense', 'pickroll'].forEach(tk => {
-        const btn = document.getElementById(`tactic-btn-${tk}`);
-        if (!btn) return;
-        btn.className = currentUserState.tactic === tk
-          ? 'p-3 rounded-xl border-2 border-[#ff6b00] bg-[#ff6b00]/15 text-left transition active:scale-95'
-          : 'p-3 rounded-xl border border-slate-700 bg-slate-900/90 text-left transition active:scale-95';
-      });
-
-      const hintEl = document.getElementById('selected-slot-hint');
-      if (hintEl) {
-        hintEl.textContent = selectedTargetSlot
-          ? `Slot selezionato: ${selectedTargetSlot} (clicca un giocatore sotto)`
-          : 'Assegnazione automatica al ruolo naturale';
+      const todayCount = getTodayMatchesCount();
+      const dailyBadge = document.getElementById('daily-matches-badge');
+      if (dailyBadge) {
+        dailyBadge.textContent = `Partite oggi: ${todayCount} / 10`;
       }
 
-      slotsEl.innerHTML = POSITION_SLOTS.map(slot => {
-        const entry = cardsBySlot[slot.key];
-        const isSelected = selectedTargetSlot === slot.key;
+      setMatchTactic(currentUserState.tactic || 'pace');
 
-        if (entry) {
-          const { card, effOvr, isNatural } = entry;
+      const metrics = calculateLineupMetrics();
+      document.getElementById('lineup-count').textContent = metrics.count;
+      document.getElementById('lineup-avg-ovr').textContent = metrics.effectiveOvr;
+      document.getElementById('lineup-chemistry-bonus').textContent = `+${metrics.chemistryBonus}`;
+
+      const slots = currentUserState.lineupSlots;
+
+      slotsContainer.innerHTML = LINEUP_ROLE_SLOTS.map(slot => {
+        const cardId = slots[slot.key];
+        const card = cardId ? ALL_CARDS.find(c => c.id === cardId) : null;
+        const isSelected = selectedLineupSlotKey === slot.key;
+
+        if (!card) {
           return `
-            <div data-action="remove-lineup-slot" data-slot="${slot.key}" class="relative bg-slate-900 border-2 ${isSelected ? 'border-amber-400' : isNatural ? 'border-emerald-500/60' : 'border-rose-500/60'} rounded-xl p-2.5 flex flex-col justify-between cursor-pointer hover:border-rose-400 transition">
-              <div class="flex justify-between items-center pointer-events-none">
-                <span class="text-[10px] font-black uppercase px-1.5 py-0.5 rounded bg-slate-950 text-amber-300">${slot.key}</span>
-                <span class="font-display text-2xl font-bold ${isNatural ? 'text-emerald-400' : 'text-rose-400'} leading-none">
-                  ${effOvr} ${!isNatural ? '(-5)' : ''}
-                </span>
-              </div>
-              <div class="my-1.5 pointer-events-none">
-                <div class="font-extrabold text-xs text-white truncate">${card.name}</div>
-                <div class="text-[10px] text-slate-400 truncate">${card.teamShort} • ${card.role}</div>
-              </div>
-              <span class="text-[9px] text-rose-300 font-bold text-center bg-rose-950/50 py-1 rounded pointer-events-none">
-                <i class="fa-solid fa-xmark mr-1"></i> Rimuovi
-              </span>
-            </div>
+            <button type="button" data-action="select-lineup-slot" data-slot="${slot.key}"
+                    class="h-36 rounded-2xl border-2 ${isSelected ? 'border-amber-400 bg-amber-500/15' : 'border-dashed border-slate-700 bg-slate-900/50 hover:border-slate-500'} flex flex-col items-center justify-center p-3 text-center transition active:scale-95">
+              <span class="text-xs font-black uppercase tracking-wider ${isSelected ? 'text-amber-300' : 'text-slate-400'} pointer-events-none">${slot.key}</span>
+              <i class="fa-solid fa-user-plus text-slate-600 text-lg my-1.5 pointer-events-none"></i>
+              <span class="text-[10px] font-bold text-slate-500 pointer-events-none">${slot.label}</span>
+            </button>
           `;
         }
 
+        const isNaturalFit = doesPlayerFitRoleSlot(card.role, slot.key);
         return `
-          <div data-action="select-lineup-slot" data-slot="${slot.key}" class="min-h-[112px] rounded-xl border-2 border-dashed ${isSelected ? 'border-amber-400 bg-amber-500/10' : 'border-slate-700 bg-slate-900/50'} flex flex-col items-center justify-center p-2 text-center cursor-pointer hover:border-slate-500 transition">
-            <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-slate-800 text-slate-300 mb-1 pointer-events-none">${slot.key}</span>
-            <span class="text-[10px] font-bold text-slate-400 pointer-events-none">${slot.label}</span>
-            <span class="text-[9px] text-slate-500 mt-1 pointer-events-none">${isSelected ? 'Scegli sotto...' : 'Clicca per selezionare'}</span>
+          <div class="h-36 rounded-2xl border-2 ${isSelected ? 'border-amber-400' : isNaturalFit ? 'border-emerald-500/70' : 'border-rose-500/80'} bg-gradient-to-b from-slate-800 to-slate-950 p-2.5 flex flex-col justify-between text-center relative shadow-lg">
+            <div class="flex justify-between items-center">
+              <button type="button" data-action="select-lineup-slot" data-slot="${slot.key}"
+                      class="text-[10px] font-black px-2 py-0.5 rounded ${isNaturalFit ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/25 text-rose-300'}">
+                ${slot.key} ${isNaturalFit ? '✓' : '(-5)'}
+              </button>
+              <button type="button" data-action="remove-lineup-slot" data-slot="${slot.key}" title="Rimuovi dallo slot"
+                      class="w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-[10px] flex items-center justify-center shadow">
+                <i class="fa-solid fa-xmark pointer-events-none"></i>
+              </button>
+            </div>
+            <div class="my-auto">
+              <span class="font-display text-2xl font-bold text-amber-400 leading-none">${isNaturalFit ? card.ovr : card.ovr - 5}</span>
+              <div class="font-bold text-xs text-white truncate mt-0.5">${card.name}</div>
+              <div class="text-[9px] text-slate-400 truncate">${card.teamShort} • ${card.role}</div>
+            </div>
           </div>
         `;
       }).join('');
@@ -4066,332 +3801,337 @@
         .filter(c => c.type === 'player' && (currentUserState.owned[c.id] || 0) > 0)
         .sort((a, b) => b.ovr - a.ovr);
 
-      const usedIds = Object.values(currentUserState.lineupSlots).filter(Boolean);
-
       if (ownedPlayers.length === 0) {
-        pickerEl.innerHTML = `
+        pickerContainer.innerHTML = `
           <div class="col-span-full text-center py-6 text-slate-400 text-xs">
-            Non possiedi ancora nessun giocatore. Spacchetta qualche bustina per schierare il quintetto!
+            Non hai ancora giocatori nel tuo album! Apri qualche bustina per schierare il quintetto.
           </div>
         `;
         return;
       }
 
-      pickerEl.innerHTML = ownedPlayers.map(card => {
-        const inLineup = usedIds.includes(card.id);
-        const natSlots = getNaturalSlotsForCard(card).join('/');
+      const assignedIds = Object.values(slots).filter(Boolean);
+
+      pickerContainer.innerHTML = ownedPlayers.map(player => {
+        const assignedSlot = LINEUP_ROLE_SLOTS.find(s => slots[s.key] === player.id);
+        const isSelected = Boolean(assignedSlot);
+        const naturalSlots = getNaturalSlotsForRole(player.role).join('/');
+
         return `
-          <button type="button" data-action="assign-player-slot" data-card-id="${card.id}"
-                  class="p-2.5 rounded-xl border text-left transition active:scale-95 ${inLineup ? 'bg-amber-500/20 border-amber-400 text-white' : 'bg-slate-900/90 border-slate-700 hover:border-slate-500 text-slate-200'}">
-            <div class="flex justify-between items-center pointer-events-none">
-              <span class="font-display text-xl font-bold text-amber-400 leading-none">${card.ovr}</span>
-              <span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-950 text-cyan-300">${natSlots}</span>
+          <button type="button" data-action="assign-player-slot" data-card-id="${player.id}"
+                  class="p-2.5 rounded-xl border text-left transition active:scale-95 ${
+                    isSelected
+                      ? 'bg-[#ff6b00]/20 border-[#ff6b00] text-white'
+                      : 'bg-slate-900/90 border-slate-700/80 hover:border-slate-500 text-slate-200'
+                  }">
+            <div class="flex justify-between items-center text-[10px] font-extrabold pointer-events-none">
+              <span class="text-amber-400">OVR ${player.ovr}</span>
+              <span class="text-cyan-300">${isSelected ? `IN ${assignedSlot.key}` : naturalSlots}</span>
             </div>
-            <div class="font-bold text-xs truncate mt-1 pointer-events-none">${card.name}</div>
-            <div class="text-[10px] text-slate-400 truncate pointer-events-none">${card.teamShort}</div>
+            <div class="font-bold text-xs truncate mt-0.5 pointer-events-none">${player.name}</div>
+            <div class="text-[10px] text-slate-400 truncate pointer-events-none">${player.teamShort} • ${player.role}</div>
           </button>
         `;
       }).join('');
     }
 
     function assignPlayerToLineup(cardId) {
-      if (!currentUserState) return;
       const card = ALL_CARDS.find(c => c.id === cardId);
-      if (!card) return;
-
+      if (!card || !currentUserState) return;
       const slots = currentUserState.lineupSlots;
 
-      const existingSlot = Object.keys(slots).find(k => slots[k] === cardId);
+      const existingSlot = LINEUP_ROLE_SLOTS.find(s => slots[s.key] === cardId);
       if (existingSlot) {
-        slots[existingSlot] = null;
-        selectedTargetSlot = null;
+        slots[existingSlot.key] = null;
         saveCurrentUserState();
         renderLineupSection();
         return;
       }
 
-      if (selectedTargetSlot) {
-        slots[selectedTargetSlot] = cardId;
-        selectedTargetSlot = null;
+      if (selectedLineupSlotKey) {
+        slots[selectedLineupSlotKey] = cardId;
+        selectedLineupSlotKey = null;
+        const hint = document.getElementById('selected-slot-hint');
+        if (hint) hint.textContent = 'Assegnazione automatica al ruolo naturale';
         saveCurrentUserState();
         renderLineupSection();
         return;
       }
 
-      const naturalSlots = getNaturalSlotsForCard(card);
-      let chosen = naturalSlots.find(s => !slots[s]);
-      if (!chosen) {
-        chosen = POSITION_SLOTS.map(s => s.key).find(k => !slots[k]);
-      }
-      if (!chosen) {
-        showToast('Il quintetto ha già 5 giocatori! Rimuovine uno o clicca uno slot.', 'error');
+      const naturalSlots = getNaturalSlotsForRole(card.role);
+      const emptyNatural = naturalSlots.find(k => !slots[k]);
+      if (emptyNatural) {
+        slots[emptyNatural] = cardId;
+        saveCurrentUserState();
+        renderLineupSection();
         return;
       }
 
-      slots[chosen] = cardId;
+      const anyEmpty = LINEUP_ROLE_SLOTS.find(s => !slots[s.key]);
+      if (anyEmpty) {
+        slots[anyEmpty.key] = cardId;
+        saveCurrentUserState();
+        renderLineupSection();
+        return;
+      }
+
+      showToast('Tutti i 5 slot del quintetto sono pieni! Clicca uno slot da sostituire.', 'info');
+    }
+
+    function removeLineupSlot(slotKey) {
+      if (!currentUserState) return;
+      currentUserState.lineupSlots[slotKey] = null;
       saveCurrentUserState();
       renderLineupSection();
     }
 
-    function autoFillBestLineup() {
-      if (!currentUserState) return;
+    function autoBestLineup() {
       const ownedPlayers = ALL_CARDS
         .filter(c => c.type === 'player' && (currentUserState.owned[c.id] || 0) > 0)
         .sort((a, b) => b.ovr - a.ovr);
 
-      if (ownedPlayers.length === 0) {
-        showToast('Nessun giocatore disponibile nell\'album!', 'error');
-        return;
-      }
-
       const newSlots = { PG: null, SG: null, SF: null, PF: null, C: null };
-      const used = new Set();
+      const usedIds = new Set();
 
-      POSITION_SLOTS.forEach(slot => {
-        const bestNat = ownedPlayers.find(p => !used.has(p.id) && getNaturalSlotsForCard(p).includes(slot.key));
-        if (bestNat) {
-          newSlots[slot.key] = bestNat.id;
-          used.add(bestNat.id);
+      LINEUP_ROLE_SLOTS.forEach(slot => {
+        const bestFit = ownedPlayers.find(p => !usedIds.has(p.id) && doesPlayerFitRoleSlot(p.role, slot.key));
+        if (bestFit) {
+          newSlots[slot.key] = bestFit.id;
+          usedIds.add(bestFit.id);
         }
       });
 
-      POSITION_SLOTS.forEach(slot => {
+      LINEUP_ROLE_SLOTS.forEach(slot => {
         if (!newSlots[slot.key]) {
-          const fallback = ownedPlayers.find(p => !used.has(p.id));
+          const fallback = ownedPlayers.find(p => !usedIds.has(p.id));
           if (fallback) {
             newSlots[slot.key] = fallback.id;
-            used.add(fallback.id);
+            usedIds.add(fallback.id);
           }
         }
       });
 
       currentUserState.lineupSlots = newSlots;
-      selectedTargetSlot = null;
       saveCurrentUserState();
       renderLineupSection();
       showToast('Miglior quintetto per ruoli schierato!', 'success');
     }
 
     function clearLineup() {
-      if (!currentUserState) return;
       currentUserState.lineupSlots = { PG: null, SG: null, SF: null, PF: null, C: null };
-      selectedTargetSlot = null;
       saveCurrentUserState();
       renderLineupSection();
     }
 
-    function startInteractiveMatch() {
-      if (!currentUserState) return;
+    function startTacticalMatch() {
+      const metrics = calculateLineupMetrics();
+      if (metrics.count < 5) {
+        showToast('Devi schierare tutti e 5 i titolari (PG, SG, SF, PF, C) per giocare!', 'error');
+        return;
+      }
+
       const todayCount = getTodayMatchesCount();
       if (todayCount >= 10) {
-        showToast('Hai già giocato le 10 partite giornaliere! Torna domani.', 'error');
+        showToast('Hai raggiunto il limite massimo di 10 partite tattiche per oggi! Torna domani.', 'error');
         return;
       }
 
-      const { count, avgOvr, cardsBySlot } = computeLineupMetrics();
-      if (count < 5) {
-        showToast('Devi schierare tutti e 5 i ruoli del quintetto prima di giocare!', 'error');
-        return;
-      }
+      incrementTodayMatchesCount();
+      saveCurrentUserState();
+      renderLineupSection();
 
-      const myTeamId = currentUserState.discord.favTeamId || 'fortitudo';
-      const opponents = TEAMS_DATA.filter(t => t.id !== myTeamId);
-      const opponent = opponents[Math.floor(Math.random() * opponents.length)];
-      const oppOvr = Math.round(opponent.roster.reduce((s, p) => s + p.ovr, 0) / opponent.roster.length);
+      const opponentTeam = TEAMS_DATA[Math.floor(Math.random() * TEAMS_DATA.length)];
+      const oppOvr = 79 + Math.floor(Math.random() * 9);
 
-      const tactic = currentUserState.tactic || 'pace';
-      let tacticBonus = 0;
-      const slotList = Object.values(cardsBySlot);
-      if (tactic === 'pace') {
-        const avgTir = slotList.reduce((s, e) => s + e.card.stats.tir, 0) / 5;
-        if (avgTir >= 84) tacticBonus = 3;
-      } else if (tactic === 'defense') {
-        const avgDif = slotList.reduce((s, e) => s + e.card.stats.dif, 0) / 5;
-        if (avgDif >= 83) tacticBonus = 3;
-      } else if (tactic === 'pickroll') {
-        const avgReg = slotList.reduce((s, e) => s + e.card.stats.reg, 0) / 5;
-        if (avgReg >= 84) tacticBonus = 3;
-      }
+      const halfUserPts = Math.round((metrics.effectiveOvr * 0.48) + Math.floor(Math.random() * 11) - 3);
+      const halfOppPts = Math.round((oppOvr * 0.48) + Math.floor(Math.random() * 11) - 3);
 
-      const diff1H = (avgOvr + tacticBonus) - oppOvr;
-      const myHalfScore = Math.max(32, Math.min(56, Math.round(41 + (diff1H * 0.7) + (Math.random() * 10 - 5))));
-      const oppHalfScore = Math.max(32, Math.min(56, Math.round(41 - (diff1H * 0.7) + (Math.random() * 10 - 5))));
-
-      pendingHalfTimeMatch = {
-        opponent,
+      activeHalftimeMatch = {
+        metrics,
+        opponentTeam,
         oppOvr,
-        avgOvr,
-        tacticBonus,
-        myHalfScore,
-        oppHalfScore
+        halfUserPts,
+        halfOppPts
       };
 
       const resBox = document.getElementById('match-result-box');
       resBox.classList.remove('hidden');
       resBox.innerHTML = `
-        <div class="text-xs font-extrabold uppercase tracking-wider text-amber-400">
-          Intervallo (Fine 2° Quarto) vs ${opponent.name} (OVR ${oppOvr})
+        <div class="text-xs font-extrabold uppercase tracking-widest text-amber-400">
+          <i class="fa-solid fa-stopwatch mr-1"></i> Fine 2° Quarto • Intervallo Lungo
         </div>
-        <div class="font-display text-4xl sm:text-5xl font-bold text-white tracking-wider">
-          TU <span class="text-amber-400">${myHalfScore}</span> - <span class="text-slate-300">${oppHalfScore}</span> ${opponent.code}
+        <div class="flex items-center justify-center gap-6 py-2">
+          <div class="text-right">
+            <span class="block text-[11px] font-bold text-slate-400">IL TUO QUINTETTO</span>
+            <span class="font-display text-4xl font-bold text-white">${halfUserPts}</span>
+          </div>
+          <span class="text-slate-500 font-black">VS</span>
+          <div class="text-left">
+            <span class="block text-[11px] font-bold text-slate-400">${opponentTeam.shortName.toUpperCase()} (OVR ${oppOvr})</span>
+            <span class="font-display text-4xl font-bold text-slate-300">${halfOppPts}</span>
+          </div>
         </div>
-        <p class="text-xs text-slate-300">Scegli la chiamata tattica negli spogliatoi per il 2° Tempo decisivo:</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-          <button type="button" data-action="finish-match-halftime" data-call="press" class="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition active:scale-95">
-            <i class="fa-solid fa-fire mr-1 pointer-events-none"></i> Pressing a Tutto Campo
+        <p class="text-xs text-slate-300">Chiama il Timeout nello spogliatoio e scegli la mossa per il 2° Tempo:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+          <button type="button" data-action="resolve-halftime" data-choice="press" class="p-2.5 rounded-xl bg-rose-600/25 hover:bg-rose-600/40 border border-rose-500/60 text-white font-bold text-xs transition active:scale-95">
+            <i class="fa-solid fa-fire mr-1 text-rose-400 pointer-events-none"></i> Pressing a Tutto Campo
           </button>
-          <button type="button" data-action="finish-match-halftime" data-call="iso" class="py-2.5 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs transition active:scale-95">
-            <i class="fa-solid fa-star mr-1 pointer-events-none"></i> Palla al Top Scorer
+          <button type="button" data-action="resolve-halftime" data-choice="triples" class="p-2.5 rounded-xl bg-amber-500/25 hover:bg-amber-500/40 border border-amber-400/60 text-white font-bold text-xs transition active:scale-95">
+            <i class="fa-solid fa-bullseye mr-1 text-amber-400 pointer-events-none"></i> Pioggia di Triple
+          </button>
+          <button type="button" data-action="resolve-halftime" data-choice="paint" class="p-2.5 rounded-xl bg-cyan-500/25 hover:bg-cyan-500/40 border border-cyan-400/60 text-white font-bold text-xs transition active:scale-95">
+            <i class="fa-solid fa-shield mr-1 text-cyan-400 pointer-events-none"></i> Palla sotto Canestro
           </button>
         </div>
       `;
     }
 
-    function finishMatchSecondHalf(halftimeCall) {
-      if (!currentUserState || !pendingHalfTimeMatch) return;
-      const m = pendingHalfTimeMatch;
-      pendingHalfTimeMatch = null;
+    function resolveHalftimeChoice(choice) {
+      if (!activeHalftimeMatch || !currentUserState) return;
+      const { metrics, opponentTeam, oppOvr, halfUserPts, halfOppPts } = activeHalftimeMatch;
+      activeHalftimeMatch = null;
 
-      const todayCount = getTodayMatchesCount();
-      if (todayCount >= 10) return;
+      let choiceBonus = 0;
+      if (choice === 'press') choiceBonus = Math.floor(Math.random() * 8) - 1;
+      if (choice === 'triples') choiceBonus = Math.floor(Math.random() * 10) - 2;
+      if (choice === 'paint') choiceBonus = 3 + Math.floor(Math.random() * 4);
 
-      currentUserState.dailyMatches.count = todayCount + 1;
+      const secondHalfUser = Math.round((metrics.effectiveOvr * 0.47) + choiceBonus + Math.floor(Math.random() * 9));
+      const secondHalfOpp = Math.round((oppOvr * 0.47) + Math.floor(Math.random() * 9));
 
-      const callBonus = halftoneBonusEval(halftimeCall);
-      const diff2H = (m.avgOvr + m.tacticBonus + callBonus) - m.oppOvr;
+      let userScore = halfUserPts + secondHalfUser;
+      let oppScore = halfOppPts + secondHalfOpp;
+      if (userScore === oppScore) userScore += 2;
 
-      let myFinal = m.myHalfScore + Math.max(33, Math.min(58, Math.round(41 + (diff2H * 0.85) + (Math.random() * 12 - 6))));
-      let oppFinal = m.oppHalfScore + Math.max(33, Math.min(58, Math.round(41 - (diff2H * 0.85) + (Math.random() * 12 - 6))));
-      if (myFinal === oppFinal) myFinal += 2;
-
-      const won = myFinal > oppFinal;
-      let reward = 0;
+      const won = userScore > oppScore;
+      const prize = won ? 80 : 0;
 
       if (won) {
-        reward = 80;
-        currentUserState.credits += reward;
         ensureWeeklyMissionsResetIfNeeded();
+        currentUserState.credits += prize;
         currentUserState.matchWins = (currentUserState.matchWins || 0) + 1;
         currentUserState.weeklyMissionsState.winsWeek = (currentUserState.weeklyMissionsState.winsWeek || 0) + 1;
-        playSound('coin');
+        playSound('legend');
         spawnConfettiBurst();
       } else {
-        reward = 0;
         playSound('flip');
       }
 
       saveCurrentUserState();
-      renderWheelAndMissionsTab();
       updateCreditsUI();
-      updateDailyMatchesBadge();
+      renderMissionsTab();
       renderLeaderboard();
+
+      const mvpCard = metrics.entries.sort((a, b) => b.card.ovr - a.card.ovr)[0].card;
+      const ptsMvp = 16 + Math.floor(Math.random() * 14);
+      const rebMvp = 4 + Math.floor(Math.random() * 8);
 
       const resBox = document.getElementById('match-result-box');
       resBox.innerHTML = `
-        <div class="text-xs font-extrabold uppercase tracking-wider text-slate-400">
-          Risultato Finale vs ${m.opponent.name} (Partita ${currentUserState.dailyMatches.count}/10 di oggi)
+        <div class="text-xs font-extrabold uppercase tracking-widest ${won ? 'text-emerald-400' : 'text-rose-400'}">
+          ${won ? 'FINALE • VITTORIA SERIE A2!' : 'FINALE • SCONFITTA ALLA SIRENA'}
         </div>
-        <div class="font-display text-4xl sm:text-5xl font-bold text-white tracking-wider">
-          TU <span class="${won ? 'text-emerald-400' : 'text-rose-400'}">${myFinal}</span> - <span class="text-slate-300">${oppFinal}</span> ${m.opponent.code}
+        <div class="flex items-center justify-center gap-6 py-2">
+          <div class="text-right">
+            <span class="block text-xs font-bold text-slate-400">IL TUO QUINTETTO</span>
+            <span class="font-display text-4xl font-bold text-white">${userScore}</span>
+          </div>
+          <span class="text-slate-500 font-black">VS</span>
+          <div class="text-left">
+            <span class="block text-xs font-bold text-slate-400">${opponentTeam.shortName.toUpperCase()}</span>
+            <span class="font-display text-4xl font-bold text-slate-300">${oppScore}</span>
+          </div>
         </div>
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full font-extrabold text-sm ${won ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40' : 'bg-rose-500/20 text-rose-300 border border-rose-400/40'}">
-          <i class="fa-solid ${won ? 'fa-trophy' : 'fa-circle-xmark'}"></i>
-          ${won ? `VITTORIA! +${reward} Crediti guadagnati` : 'SCONFITTA! 0 Crediti guadagnati'}
+        <div class="text-xs text-slate-300 bg-slate-950/75 rounded-xl p-2.5 border border-slate-800">
+          <strong class="text-amber-400">MVP del Match:</strong> ${mvpCard.name} (${ptsMvp} PTS, ${rebMvp} REB)
+        </div>
+        <div class="inline-flex items-center gap-1.5 ${won ? 'bg-amber-500/20 border-amber-400/50 text-amber-300' : 'bg-rose-950/60 border-rose-500/40 text-rose-300'} border px-4 py-1.5 rounded-full font-extrabold text-sm">
+          <i class="fa-solid fa-coins"></i> ${won ? '+80 Crediti guadagnati!' : '0 Crediti (Sconfitta)'}
         </div>
       `;
     }
 
-    function halftoneBonusEval(call) {
-      return call === 'press' ? (Math.random() < 0.55 ? 3 : 0) : 2;
-    }
-
     /**
-     * 11. CLASSIFICA LIVE MULTI-BROWSER & ISPEZIONE COLLEZIONE ALTRO PLAYER
+     * 12. CLASSIFICA LIVE COLLEZIONISTI & ISPEZIONE COLLEZIONE PLAYER
      */
     function renderLeaderboard() {
-      if (!currentUserState) return;
-      const sortBy = document.getElementById('leaderboard-sort-select').value;
+      const tbody = document.getElementById('leaderboard-tbody');
+      if (!tbody) return;
 
-      const allProfilesMap = { ...livePublicProfilesMap };
-      allProfilesMap[currentUserState.discord.id] = buildPublicSummary(currentUserState);
+      const sortMode = document.getElementById('leaderboard-sort-select')?.value || 'album';
+      const profilesMap = { ...livePublicProfilesMap };
+      if (currentUserState && currentUserState.discord) {
+        profilesMap[currentUserState.discord.id] = buildPublicSummary(currentUserState);
+      }
 
-      const rows = Object.values(allProfilesMap);
-
-      rows.sort((a, b) => {
-        if (sortBy === 'clubs') {
+      const entries = Object.values(profilesMap);
+      entries.sort((a, b) => {
+        if (sortMode === 'clubs') {
           if ((b.clubs100 || 0) !== (a.clubs100 || 0)) return (b.clubs100 || 0) - (a.clubs100 || 0);
-          return (b.uniqueOwned || 0) - (a.uniqueOwned || 0);
-        }
-        if (sortBy === 'ovr') {
+        } else if (sortMode === 'ovr') {
           if ((b.lineupAvg || 0) !== (a.lineupAvg || 0)) return (b.lineupAvg || 0) - (a.lineupAvg || 0);
-          return (b.uniqueOwned || 0) - (a.uniqueOwned || 0);
-        }
-        if (sortBy === 'wins') {
+        } else if (sortMode === 'wins') {
           if ((b.wins || 0) !== (a.wins || 0)) return (b.wins || 0) - (a.wins || 0);
-          return (b.uniqueOwned || 0) - (a.uniqueOwned || 0);
         }
         if ((b.uniqueOwned || 0) !== (a.uniqueOwned || 0)) return (b.uniqueOwned || 0) - (a.uniqueOwned || 0);
         return (b.clubs100 || 0) - (a.clubs100 || 0);
       });
 
-      const tbody = document.getElementById('leaderboard-tbody');
-      if (rows.length === 0) {
+      if (entries.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="7" class="py-8 text-center text-slate-400 text-xs">
-              Nessun giocatore in classifica al momento.
+            <td colspan="7" class="py-8 text-center text-slate-400">
+              Nessun collezionista registrato ancora. Accedi con Discord per entrare in classifica!
             </td>
           </tr>
         `;
         return;
       }
 
-      tbody.innerHTML = rows.map((row, idx) => {
-        const rank = idx + 1;
-        const isMe = row.discord && row.discord.id === currentUserState.discord.id;
-        const rankBadge = rank === 1
-          ? '<span class="w-7 h-7 rounded-lg bg-yellow-400 text-slate-950 font-black inline-flex items-center justify-center shadow">1</span>'
-          : rank === 2
-            ? '<span class="w-7 h-7 rounded-lg bg-slate-300 text-slate-950 font-black inline-flex items-center justify-center">2</span>'
-            : rank === 3
-              ? '<span class="w-7 h-7 rounded-lg bg-amber-600 text-white font-black inline-flex items-center justify-center">3</span>'
-              : `<span class="font-mono font-bold text-slate-400 pl-2">${rank}</span>`;
+      tbody.innerHTML = entries.map((p, index) => {
+        const rank = index + 1;
+        const isMe = currentUserState && currentUserState.discord && p.discord.id === currentUserState.discord.id;
 
-        const uniqueOwned = row.uniqueOwned || 0;
-        const pct = row.pct || Math.round((uniqueOwned / TOTAL_CARDS_COUNT) * 100);
+        let rankBadge = `<span class="font-extrabold text-slate-400">#${rank}</span>`;
+        if (rank === 1) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-400 text-slate-950 font-black shadow"><i class="fa-solid fa-crown text-xs"></i></span>`;
+        if (rank === 2) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-300 text-slate-950 font-black">2</span>`;
+        if (rank === 3) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-700 text-white font-black">3</span>`;
 
         return `
-          <tr class="${isMe ? 'bg-indigo-950/50' : 'hover:bg-slate-900/60'} transition">
+          <tr class="${isMe ? 'bg-[#5865F2]/15' : 'hover:bg-slate-900/60'} transition">
             <td class="py-3.5 px-4">${rankBadge}</td>
             <td class="py-3.5 px-4">
               <div class="flex items-center gap-2.5">
-                <img src="${row.discord.avatarUrl}" alt="" class="w-8 h-8 rounded-full border ${isMe ? 'border-amber-400' : 'border-slate-600'}" />
+                <img src="${p.discord.avatarUrl}" alt="" class="w-8 h-8 rounded-full border border-indigo-400 object-cover" />
                 <div>
-                  <div class="font-extrabold text-white flex items-center gap-1.5">
-                    <span>${row.discord.username}</span>
-                    ${isMe ? '<span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-400 text-slate-950">TU</span>' : ''}
-                  </div>
-                  <span class="text-[10px] text-slate-400">${row.discord.favTeamShort || 'LNP Fan'}</span>
+                  <span class="block font-extrabold text-white">
+                    ${p.discord.username} ${isMe ? '<span class="text-[10px] bg-indigo-500 text-white px-1.5 py-0.5 rounded ml-1">TU</span>' : ''}
+                  </span>
+                  <span class="block text-[10px] text-slate-400">${p.discord.favTeamShort || 'LNP Fan'}</span>
                 </div>
               </div>
             </td>
             <td class="py-3.5 px-4">
-              <div class="flex items-center gap-2">
-                <span class="font-extrabold text-amber-300">${uniqueOwned}/${TOTAL_CARDS_COUNT}</span>
-                <span class="text-[11px] text-slate-400">(${pct}%)</span>
-              </div>
-              <div class="w-28 h-1.5 bg-slate-950 rounded-full overflow-hidden mt-1">
-                <div class="h-full bg-gradient-to-r from-[#ff6b00] to-amber-400" style="width: ${pct}%"></div>
+              <div class="flex items-center gap-2.5">
+                <div class="w-24 sm:w-32 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-700">
+                  <div class="h-full bg-gradient-to-r from-[#ff6b00] to-amber-400" style="width: ${p.pct || 0}%"></div>
+                </div>
+                <span class="font-extrabold text-amber-300 text-xs">${p.uniqueOwned || 0}/${TOTAL_CARDS_COUNT} (${p.pct || 0}%)</span>
               </div>
             </td>
-            <td class="py-3.5 px-4 text-center font-extrabold text-emerald-400">${row.clubs100 || 0}/20</td>
-            <td class="py-3.5 px-4 text-center font-extrabold text-cyan-300">${row.lineupAvg || 0}</td>
-            <td class="py-3.5 px-4 text-center font-extrabold text-white">${row.wins || 0}</td>
+            <td class="py-3.5 px-4 text-center font-extrabold text-emerald-400">${p.clubs100 || 0} / 20</td>
+            <td class="py-3.5 px-4 text-center font-extrabold text-cyan-300">${p.lineupAvg || '-'}</td>
+            <td class="py-3.5 px-4 text-center font-extrabold text-white">${p.wins || 0}</td>
             <td class="py-3.5 px-4 text-right">
-              <button type="button" data-action="view-user-collection" data-user-id="${row.discord.id}"
-                      class="px-3 py-1.5 rounded-xl bg-cyan-600/25 hover:bg-cyan-600/45 text-cyan-300 border border-cyan-500/50 font-extrabold text-xs transition active:scale-95">
-                <i class="fa-solid fa-eye mr-1 pointer-events-none"></i> Vedi Carte
-              </button>
+              ${isMe ? `
+                <button type="button" data-action="switch-tab" data-tab="album" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition active:scale-95">
+                  Tuo Album
+                </button>
+              ` : `
+                <button type="button" data-action="view-user-collection" data-user-id="${p.discord.id}" class="px-3 py-1.5 rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-200 font-extrabold text-xs border border-cyan-500/50 transition active:scale-95">
+                  <i class="fa-solid fa-eye mr-1 pointer-events-none"></i> Vedi Carte
+                </button>
+              `}
             </td>
           </tr>
         `;
@@ -4404,55 +4144,51 @@
       renderUserCollectionModalContent(userId);
     }
 
-    function renderUserCollectionModalContent(userId) {
-      const profile = (currentUserState && currentUserState.discord.id === userId)
-        ? buildPublicSummary(currentUserState)
-        : livePublicProfilesMap[userId];
+    function closeUserCollectionModal() {
+      currentlyViewedUserId = null;
+      document.getElementById('user-collection-modal').classList.add('hidden');
+    }
 
-      if (!profile) return;
+    function renderUserCollectionModalContent(userId) {
+      const profile = livePublicProfilesMap[userId];
+      if (!profile || !profile.discord) return;
 
       document.getElementById('viewer-user-avatar').src = profile.discord.avatarUrl;
-      document.getElementById('viewer-user-name').textContent = `Album di ${profile.discord.username}`;
+      document.getElementById('viewer-user-name').textContent = `Collezione di ${profile.discord.username}`;
       document.getElementById('viewer-user-badge').textContent = `${profile.uniqueOwned || 0} / ${TOTAL_CARDS_COUNT} (${profile.pct || 0}%)`;
 
-      const isMe = currentUserState && currentUserState.discord.id === userId;
-      document.getElementById('viewer-user-subtitle').textContent = isMe
-        ? 'Questa è la tua collezione pubblica visibile agli altri utenti.'
-        : 'Carte possedute da questo utente. Puoi proporre subito uno scambio per le carte che ti mancano!';
+      const otherOwnedMap = profile.owned || (profile.fullState && profile.fullState.owned) || {};
+      const teamF = document.getElementById('viewer-team-filter').value;
+      const rarityF = document.getElementById('viewer-rarity-filter').value;
+      const copiesF = document.getElementById('viewer-copies-filter').value;
 
-      const teamVal = document.getElementById('viewer-team-filter').value;
-      const rarityVal = document.getElementById('viewer-rarity-filter').value;
-      const copiesVal = document.getElementById('viewer-copies-filter').value;
-
-      const userOwnedMap = profile.owned || {};
-      const ownedCards = ALL_CARDS.filter(c => (userOwnedMap[c.id] || 0) > 0).filter(card => {
-        const theirCount = userOwnedMap[card.id] || 0;
-        const myCount = currentUserState ? (currentUserState.owned[card.id] || 0) : 0;
-
-        if (teamVal !== 'ALL' && card.teamId !== teamVal) return false;
-        if (rarityVal !== 'ALL' && card.rarity !== rarityVal) return false;
-        if (copiesVal === 'DUPS_ONLY' && theirCount < 2) return false;
-        if (copiesVal === 'MISSING_FOR_ME' && myCount > 0) return false;
+      const cardsToShow = ALL_CARDS.filter(card => {
+        const theirCount = otherOwnedMap[card.id] || 0;
+        if (theirCount <= 0) return false;
+        if (teamF !== 'ALL' && card.teamId !== teamF) return false;
+        if (rarityF !== 'ALL' && card.rarity !== rarityF) return false;
+        if (copiesF === 'DUPS_ONLY' && theirCount <= 1) return false;
+        if (copiesF === 'MISSING_FOR_ME' && (currentUserState.owned[card.id] || 0) > 0) return false;
         return true;
       });
 
       const grid = document.getElementById('viewer-cards-grid');
-      if (ownedCards.length === 0) {
+      if (cardsToShow.length === 0) {
         grid.innerHTML = `
           <div class="col-span-full py-12 text-center text-slate-400">
-            <i class="fa-solid fa-box-open text-3xl text-slate-600 mb-2"></i>
-            <p class="font-bold text-white">Nessuna figurina trovata con questi filtri.</p>
+            <i class="fa-solid fa-folder-open text-3xl text-slate-600 mb-2"></i>
+            <p class="font-bold text-white">Nessuna carta trovata con i filtri selezionati.</p>
           </div>
         `;
         return;
       }
 
-      grid.innerHTML = ownedCards.map(card => {
-        const theirCount = userOwnedMap[card.id] || 0;
-        const iNeedIt = !isMe && currentUserState && (currentUserState.owned[card.id] || 0) === 0;
+      grid.innerHTML = cardsToShow.map(card => {
+        const theirCount = otherOwnedMap[card.id] || 0;
+        const iNeedIt = (currentUserState.owned[card.id] || 0) === 0;
 
         return `
-          <div class="relative w-full max-w-[215px] flex flex-col gap-2">
+          <div class="w-full max-w-[215px] flex flex-col items-center gap-2 relative">
             <span class="absolute -top-2 -left-2 z-20 bg-slate-950 text-cyan-300 font-black text-xs px-2.5 py-0.5 rounded-full shadow-lg border border-cyan-400/60 pointer-events-none">
               x${theirCount}
             </span>
@@ -4460,172 +4196,164 @@
               showBadge: iNeedIt ? 'NEEDED' : null,
               clickable: true
             })}
-            ${!isMe ? `
-              <button type="button" data-action="propose-trade-for-card" data-card-id="${card.id}"
-                      class="w-full py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-[11px] shadow transition active:scale-95">
-                <i class="fa-solid fa-right-left mr-1 pointer-events-none"></i> Proponi Scambio
-              </button>
-            ` : ''}
+            <button type="button" data-action="propose-trade-for-card" data-card-id="${card.id}"
+                    class="w-full py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:brightness-110 text-white font-extrabold text-[11px] shadow transition active:scale-95">
+              <i class="fa-solid fa-right-left mr-1 pointer-events-none"></i> Proponi Scambio
+            </button>
           </div>
         `;
       }).join('');
     }
 
-    function jumpToProposeTradeForCard(requestedCardId) {
-      document.getElementById('user-collection-modal').classList.add('hidden');
-      currentlyViewedUserId = null;
-      switchTab('trades');
-      const reqSelect = document.getElementById('trade-request-select');
-      if (reqSelect) {
-        reqSelect.value = requestedCardId;
-      }
-      showToast('Carta impostata nella richiesta di scambio! Scegli ora quale carta offrire.', 'info');
-    }
-
     /**
-     * 12. MODAL ISPEZIONE FIGURINA + CARICAMENTO FOTO ADMIN
+     * 13. OBIETTIVI SETTIMANALI (CON RESET OGNI 7 GIORNI • SOLO COLLEZIONE/PARTITE/SCAMBI)
      */
-    function inspectCard(cardId) {
-      const card = ALL_CARDS.find(c => c.id === cardId);
-      if (!card || !currentUserState) return;
+    const WEEKLY_MISSIONS_DEF = [
+      { id: 'w_pack_3', title: 'Collezionista Attivo', desc: 'Apri 3 bustine questa settimana', target: 3, reward: 220, type: 'packsWeek' },
+      { id: 'w_pack_10', title: 'Cacciatore di Figurini', desc: 'Apri 10 bustine questa settimana', target: 10, reward: 650, type: 'packsWeek' },
+      { id: 'w_win_3', title: 'Coach Vincente', desc: 'Vinci 3 Partite Tattiche questa settimana', target: 3, reward: 250, type: 'winsWeek' },
+      { id: 'w_win_10', title: 'Dominatore del Parquet', desc: 'Vinci 10 Partite Tattiche questa settimana', target: 10, reward: 750, type: 'winsWeek' },
+      { id: 'w_trade_2', title: 'Direttore Sportivo', desc: 'Completa 2 Scambi Player questa settimana', target: 2, reward: 300, type: 'tradesWeek' },
+      { id: 'w_album_100', title: 'Collezione Solida', desc: 'Raggiungi 100 figurine uniche nell\'album', target: 100, reward: 500, type: 'unique' },
+      { id: 'w_album_220', title: 'Esperto Serie A2', desc: 'Raggiungi 220 figurine uniche nell\'album', target: 220, reward: 1100, type: 'unique' },
+      { id: 'w_club_1', title: 'Club Completo', desc: 'Completa almeno 1 squadra al 100%', target: 1, reward: 600, type: 'clubs100' }
+    ];
 
-      const count = currentUserState.owned[card.id] || 0;
-      const isWish = currentUserState.wishlist.includes(card.id);
-      const container = document.getElementById('inspect-card-container');
-      const detailsBox = document.getElementById('inspect-details-box');
-
-      container.innerHTML = renderCardHTML(card, { clickable: false });
-
-      const bioHTML = card.type === 'player'
-        ? `
-          <div class="grid grid-cols-3 gap-2 bg-slate-950/75 p-2.5 rounded-xl border border-slate-800 text-center">
-            <div><span class="block text-[9px] text-slate-400">NASCITA</span><span class="font-bold text-white">${card.dob}</span></div>
-            <div><span class="block text-[9px] text-slate-400">ALTEZZA</span><span class="font-bold text-white">${card.height} cm</span></div>
-            <div><span class="block text-[9px] text-slate-400">PESO</span><span class="font-bold text-white">${card.weight} kg</span></div>
-          </div>
-        `
-        : `<div class="bg-slate-950/75 p-2.5 rounded-xl border border-slate-800 text-center text-slate-300 font-semibold">${card.fullName} • Stemma Ufficiale LNP</div>`;
-
-      const adminPhotoEditorHTML = adminUnlocked ? `
-        <div class="bg-cyan-950/40 border border-cyan-500/50 rounded-xl p-2.5 space-y-2">
-          <span class="block text-[10px] font-black uppercase text-cyan-300">
-            <i class="fa-solid fa-camera mr-1"></i> Admin: Cambia Foto Figurina
-          </span>
-          <div class="flex gap-1.5">
-            <input id="inspect-admin-photo-url" type="url" placeholder="URL immagine (https://...)" class="flex-1 bg-slate-950 border border-slate-700 text-white text-[11px] rounded-lg px-2 py-1.5 focus:outline-none" />
-            <button type="button" data-action="inspect-save-photo-url" data-card-id="${card.id}" class="px-2.5 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[11px]">
-              Salva
-            </button>
-          </div>
-          <label class="block cursor-pointer py-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-center text-[10px] font-bold text-slate-200">
-            <i class="fa-solid fa-upload mr-1 text-cyan-400"></i> Carica Foto da Dispositivo
-            <input type="file" accept="image/*" data-inspect-file-card="${card.id}" class="hidden" />
-          </label>
-        </div>
-      ` : '';
-
-      detailsBox.innerHTML = `
-        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-          <span class="text-slate-400 font-semibold">Squadra:</span>
-          <span class="font-extrabold text-white text-right">${card.teamName}</span>
-        </div>
-        ${bioHTML}
-        <div class="flex justify-between items-center pt-1">
-          <span class="text-slate-400 font-semibold">Copie nell'Album:</span>
-          <span class="font-extrabold ${count > 0 ? 'text-emerald-400' : 'text-rose-400'}">
-            ${count > 0 ? `${count} ${count === 1 ? 'copia' : 'copie'}` : 'Non ancora trovata'}
-          </span>
-        </div>
-        <button type="button" data-action="toggle-wishlist-inspect" data-card-id="${card.id}" class="w-full py-2 rounded-xl border ${isWish ? 'bg-rose-500/20 border-rose-400 text-rose-200' : 'bg-slate-900 border-slate-700 text-slate-300 hover:text-white'} font-extrabold text-xs transition active:scale-95">
-          <i class="fa-solid fa-heart ${isWish ? 'text-rose-500' : 'text-slate-400'} mr-1 pointer-events-none"></i>
-          ${isWish ? 'Rimuovi dalla Wishlist' : 'Aggiungi alla Wishlist'}
-        </button>
-        ${adminPhotoEditorHTML}
-      `;
-
-      const fileInput = detailsBox.querySelector('input[data-inspect-file-card]');
-      if (fileInput) {
-        fileInput.addEventListener('change', (ev) => {
-          const file = ev.target.files && ev.target.files[0];
-          if (!file) return;
-          compressImageFileToDataUrl(file, async (dataUrl) => {
-            await saveCustomCardPhoto(card.id, dataUrl);
-            inspectCard(card.id);
-            renderAlbum();
-            showToast('Foto figurina aggiornata per tutti gli utenti!', 'success');
-          });
-        });
-      }
-
-      document.getElementById('card-inspect-modal').classList.remove('hidden');
-    }
-
-    function compressImageFileToDataUrl(file, callback) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const maxW = 360;
-          const scale = Math.min(1, maxW / img.width);
-          canvas.width = Math.round(img.width * scale);
-          canvas.height = Math.round(img.height * scale);
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          callback(canvas.toDataURL('image/jpeg', 0.82));
+    function ensureWeeklyMissionsResetIfNeeded() {
+      if (!currentUserState) return;
+      const curWeek = getCurrentWeekIndex();
+      if (!currentUserState.weeklyMissionsState || currentUserState.weeklyMissionsState.weekIndex !== curWeek) {
+        currentUserState.weeklyMissionsState = {
+          weekIndex: curWeek,
+          packsOpenedWeek: 0,
+          tradesWeek: 0,
+          winsWeek: 0,
+          claimed: []
         };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    /**
-     * 13. CONSOLE ADMIN SEGRETA (CTRL + SHIFT + A -> PASSWORD "bananabella")
-     */
-    function openAdminModal() {
-      document.getElementById('admin-secret-modal').classList.remove('hidden');
-      if (adminUnlocked) {
-        document.getElementById('admin-login-box').classList.add('hidden');
-        document.getElementById('admin-controls-box').classList.remove('hidden');
-      } else {
-        document.getElementById('admin-login-box').classList.remove('hidden');
-        document.getElementById('admin-controls-box').classList.add('hidden');
-        const input = document.getElementById('admin-password-input');
-        input.value = '';
-        setTimeout(() => input.focus(), 50);
+        saveCurrentUserState();
       }
     }
 
-    function verifyAdminPassword() {
-      const val = document.getElementById('admin-password-input').value.trim();
-      if (val === 'bananabella') {
-        adminUnlocked = true;
-        document.getElementById('admin-login-box').classList.add('hidden');
-        document.getElementById('admin-controls-box').classList.remove('hidden');
-        showToast('Accesso Admin sbloccato!', 'success');
+    function getWeeklyCountdownText() {
+      const msPerDay = 86400000;
+      const now = new Date();
+      const localMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const dayNum = Math.floor(localMidnight / msPerDay) + dayOffsetForTesting;
+      const nextWeekStartDay = (Math.floor(dayNum / 7) + 1) * 7;
+      const nextWeekStartMs = nextWeekStartDay * msPerDay;
+      const diffMs = Math.max(0, nextWeekStartMs - Date.now());
+      const days = Math.floor(diffMs / msPerDay);
+      const hours = Math.floor((diffMs % msPerDay) / 3600000);
+      return `${days}g ${String(hours).padStart(2, '0')}h`;
+    }
+
+    function getMissionProgress(m) {
+      if (!currentUserState) return 0;
+      ensureWeeklyMissionsResetIfNeeded();
+      const wm = currentUserState.weeklyMissionsState;
+
+      if (m.type === 'packsWeek') return wm.packsOpenedWeek || 0;
+      if (m.type === 'winsWeek') return wm.winsWeek || 0;
+      if (m.type === 'tradesWeek') return wm.tradesWeek || 0;
+      if (m.type === 'unique') return ALL_CARDS.filter(c => (currentUserState.owned[c.id] || 0) > 0).length;
+      if (m.type === 'clubs100') return (currentUserState.completedTeams || []).length;
+      return 0;
+    }
+
+    function renderMissionsTab() {
+      if (!currentUserState) return;
+      ensureWeeklyMissionsResetIfNeeded();
+      const claimed = currentUserState.weeklyMissionsState.claimed || [];
+      let readyCount = 0;
+
+      const timerBadge = document.getElementById('weekly-missions-timer-badge');
+      if (timerBadge) {
+        timerBadge.innerHTML = `<i class="fa-regular fa-clock mr-1"></i> Scade tra: ${getWeeklyCountdownText()}`;
+      }
+
+      const grid = document.getElementById('missions-grid');
+      if (!grid) return;
+
+      grid.innerHTML = WEEKLY_MISSIONS_DEF.map(m => {
+        const prog = Math.min(m.target, getMissionProgress(m));
+        const isClaimed = claimed.includes(m.id);
+        const isReady = !isClaimed && prog >= m.target;
+        if (isReady) readyCount++;
+
+        const pct = Math.round((prog / m.target) * 100);
+
+        return `
+          <div class="bg-slate-900/90 border ${isReady ? 'border-amber-400 shadow-lg shadow-amber-500/15' : isClaimed ? 'border-emerald-500/40 opacity-80' : 'border-slate-700/80'} rounded-2xl p-4 flex flex-col justify-between gap-3">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <h4 class="font-extrabold text-sm text-white">${m.title}</h4>
+                <p class="text-xs text-slate-400 mt-0.5">${m.desc}</p>
+              </div>
+              <span class="shrink-0 bg-amber-500/20 border border-amber-400/40 text-amber-300 font-extrabold text-xs px-2.5 py-1 rounded-lg">
+                +${m.reward} <i class="fa-solid fa-coins text-[10px]"></i>
+              </span>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-[11px] font-bold mb-1">
+                <span class="text-slate-400">Progresso</span>
+                <span class="${isReady || isClaimed ? 'text-emerald-400' : 'text-white'}">${prog} / ${m.target}</span>
+              </div>
+              <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                <div class="h-full ${isClaimed ? 'bg-emerald-500' : 'bg-gradient-to-r from-[#ff6b00] to-amber-400'}" style="width: ${pct}%"></div>
+              </div>
+            </div>
+
+            ${isClaimed ? `
+              <div class="w-full py-2 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 font-bold text-xs text-center">
+                <i class="fa-solid fa-check mr-1"></i> Ricompensa Riscattata
+              </div>
+            ` : isReady ? `
+              <button type="button" data-action="claim-mission" data-mission-id="${m.id}" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-black text-xs shadow transition active:scale-95">
+                Riscatta +${m.reward} Crediti!
+              </button>
+            ` : `
+              <div class="w-full py-2 rounded-xl bg-slate-950/70 border border-slate-800 text-slate-500 font-bold text-xs text-center">
+                In corso (${pct}%)
+              </div>
+            `}
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('missions-completed-counter').textContent = `${claimed.length} / ${WEEKLY_MISSIONS_DEF.length}`;
+      const navBadge = document.getElementById('nav-missions-badge');
+      if (readyCount > 0) {
+        navBadge.textContent = `${readyCount} PRONTI!`;
+        navBadge.className = 'text-[10px] bg-amber-500 text-slate-950 font-black px-1.5 py-0.5 rounded-md pointer-events-none animate-pulse';
       } else {
-        showToast('Password errata!', 'error');
+        navBadge.textContent = `${claimed.length}/${WEEKLY_MISSIONS_DEF.length}`;
+        navBadge.className = 'text-[10px] bg-slate-950/70 text-emerald-400 font-bold px-1.5 py-0.5 rounded-md pointer-events-none';
       }
     }
 
-    function toggleInfiniteCredits() {
-      if (!adminUnlocked) return;
-      tempInfiniteCredits = !tempInfiniteCredits;
-      const btn = document.getElementById('btn-toggle-inf-credits');
-      if (tempInfiniteCredits) {
-        btn.textContent = 'DISATTIVA ∞';
-        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-rose-600 text-white';
-        showToast('Crediti Infiniti Temporanei ATTIVI!', 'success');
-      } else {
-        btn.textContent = 'ATTIVA ∞';
-        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-emerald-600 text-white';
-        showToast('Crediti Infiniti disattivati. Saldo normale ripristinato.', 'info');
-      }
+    function claimMissionReward(missionId) {
+      if (!currentUserState) return;
+      ensureWeeklyMissionsResetIfNeeded();
+      const m = WEEKLY_MISSIONS_DEF.find(item => item.id === missionId);
+      if (!m) return;
+
+      if (currentUserState.weeklyMissionsState.claimed.includes(missionId)) return;
+      if (getMissionProgress(m) < m.target) return;
+
+      currentUserState.weeklyMissionsState.claimed.push(missionId);
+      currentUserState.credits += m.reward;
+      saveCurrentUserState();
       updateCreditsUI();
+      renderMissionsTab();
+
+      playSound('coin');
+      spawnConfettiBurst();
+      showToast(`Obiettivo "${m.title}" completato! +${m.reward} Crediti!`, 'success');
     }
 
     /**
-     * 14. NAVIGAZIONE TABS, AUDIO WEB API & EFFETTI VISIVI
+     * 14. NAVIGAZIONE TABS & MODAL ISPEZIONE + CARICAMENTO FOTO ADMIN
      */
     function switchTab(tabName) {
       const tabs = ['shop', 'pass', 'missions', 'album', 'trades', 'arena', 'leaderboard'];
@@ -4643,21 +4371,202 @@
       });
 
       if (tabName === 'pass') renderWeeklyPass();
-      if (tabName === 'missions') renderWheelAndMissionsTab();
+      if (tabName === 'missions') renderMissionsTab();
       if (tabName === 'album') renderAlbum();
       if (tabName === 'trades') renderTradesTab();
       if (tabName === 'arena') renderArenaAndDuplicates();
       if (tabName === 'leaderboard') renderLeaderboard();
     }
 
+    function openInspectModal(cardId) {
+      const card = ALL_CARDS.find(c => c.id === cardId);
+      if (!card) return;
+
+      const count = currentUserState ? (currentUserState.owned[card.id] || 0) : 0;
+      const isWish = currentUserState ? currentUserState.wishlist.includes(card.id) : false;
+
+      document.getElementById('inspect-card-container').innerHTML = renderCardHTML(card, { clickable: false });
+      document.getElementById('inspect-details-box').innerHTML = `
+        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+          <span class="font-bold text-slate-400">Club Ufficiale:</span>
+          <span class="font-extrabold text-white text-right">${card.teamName}</span>
+        </div>
+        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+          <span class="font-bold text-slate-400">Data di Nascita:</span>
+          <span class="font-bold text-amber-300">${card.dob}</span>
+        </div>
+        ${card.type === 'player' ? `
+          <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+            <span class="font-bold text-slate-400">Dati Fisici & Nazionalità:</span>
+            <span class="font-bold text-white">${card.height} cm • ${card.weight} kg • ${card.nat}</span>
+          </div>
+        ` : ''}
+        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+          <span class="font-bold text-slate-400">Copie nel tuo Album:</span>
+          <span class="font-extrabold text-emerald-400">${count} ${count === 1 ? 'copia' : 'copie'}</span>
+        </div>
+
+        <button type="button" data-action="toggle-wishlist-modal" data-card-id="${card.id}"
+                class="w-full py-2.5 rounded-xl ${isWish ? 'bg-rose-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-rose-300 border border-rose-500/40'} font-extrabold text-xs transition active:scale-95">
+          <i class="fa-solid fa-heart mr-1.5 pointer-events-none"></i> ${isWish ? 'Rimuovi dalla Wishlist' : 'Aggiungi alla Wishlist Scambi'}
+        </button>
+
+        ${adminUnlocked ? `
+          <div class="pt-2 border-t border-cyan-500/40 space-y-2">
+            <span class="block text-[11px] font-extrabold text-cyan-300">
+              <i class="fa-solid fa-camera mr-1"></i> Controllo Admin: Carica Foto Ufficiale
+            </span>
+            <label class="block w-full cursor-pointer py-2 px-3 rounded-xl bg-cyan-600/30 hover:bg-cyan-600/50 border border-cyan-400/60 text-center text-xs font-extrabold text-cyan-100 transition">
+              <i class="fa-solid fa-upload mr-1"></i> Scegli Foto da Dispositivo
+              <input type="file" accept="image/*" data-admin-modal-photo-card="${card.id}" class="hidden" />
+            </label>
+          </div>
+        ` : ''}
+      `;
+
+      document.getElementById('card-inspect-modal').classList.remove('hidden');
+    }
+
+    function closeInspectModal() {
+      document.getElementById('card-inspect-modal').classList.add('hidden');
+    }
+
+    /**
+     * 15. CONSOLE SEGRETA ADMIN (CTRL + SHIFT + A -> "bananabella")
+     */
+    function openAdminSecretModal() {
+      const modal = document.getElementById('admin-secret-modal');
+      modal.classList.remove('hidden');
+      if (adminUnlocked) {
+        document.getElementById('admin-login-box').classList.add('hidden');
+        document.getElementById('admin-controls-box').classList.remove('hidden');
+        updateAdminInfButtonUI();
+      } else {
+        document.getElementById('admin-login-box').classList.remove('hidden');
+        document.getElementById('admin-controls-box').classList.add('hidden');
+        const input = document.getElementById('admin-password-input');
+        input.value = '';
+        setTimeout(() => input.focus(), 50);
+      }
+    }
+
+    function closeAdminSecretModal() {
+      document.getElementById('admin-secret-modal').classList.add('hidden');
+    }
+
+    function verifyAdminPassword() {
+      const val = document.getElementById('admin-password-input').value.trim();
+      if (val === 'bananabella') {
+        adminUnlocked = true;
+        document.getElementById('admin-login-box').classList.add('hidden');
+        document.getElementById('admin-controls-box').classList.remove('hidden');
+        updateAdminInfButtonUI();
+        playSound('legend');
+        showToast('Accesso Admin sbloccato!', 'success');
+      } else {
+        playSound('flip');
+        showToast('Password errata!', 'error');
+      }
+    }
+
+    function updateAdminInfButtonUI() {
+      const btn = document.getElementById('btn-toggle-inf-credits');
+      if (!btn) return;
+      if (tempInfiniteCredits) {
+        btn.textContent = 'DISATTIVA ∞';
+        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-rose-600 text-white';
+      } else {
+        btn.textContent = 'ATTIVA ∞';
+        btn.className = 'px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-emerald-600 text-white';
+      }
+    }
+
+    function toggleInfiniteCredits() {
+      if (!adminUnlocked) return;
+      tempInfiniteCredits = !tempInfiniteCredits;
+      updateAdminInfButtonUI();
+      updateCreditsUI();
+      showToast(
+        tempInfiniteCredits
+          ? 'Crediti Infiniti (∞) attivati solo per questa sessione!'
+          : 'Crediti Infiniti disattivati. Saldo normale ripristinato.',
+        'info'
+      );
+    }
+
+    /**
+     * 16. AUDIO SYNTH & EFFETTI VISIVI
+     */
     let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (currentUserState && !currentUserState.audioEnabled) return;
+      const ctx = getAudioContext();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      if (type === 'tear') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(620, now + 0.25);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+        osc.start(now);
+        osc.stop(now + 0.27);
+      } else if (type === 'flip') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(420, now);
+        osc.frequency.exponentialRampToValueAtTime(750, now + 0.12);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+        osc.start(now);
+        osc.stop(now + 0.14);
+      } else if (type === 'coin') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(987, now);
+        osc.frequency.setValueAtTime(1318, now + 0.08);
+        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc.start(now);
+        osc.stop(now + 0.29);
+      } else if (type === 'legend') {
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(freq, now + idx * 0.09);
+          g.gain.setValueAtTime(0.16, now + idx * 0.09);
+          g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.35);
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start(now + idx * 0.09);
+          o.stop(now + idx * 0.09 + 0.36);
+        });
+      }
+    }
 
     function toggleAudio() {
       if (!currentUserState) return;
       currentUserState.audioEnabled = !currentUserState.audioEnabled;
       saveCurrentUserState();
       updateAudioIcon();
-      showToast(currentUserState.audioEnabled ? 'Effetti sonori attivati' : 'Effetti sonori disattivati', 'info');
     }
 
     function updateAudioIcon() {
@@ -4668,846 +4577,330 @@
         : 'fa-solid fa-volume-xmark text-sm text-slate-500 pointer-events-none';
     }
 
-    function playSound(type) {
-      if (!currentUserState || !currentUserState.audioEnabled) return;
-      try {
-        if (!audioCtx) {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          audioCtx = new AudioContextClass();
-        }
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        if (type === 'tear') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(160, now);
-          osc.frequency.exponentialRampToValueAtTime(520, now + 0.25);
-          gain.gain.setValueAtTime(0.12, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
-          osc.start(now);
-          osc.stop(now + 0.27);
-        } else if (type === 'flip') {
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(520, now);
-          osc.frequency.exponentialRampToValueAtTime(780, now + 0.1);
-          gain.gain.setValueAtTime(0.08, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
-          osc.start(now);
-          osc.stop(now + 0.12);
-        } else if (type === 'coin') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(987.77, now);
-          osc.frequency.setValueAtTime(1318.51, now + 0.08);
-          gain.gain.setValueAtTime(0.1, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
-          osc.start(now);
-          osc.stop(now + 0.3);
-        } else if (type === 'legend') {
-          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            o.type = 'triangle';
-            o.connect(g);
-            g.connect(audioCtx.destination);
-            o.frequency.setValueAtTime(freq, now + i * 0.07);
-            g.gain.setValueAtTime(0.09, now + i * 0.07);
-            g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.35);
-            o.start(now + i * 0.07);
-            o.stop(now + i * 0.07 + 0.36);
-          });
-        }
-      } catch (e) {}
-    }
-
     function spawnConfettiBurst() {
       const colors = ['#ff6b00', '#ffd700', '#38bdf8', '#10b981', '#a855f7', '#ffffff'];
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2.4;
 
       for (let i = 0; i < 36; i++) {
         const el = document.createElement('div');
         el.className = 'confetti-piece';
         el.style.backgroundColor = colors[i % colors.length];
-        el.style.left = `${cx}px`;
-        el.style.top = `${cy}px`;
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 90 + Math.random() * 240;
-        el.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
-        el.style.setProperty('--ty', `${Math.sin(angle) * dist - 40}px`);
+        el.style.left = `${centerX}px`;
+        el.style.top = `${centerY}px`;
+
+        const angle = (Math.PI * 2 * i) / 36 + (Math.random() * 0.3);
+        const velocity = 90 + Math.random() * 210;
+        const tx = Math.cos(angle) * velocity;
+        const ty = Math.sin(angle) * velocity + 80;
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+
         document.body.appendChild(el);
         setTimeout(() => el.remove(), 1450);
       }
     }
 
-    function showToast(message, variant = 'info') {
+    function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
+
       const styles = {
-        success: 'bg-emerald-900/95 border-emerald-500 text-emerald-100',
+        success: 'bg-emerald-950/95 border-emerald-500 text-emerald-100',
         error: 'bg-rose-950/95 border-rose-500 text-rose-100',
-        info: 'bg-slate-900/95 border-amber-400/60 text-white'
+        info: 'bg-slate-900/95 border-amber-400/70 text-white'
       };
+
       const icons = {
         success: 'fa-circle-check text-emerald-400',
         error: 'fa-circle-exclamation text-rose-400',
         info: 'fa-basketball text-amber-400'
       };
 
-      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-2xl text-xs sm:text-sm font-bold max-w-sm ${styles[variant] || styles.info}`;
-      toast.innerHTML = `<i class="fa-solid ${icons[variant] || icons.info}"></i><span>${message}</span>`;
-      container.appendChild(toast);
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-2xl text-xs sm:text-sm font-bold max-w-sm transition-all duration-300 ${styles[type] || styles.info}`;
+      toast.innerHTML = `
+        <i class="fa-solid ${icons[type] || icons.info} text-base shrink-0"></i>
+        <span>${message}</span>
+      `;
 
+      container.appendChild(toast);
       setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.25s ease';
-        setTimeout(() => toast.remove(), 260);
-      }, 3400);
+        toast.style.transform = 'translateY(8px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3300);
     }
 
     /**
-     * 14B. RUOTA DELLA FORTUNA, QUIZ TRIVIA LNP, TIMER ATTIVITÀ & MISSIONI SETTIMANALI HARDCORE
+     * 17. INIZIALIZZAZIONE & LISTENER DELEGATO GLOBALE
      */
-    const WHEEL_SLICES = [
-      { label: '+250 Crediti', type: 'credits', amount: 250, deg: 330 },
-      { label: 'Bustina Base Gratis!', type: 'pack', packType: 'base', deg: 270 },
-      { label: '+500 Crediti', type: 'credits', amount: 500, deg: 210 },
-      { label: 'Gold Pack Gratis!', type: 'pack', packType: 'gold', deg: 150 },
-      { label: '+900 Crediti', type: 'credits', amount: 900, deg: 90 },
-      { label: 'JACKPOT: Mega Pack MVP!', type: 'pack', packType: 'mvp', deg: 30 }
-    ];
-
-    let isWheelSpinning = false;
-    let currentWheelRotation = 0;
-
-    function ensureWeeklyMissionsResetIfNeeded() {
-      if (!currentUserState) return;
-      const curWeek = getCurrentWeekIndex();
-      if (!currentUserState.weeklyMissionsState || currentUserState.weeklyMissionsState.weekIndex !== curWeek) {
-        currentUserState.weeklyMissionsState = {
-          weekIndex: curWeek,
-          packsOpenedWeek: 0,
-          tradesWeek: 0,
-          winsWeek: 0,
-          quizCorrectWeek: 0,
-          claimed: []
-        };
-      }
-    }
-
-    function getWeeklyTimeRemainingLabel() {
-      const msPerDay = 86400000;
-      const dayInWeek = getCurrentDayNumber() % 7;
-      const daysLeft = 6 - dayInWeek;
-      const now = new Date();
-      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
-      const hoursLeft = Math.max(0, Math.floor((endOfDay - now.getTime()) / 3600000));
-      return `${daysLeft}g ${String(hoursLeft).padStart(2, '0')}h`;
-    }
-
-    const WEEKLY_HARDCORE_MISSIONS = [
-      {
-        id: 'wk_packs_25',
-        title: 'Maratona Spacchettamento',
-        desc: 'Apri almeno 25 bustine durante questa settimana',
-        rewardCredits: 950,
-        icon: 'fa-box-open',
-        getProgress: (s) => ({ cur: Math.min(25, s.weeklyMissionsState?.packsOpenedWeek || 0), max: 25 })
-      },
-      {
-        id: 'wk_wins_25',
-        title: 'Dominatore del Parquet',
-        desc: 'Vinci 25 partite tattiche in Arena questa settimana',
-        rewardCredits: 1100,
-        icon: 'fa-trophy',
-        getProgress: (s) => ({ cur: Math.min(25, s.weeklyMissionsState?.winsWeek || 0), max: 25 })
-      },
-      {
-        id: 'wk_trades_12',
-        title: 'Direttore Sportivo Instancabile',
-        desc: 'Completa 12 scambi con altri player questa settimana',
-        rewardCredits: 1000,
-        icon: 'fa-right-left',
-        getProgress: (s) => ({ cur: Math.min(12, s.weeklyMissionsState?.tradesWeek || 0), max: 12 })
-      },
-      {
-        id: 'wk_quiz_35',
-        title: 'Enciclopedia della Serie A2',
-        desc: 'Rispondi correttamente a 35 domande del Quiz LNP questa settimana',
-        rewardCredits: 850,
-        icon: 'fa-brain',
-        getProgress: (s) => ({ cur: Math.min(35, s.weeklyMissionsState?.quizCorrectWeek || 0), max: 35 })
-      },
-      {
-        id: 'wk_special_cards_6',
-        title: 'Cacciatore di Stelle Elite',
-        desc: 'Possiedi almeno 6 carte tra Signature, MVP Icona o Limited 99',
-        rewardCredits: 1300,
-        icon: 'fa-wand-magic-sparkles',
-        getProgress: (s) => {
-          const specials = ALL_CARDS.filter(c => ['signature', 'icon', 'limited'].includes(c.rarity) && (s.owned[c.id] || 0) > 0).length;
-          return { cur: Math.min(6, specials), max: 6 };
-        }
-      },
-      {
-        id: 'wk_clubs_3',
-        title: 'Collezionista Triplo Scudetto',
-        desc: 'Completa al 100% almeno 3 squadre dell\'Album Ufficiale',
-        rewardCredits: 1500,
-        icon: 'fa-shield-halved',
-        getProgress: (s) => ({ cur: Math.min(3, (s.completedTeams || []).length), max: 3 })
-      },
-      {
-        id: 'wk_album_200',
-        title: 'Metà Opera Ufficiale',
-        desc: 'Raggiungi almeno 200 figurine diverse incollate nell\'Album',
-        rewardCredits: 1400,
-        icon: 'fa-book-open',
-        getProgress: (s) => {
-          const uniq = ALL_CARDS.filter(c => (s.owned[c.id] || 0) > 0).length;
-          return { cur: Math.min(200, uniq), max: 200 };
-        }
-      },
-      {
-        id: 'wk_limited_1',
-        title: 'Tocco Divino OVR 99',
-        desc: 'Trova almeno 1 carta Limited Edition OVR 99',
-        rewardCredits: 2000,
-        icon: 'fa-crown',
-        getProgress: (s) => {
-          const lim = ALL_CARDS.filter(c => c.rarity === 'limited' && (s.owned[c.id] || 0) > 0).length;
-          return { cur: Math.min(1, lim), max: 1 };
-        }
-      }
-    ];
-
-    function spinDailyLuckyWheel() {
-      if (!currentUserState || isWheelSpinning) return;
-      const todayNum = getCurrentDayNumber();
-      if (currentUserState.lastWheelSpinDayNum === todayNum) {
-        showToast('Hai già girato la Ruota della Fortuna oggi! Torna domani.', 'info');
-        return;
-      }
-
-      isWheelSpinning = true;
-      const btn = document.getElementById('btn-spin-wheel');
-      if (btn) btn.disabled = true;
-
-      const chosenIdx = Math.floor(Math.random() * WHEEL_SLICES.length);
-      const prize = WHEEL_SLICES[chosenIdx];
-      const extraSpins = 360 * 6;
-      const jitter = Math.floor(Math.random() * 24) - 12;
-      currentWheelRotation += extraSpins + ((prize.deg - (currentWheelRotation % 360) + 360) % 360) + jitter;
-
-      const disc = document.getElementById('lucky-wheel-disc');
-      if (disc) disc.style.transform = `rotate(${currentWheelRotation}deg)`;
-      playSound('tear');
-
-      setTimeout(() => {
-        isWheelSpinning = false;
-        currentUserState.lastWheelSpinDayNum = todayNum;
-
-        const msgEl = document.getElementById('wheel-last-prize-msg');
-        if (msgEl) {
-          msgEl.textContent = `Hai vinto oggi: ${prize.label}`;
-          msgEl.classList.remove('hidden');
-        }
-
-        if (prize.type === 'credits') {
-          currentUserState.credits += prize.amount;
-          playSound('coin');
-          spawnConfettiBurst();
-          showToast(`Ruota della Fortuna: hai vinto ${prize.label}!`, 'success');
-          saveCurrentUserState();
-          updateCreditsUI();
-          renderWheelAndMissionsTab();
-        } else if (prize.type === 'pack') {
-          playSound('legend');
-          spawnConfettiBurst();
-          showToast(`Ruota della Fortuna: hai vinto ${prize.label}!`, 'success');
-          saveCurrentUserState();
-          renderWheelAndMissionsTab();
-          switchTab('shop');
-          openPackDirectly(prize.packType, false);
-        }
-      }, 4300);
-    }
-
-    function claimMissionReward(missionId) {
-      if (!currentUserState) return;
-      ensureWeeklyMissionsResetIfNeeded();
-      const mission = WEEKLY_HARDCORE_MISSIONS.find(m => m.id === missionId);
-      if (!mission) return;
-
-      const claimedList = currentUserState.weeklyMissionsState.claimed || [];
-      if (claimedList.includes(missionId)) return;
-      const prog = mission.getProgress(currentUserState);
-      if (prog.cur < prog.max) {
-        showToast('Obiettivo settimanale non ancora completato!', 'error');
-        return;
-      }
-
-      claimedList.push(missionId);
-      currentUserState.weeklyMissionsState.claimed = claimedList;
-      currentUserState.credits += mission.rewardCredits;
-      playSound('legend');
-      spawnConfettiBurst();
-      showToast(`Obiettivo settimanale "${mission.title}" riscattato! +${mission.rewardCredits} Crediti!`, 'success');
-
-      saveCurrentUserState();
-      updateCreditsUI();
-      renderWheelAndMissionsTab();
-    }
-
-    function renderWheelAndMissionsTab() {
-      if (!currentUserState) return;
-      ensureWeeklyMissionsResetIfNeeded();
-
-      const todayNum = getCurrentDayNumber();
-      const spunToday = currentUserState.lastWheelSpinDayNum === todayNum;
-      const spinBtn = document.getElementById('btn-spin-wheel');
-      const spinLabel = document.getElementById('spin-wheel-btn-label');
-
-      if (spinBtn && spinLabel) {
-        spinBtn.disabled = spunToday || isWheelSpinning;
-        spinLabel.textContent = spunToday ? 'GIRO GIÀ EFFETTUATO OGGI (TORNA DOMANI)' : 'GIRA LA RUOTA GRATIS!';
-      }
-
-      const timerBadge = document.getElementById('weekly-missions-timer-badge');
-      if (timerBadge) {
-        timerBadge.innerHTML = `<i class="fa-regular fa-clock mr-1"></i> Scade tra: ${getWeeklyTimeRemainingLabel()}`;
-      }
-
-      const claimedList = currentUserState.weeklyMissionsState.claimed || [];
-      let claimableCount = 0;
-
-      const grid = document.getElementById('missions-grid');
-      if (grid) {
-        grid.innerHTML = WEEKLY_HARDCORE_MISSIONS.map(m => {
-          const isClaimed = claimedList.includes(m.id);
-          const prog = m.getProgress(currentUserState);
-          const isReady = !isClaimed && prog.cur >= prog.max;
-          if (isReady) claimableCount++;
-
-          const pct = Math.round((prog.cur / prog.max) * 100);
-
-          return `
-            <div class="rounded-2xl p-4 border ${isClaimed ? 'border-emerald-500/40 bg-emerald-950/20' : isReady ? 'border-amber-400 bg-amber-500/10 shadow-lg' : 'border-slate-700/80 bg-slate-900/85'} flex flex-col justify-between gap-3">
-              <div class="flex items-start justify-between gap-3">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isClaimed ? 'bg-emerald-500/20 text-emerald-400' : isReady ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'}">
-                    <i class="fa-solid ${isClaimed ? 'fa-check' : m.icon} text-base"></i>
-                  </div>
-                  <div>
-                    <h4 class="font-extrabold text-sm text-white">${m.title}</h4>
-                    <p class="text-[11px] text-slate-400">${m.desc}</p>
-                  </div>
-                </div>
-                <span class="shrink-0 text-xs font-black text-amber-300 bg-slate-950/80 border border-amber-500/40 px-2.5 py-1 rounded-lg">
-                  +${m.rewardCredits} <i class="fa-solid fa-coins text-[10px]"></i>
-                </span>
-              </div>
-
-              <div class="space-y-1.5">
-                <div class="flex justify-between text-[10px] font-bold text-slate-400">
-                  <span>Progresso Settimanale</span>
-                  <span class="${isReady || isClaimed ? 'text-emerald-400' : 'text-slate-300'}">${prog.cur} / ${prog.max}</span>
-                </div>
-                <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                  <div class="h-full ${isClaimed ? 'bg-emerald-500' : 'bg-gradient-to-r from-[#ff6b00] to-amber-400'}" style="width: ${pct}%"></div>
-                </div>
-              </div>
-
-              ${isClaimed ? `
-                <div class="w-full py-2 rounded-xl bg-emerald-600/20 text-emerald-300 font-extrabold text-xs text-center border border-emerald-500/30">
-                  <i class="fa-solid fa-circle-check mr-1"></i> Riscattato questa settimana
-                </div>
-              ` : isReady ? `
-                <button type="button" data-action="claim-mission" data-mission-id="${m.id}" class="w-full py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-black text-xs shadow transition active:scale-95">
-                  <i class="fa-solid fa-gift mr-1 pointer-events-none"></i> Riscatta +${m.rewardCredits} Crediti!
-                </button>
-              ` : `
-                <div class="w-full py-2 rounded-xl bg-slate-950/70 text-slate-500 font-bold text-[11px] text-center border border-slate-800">
-                  In corso (${pct}%)
-                </div>
-              `}
-            </div>
-          `;
-        }).join('');
-      }
-
-      const counterEl = document.getElementById('missions-completed-counter');
-      if (counterEl) counterEl.textContent = `${claimedList.length} / ${WEEKLY_HARDCORE_MISSIONS.length}`;
-
-      const navBadge = document.getElementById('nav-missions-badge');
-      if (navBadge) {
-        if (!spunToday) {
-          navBadge.textContent = 'GIRA!';
-          navBadge.className = 'text-[10px] bg-emerald-500 text-slate-950 font-black px-1.5 py-0.5 rounded-md pointer-events-none animate-pulse';
-        } else if (claimableCount > 0) {
-          navBadge.textContent = `${claimableCount} PREMI!`;
-          navBadge.className = 'text-[10px] bg-amber-500 text-slate-950 font-black px-1.5 py-0.5 rounded-md pointer-events-none animate-pulse';
-        } else {
-          navBadge.textContent = 'QUIZ';
-          navBadge.className = 'text-[10px] bg-slate-950/70 text-cyan-300 font-bold px-1.5 py-0.5 rounded-md pointer-events-none';
-        }
-      }
-    }
-
-    /* --- QUIZ TRIVIA LNP SERIE A2 --- */
-    let currentQuizData = null;
-    let quizLocked = false;
-
-    function getTodayQuizState() {
-      if (!currentUserState) return { dayNum: getCurrentDayNumber(), count: 0, streak: 0 };
-      const todayNum = getCurrentDayNumber();
-      if (!currentUserState.dailyQuiz || currentUserState.dailyQuiz.dayNum !== todayNum) {
-        currentUserState.dailyQuiz = { dayNum: todayNum, count: 0, streak: 0 };
-      }
-      return currentUserState.dailyQuiz;
-    }
-
-    function initNewQuizQuestion() {
-      if (!currentUserState) return;
-      const qState = getTodayQuizState();
-      document.getElementById('quiz-streak-display').textContent = qState.streak || 0;
-      document.getElementById('quiz-daily-count-display').textContent = `${qState.count || 0} / 15`;
-
-      const qTextEl = document.getElementById('quiz-question-text');
-      const optGrid = document.getElementById('quiz-options-grid');
-      const fbBar = document.getElementById('quiz-feedback-bar');
-      if (!qTextEl || !optGrid) return;
-
-      if (qState.count >= 15) {
-        qTextEl.textContent = 'Hai completato tutte le 15 domande del Quiz LNP di oggi! Torna domani per nuove sfide.';
-        optGrid.innerHTML = '';
-        fbBar.classList.add('hidden');
-        return;
-      }
-
-      quizLocked = false;
-      fbBar.classList.add('hidden');
-
-      const randomTeam = TEAMS_DATA[Math.floor(Math.random() * TEAMS_DATA.length)];
-      const randomPlayer = randomTeam.roster[Math.floor(Math.random() * randomTeam.roster.length)];
-      const qType = Math.floor(Math.random() * 3);
-
-      let question = '';
-      let correctAnswer = '';
-      let options = [];
-
-      if (qType === 0) {
-        question = `In quale squadra milita ${randomPlayer.name} nella stagione LNP Serie A2 2026/27?`;
-        correctAnswer = randomTeam.shortName;
-        const distractors = TEAMS_DATA.filter(t => t.id !== randomTeam.id).sort(() => Math.random() - 0.5).slice(0, 3).map(t => t.shortName);
-        options = [correctAnswer, ...distractors].sort(() => Math.random() - 0.5);
-      } else if (qType === 1) {
-        question = `Qual è il ruolo ufficiale di ${randomPlayer.name} (${randomTeam.shortName})?`;
-        correctAnswer = randomPlayer.role;
-        const allRoles = ['Play', 'Guardia', 'Play/Guardia', 'Guardia/Ala', 'Ala', 'Ala/Centro', 'Centro'];
-        const distractors = allRoles.filter(r => r !== correctAnswer).sort(() => Math.random() - 0.5).slice(0, 3);
-        options = [correctAnswer, ...distractors].sort(() => Math.random() - 0.5);
-      } else {
-        question = `Che numero di maglia indossa ${randomPlayer.name} con ${randomTeam.shortName}?`;
-        correctAnswer = `#${randomPlayer.num}`;
-        const nums = new Set([correctAnswer]);
-        while (nums.size < 4) {
-          nums.add(`#${Math.floor(Math.random() * 55)}`);
-        }
-        options = Array.from(nums).sort(() => Math.random() - 0.5);
-      }
-
-      currentQuizData = { question, correctAnswer, options };
-      qTextEl.textContent = question;
-      optGrid.innerHTML = options.map((opt, idx) => `
-        <button type="button" data-action="answer-quiz" data-option-idx="${idx}"
-                class="p-3 rounded-xl bg-slate-950/90 hover:bg-slate-800 border border-slate-700 hover:border-cyan-400 text-left font-bold text-xs sm:text-sm text-slate-200 transition active:scale-95">
-          <span class="inline-block w-6 h-6 rounded-lg bg-slate-800 text-cyan-300 font-black text-center leading-6 mr-2 pointer-events-none">${['A', 'B', 'C', 'D'][idx]}</span>
-          <span class="pointer-events-none">${opt}</span>
-        </button>
-      `).join('');
-    }
-
-    function answerLnpQuiz(optionIdx) {
-      if (!currentUserState || !currentQuizData || quizLocked) return;
-      const qState = getTodayQuizState();
-      if (qState.count >= 15) return;
-
-      quizLocked = true;
-      qState.count++;
-      const chosen = currentQuizData.options[optionIdx];
-      const isCorrect = chosen === currentQuizData.correctAnswer;
-      const fbBar = document.getElementById('quiz-feedback-bar');
-
-      if (isCorrect) {
-        qState.streak = (qState.streak || 0) + 1;
-        const streakBonus = qState.streak >= 3 ? 15 : 0;
-        const totalWin = 45 + streakBonus;
-        currentUserState.credits += totalWin;
-
-        ensureWeeklyMissionsResetIfNeeded();
-        currentUserState.weeklyMissionsState.quizCorrectWeek = (currentUserState.weeklyMissionsState.quizCorrectWeek || 0) + 1;
-
-        playSound('coin');
-        fbBar.className = 'text-xs font-extrabold p-3 rounded-xl bg-emerald-950/80 border border-emerald-500 text-emerald-300';
-        fbBar.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> RISPOSTA ESATTA! +${totalWin} Crediti ${streakBonus > 0 ? '(incluso bonus serie +15!)' : ''}`;
-      } else {
-        qState.streak = 0;
-        playSound('flip');
-        fbBar.className = 'text-xs font-extrabold p-3 rounded-xl bg-rose-950/80 border border-rose-500 text-rose-300';
-        fbBar.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Risposta errata! La soluzione era: <strong class="text-white">${currentQuizData.correctAnswer}</strong>`;
-      }
-
-      fbBar.classList.remove('hidden');
-      saveCurrentUserState();
-      updateCreditsUI();
-      renderWheelAndMissionsTab();
-
-      setTimeout(() => {
-        initNewQuizQuestion();
-      }, 1600);
-    }
-
-    /* --- TIMER ATTIVITÀ SUL PARQUET (PREMIA CHI RESTA SUL SITO PIÙ A LUNGO) --- */
-    const SESSION_MILESTONES = [
-      { seconds: 300, label: '5 min', rewardType: 'credits', amount: 150, desc: '+150 Crediti Fedeltà!' },
-      { seconds: 900, label: '15 min', rewardType: 'credits', amount: 350, desc: '+350 Crediti Maratoneta!' },
-      { seconds: 1800, label: '30 min', rewardType: 'pack', packType: 'base', desc: 'Bustina Base Gratis!' }
-    ];
-
-    function startSessionActivityTracker() {
-      setInterval(() => {
-        if (!currentUserState || document.hidden) return;
-        const todayNum = getCurrentDayNumber();
-        if (!currentUserState.sessionActivity || currentUserState.sessionActivity.dayNum !== todayNum) {
-          currentUserState.sessionActivity = { dayNum: todayNum, activeSeconds: 0, claimedMilestones: [] };
-        }
-        currentUserState.sessionActivity.activeSeconds++;
-        updateSessionBonusUI();
-      }, 1000);
-    }
-
-    function updateSessionBonusUI() {
-      if (!currentUserState || !currentUserState.sessionActivity) return;
-      const secs = currentUserState.sessionActivity.activeSeconds || 0;
-      const claimed = currentUserState.sessionActivity.claimedMilestones || [];
-
-      const mins = Math.floor(secs / 60);
-      const remSecs = secs % 60;
-      const timerLabel = document.getElementById('session-timer-label');
-      const nextLabel = document.getElementById('session-next-reward-label');
-      const pill = document.getElementById('session-bonus-pill');
-
-      if (timerLabel) timerLabel.textContent = `${String(mins).padStart(2, '0')}:${String(remSecs).padStart(2, '0')} sul sito`;
-
-      const readyMilestone = SESSION_MILESTONES.find(m => secs >= m.seconds && !claimed.includes(m.seconds));
-      const nextMilestone = SESSION_MILESTONES.find(m => secs < m.seconds);
-
-      if (readyMilestone && pill && nextLabel) {
-        pill.className = 'hidden md:flex items-center gap-2 bg-cyan-950/90 border-2 border-cyan-400 px-3 py-1.5 rounded-xl animate-pulse transition active:scale-95';
-        nextLabel.innerHTML = `<span class="text-amber-300 font-black">RISCATTA PREMIO (${readyMilestone.label})!</span>`;
-      } else if (nextMilestone && pill && nextLabel) {
-        pill.className = 'hidden md:flex items-center gap-2 bg-slate-900/90 border border-cyan-500/40 px-3 py-1.5 rounded-xl hover:border-cyan-400 transition active:scale-95';
-        nextLabel.textContent = `Prossimo premio: ${nextMilestone.label}`;
-      } else if (pill && nextLabel) {
-        pill.className = 'hidden md:flex items-center gap-2 bg-slate-900/90 border border-emerald-500/40 px-3 py-1.5 rounded-xl transition';
-        nextLabel.textContent = 'Tutti i premi tempo riscattati!';
-      }
-    }
-
-    function claimSessionBonusReward() {
-      if (!currentUserState || !currentUserState.sessionActivity) return;
-      const secs = currentUserState.sessionActivity.activeSeconds || 0;
-      const claimed = currentUserState.sessionActivity.claimedMilestones || [];
-      const readyMilestone = SESSION_MILESTONES.find(m => secs >= m.seconds && !claimed.includes(m.seconds));
-
-      if (!readyMilestone) {
-        showToast('Resta attivo sul sito fino al prossimo traguardo per riscattare il premio!', 'info');
-        return;
-      }
-
-      claimed.push(readyMilestone.seconds);
-      currentUserState.sessionActivity.claimedMilestones = claimed;
-
-      if (readyMilestone.rewardType === 'credits') {
-        currentUserState.credits += readyMilestone.amount;
-        playSound('coin');
-        spawnConfettiBurst();
-        showToast(`Premio Attività (${readyMilestone.label}): ${readyMilestone.desc}`, 'success');
-        saveCurrentUserState();
-        updateCreditsUI();
-        updateSessionBonusUI();
-      } else if (readyMilestone.rewardType === 'pack') {
-        playSound('legend');
-        spawnConfettiBurst();
-        showToast(`Premio Attività (${readyMilestone.label}): ${readyMilestone.desc}`, 'success');
-        saveCurrentUserState();
-        updateSessionBonusUI();
-        switchTab('shop');
-        openPackDirectly(readyMilestone.packType, false);
-      }
-    }
-
-    /**
-     * 15. GESTIONE CENTRALIZZATA EVENTI & INIZIALIZZAZIONE
-     */
-    document.addEventListener('click', (e) => {
-      const target = e.target.closest('[data-action]');
-      if (!target) return;
-
-      const action = target.dataset.action;
-
-      if (action === 'discord-bot-oauth') {
-        handleDiscordBotOAuth();
-      } else if (action === 'quick-guest-login') {
-        const nickInput = document.getElementById('quick-username-input');
-        const nick = (nickInput && nickInput.value.trim()) ? nickInput.value.trim() : `Coach_${Math.floor(100 + Math.random() * 899)}`;
-        loginWithDiscordProfile({
-          id: `guest_${nick.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
-          username: nick,
-          favTeamId: 'fortitudo',
-          favTeamShort: 'Serie A2 Fan',
-          avatarUrl: generateDiscordAvatarUrl(nick, 'ff6b00')
-        });
-      } else if (action === 'login-saved-account') {
-        const accId = target.dataset.accountId;
-        try {
-          const map = JSON.parse(localStorage.getItem(ACCOUNTS_INDEX_KEY) || '{}');
-          if (map[accId]) loginWithDiscordProfile(map[accId]);
-        } catch (err) {}
-      } else if (action === 'switch-discord-user') {
-        renderSavedAccountsList();
-        document.getElementById('discord-auth-screen').classList.remove('hidden');
-      } else if (action === 'switch-tab') {
-        switchTab(target.dataset.tab);
-      } else if (action === 'toggle-audio') {
-        toggleAudio();
-      } else if (action === 'claim-session-bonus') {
-        claimSessionBonusReward();
-      } else if (action === 'claim-daily-pass') {
-        claimDailyPassReward();
-      } else if (action === 'spin-daily-wheel') {
-        spinDailyLuckyWheel();
-      } else if (action === 'answer-quiz') {
-        answerLnpQuiz(Number(target.dataset.optionIdx));
-      } else if (action === 'claim-mission') {
-        claimMissionReward(target.dataset.missionId);
-      } else if (action === 'buy-pack') {
-        buyAndOpenPack(target.dataset.pack);
-      } else if (action === 'tear-pack') {
-        tearPackAction();
-      } else if (action === 'flip-card') {
-        flipSinglePackCard(Number(target.dataset.index));
-      } else if (action === 'flip-all') {
-        flipAllPackCards();
-      } else if (action === 'close-stage') {
-        closePackStage();
-      } else if (action === 'album-status') {
-        setAlbumStatusFilter(target.dataset.status);
-      } else if (action === 'toggle-wishlist') {
-        e.stopPropagation();
-        toggleWishlistCard(target.dataset.cardId);
-      } else if (action === 'toggle-wishlist-inspect') {
-        toggleWishlistCard(target.dataset.cardId);
-        inspectCard(target.dataset.cardId);
-      } else if (action === 'create-trade-offer') {
-        createTradeOffer();
-      } else if (action === 'refresh-trades') {
-        renderTradesTab();
-        showToast('Bacheca scambi aggiornata!', 'info');
-      } else if (action === 'cancel-trade') {
-        cancelTradeOffer(target.dataset.tradeId);
-      } else if (action === 'accept-trade') {
-        acceptTradeOffer(target.dataset.tradeId);
-      } else if (action === 'discard-one-dup') {
-        discardSingleDuplicate(target.dataset.cardId);
-      } else if (action === 'discard-all-dups') {
-        discardAllDuplicates();
-      } else if (action === 'shoot-freethrow') {
-        shootFreeThrowAction();
-      } else if (action === 'select-lineup-slot') {
-        selectedTargetSlot = (selectedTargetSlot === target.dataset.slot) ? null : target.dataset.slot;
-        renderLineupSection();
-      } else if (action === 'remove-lineup-slot') {
-        if (currentUserState && currentUserState.lineupSlots) {
-          currentUserState.lineupSlots[target.dataset.slot] = null;
-          saveCurrentUserState();
+    function handleAdminPhotoUploadFile(file, cardId) {
+      if (!file || !cardId) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        const img = new Image();
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 420;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.84);
+          await saveCustomCardPhoto(cardId, compressedDataUrl);
+          renderAlbum();
           renderLineupSection();
-        }
-      } else if (action === 'assign-player-slot') {
-        assignPlayerToLineup(target.dataset.cardId);
-      } else if (action === 'select-tactic') {
-        selectTactic(target.dataset.tactic);
-      } else if (action === 'auto-lineup') {
-        autoFillBestLineup();
-      } else if (action === 'clear-lineup') {
-        clearLineup();
-      } else if (action === 'play-match') {
-        startInteractiveMatch();
-      } else if (action === 'finish-match-halftime') {
-        finishMatchSecondHalf(target.dataset.call);
-      } else if (action === 'refresh-leaderboard') {
-        renderLeaderboard();
-        showToast('Classifica Live aggiornata!', 'info');
-      } else if (action === 'view-user-collection') {
-        openUserCollectionModal(target.dataset.userId);
-      } else if (action === 'propose-trade-for-card') {
-        jumpToProposeTradeForCard(target.dataset.cardId);
-      } else if (action === 'close-user-collection') {
-        if (e.target === target || target.tagName === 'BUTTON') {
-          document.getElementById('user-collection-modal').classList.add('hidden');
-          currentlyViewedUserId = null;
-        }
-      } else if (action === 'inspect-card') {
-        inspectCard(target.dataset.cardId);
-      } else if (action === 'close-inspect') {
-        if (e.target === target || target.tagName === 'BUTTON') {
-          document.getElementById('card-inspect-modal').classList.add('hidden');
-        }
-      } else if (action === 'close-admin') {
-        if (e.target === target || target.tagName === 'BUTTON') {
-          document.getElementById('admin-secret-modal').classList.add('hidden');
-        }
-      } else if (action === 'verify-admin-password') {
-        verifyAdminPassword();
-      } else if (action === 'toggle-infinite-credits') {
-        toggleInfiniteCredits();
-      } else if (action === 'admin-sim-next-day') {
-        if (!adminUnlocked) return;
-        dayOffsetForTesting += 1;
-        evaluatePassStreakIntegrity(true);
-        renderWeeklyPass();
-        renderWheelAndMissionsTab();
-        updateDailyMatchesBadge();
-        updateFreeThrowsUI();
-        showToast(`Simulato +1 giorno consecutivo!`, 'info');
-      } else if (action === 'admin-sim-skip-day') {
-        if (!adminUnlocked) return;
-        dayOffsetForTesting += 2;
-        evaluatePassStreakIntegrity(true);
-        renderWeeklyPass();
-        renderWheelAndMissionsTab();
-        updateDailyMatchesBadge();
-        updateFreeThrowsUI();
-      } else if (action === 'admin-save-photo-url') {
-        if (!adminUnlocked) return;
-        const cId = document.getElementById('admin-photo-card-select').value;
-        const url = document.getElementById('admin-photo-url-input').value.trim();
-        if (!cId || !url) {
-          showToast('Seleziona una figurina e incolla un URL valido!', 'error');
-          return;
-        }
-        saveCustomCardPhoto(cId, url).then(() => {
-          renderAlbum();
-          showToast('Foto figurina salvata su Cloud!', 'success');
-        });
-      } else if (action === 'admin-remove-photo') {
-        if (!adminUnlocked) return;
-        const cId = document.getElementById('admin-photo-card-select').value;
-        if (!cId) return;
-        saveCustomCardPhoto(cId, null).then(() => {
-          renderAlbum();
-          showToast('Foto personalizzata rimossa.', 'info');
-        });
-      } else if (action === 'inspect-save-photo-url') {
-        if (!adminUnlocked) return;
-        const cId = target.dataset.cardId;
-        const urlInput = document.getElementById('inspect-admin-photo-url');
-        const url = urlInput ? urlInput.value.trim() : '';
-        if (!url) return;
-        saveCustomCardPhoto(cId, url).then(() => {
-          inspectCard(cId);
-          renderAlbum();
-          showToast('Foto figurina aggiornata!', 'success');
-        });
-      } else if (action === 'admin-global-reset') {
-        if (!adminUnlocked) return;
-        forceGlobalResetFromAdmin();
-      }
-    });
-
-    document.getElementById('team-filter').addEventListener('change', renderAlbum);
-    document.getElementById('rarity-filter').addEventListener('change', renderAlbum);
-    document.getElementById('leaderboard-sort-select').addEventListener('change', renderLeaderboard);
-
-    document.getElementById('viewer-team-filter').addEventListener('change', () => {
-      if (currentlyViewedUserId) renderUserCollectionModalContent(currentlyViewedUserId);
-    });
-    document.getElementById('viewer-rarity-filter').addEventListener('change', () => {
-      if (currentlyViewedUserId) renderUserCollectionModalContent(currentlyViewedUserId);
-    });
-    document.getElementById('viewer-copies-filter').addEventListener('change', () => {
-      if (currentlyViewedUserId) renderUserCollectionModalContent(currentlyViewedUserId);
-    });
-
-    const adminFileEl = document.getElementById('admin-photo-file-input');
-    if (adminFileEl) {
-      adminFileEl.addEventListener('change', (ev) => {
-        if (!adminUnlocked) return;
-        const cId = document.getElementById('admin-photo-card-select').value;
-        const file = ev.target.files && ev.target.files[0];
-        if (!cId) {
-          showToast('Seleziona prima un giocatore dal menu a tendina!', 'error');
-          return;
-        }
-        if (!file) return;
-        compressImageFileToDataUrl(file, async (dataUrl) => {
-          await saveCustomCardPhoto(cId, dataUrl);
-          renderAlbum();
-          showToast('Foto locale caricata e sincronizzata!', 'success');
-        });
-      });
+          if (!document.getElementById('card-inspect-modal').classList.contains('hidden')) {
+            openInspectModal(cardId);
+          }
+          showToast('Foto giocatore salvata e sincronizzata!', 'success');
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
     }
 
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
-        e.preventDefault();
-        openAdminModal();
-      } else if (e.key === 'Escape') {
-        document.getElementById('card-inspect-modal').classList.add('hidden');
-        document.getElementById('admin-secret-modal').classList.add('hidden');
-        document.getElementById('user-collection-modal').classList.add('hidden');
-        currentlyViewedUserId = null;
-      }
-    });
-
-    document.getElementById('admin-password-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') verifyAdminPassword();
-    });
-
-    async function bootstrapApp() {
+    async function initApp() {
       try {
-        const rawPhotos = localStorage.getItem(CUSTOM_PHOTOS_KEY);
-        if (rawPhotos) customCardPhotos = JSON.parse(rawPhotos);
+        const savedPhotos = localStorage.getItem(CUSTOM_PHOTOS_KEY);
+        if (savedPhotos) customCardPhotos = JSON.parse(savedPhotos);
       } catch (e) {}
 
       populateTeamDropdowns();
       initPackTearSwipe();
-      startFreeThrowCursorAnimation();
-      startSessionActivityTracker();
       await initCloudBackend();
-
-      const oauthLoggedIn = await checkDiscordOAuthHashCallback();
-      if (oauthLoggedIn) return;
-
       renderSavedAccountsList();
 
-      try {
-        const activeId = localStorage.getItem(ACTIVE_ACCOUNT_KEY);
-        if (activeId) {
-          const map = JSON.parse(localStorage.getItem(ACCOUNTS_INDEX_KEY) || '{}');
-          if (map[activeId]) {
-            await loginWithDiscordProfile(map[activeId]);
+      const loggedFromDiscordHash = await checkDiscordOAuthHashCallback();
+      if (!loggedFromDiscordHash) {
+        try {
+          const lastId = localStorage.getItem(ACTIVE_ACCOUNT_KEY);
+          const idxRaw = localStorage.getItem(ACCOUNTS_INDEX_KEY);
+          if (lastId && idxRaw) {
+            const map = JSON.parse(idxRaw);
+            if (map[lastId]) {
+              await loginWithDiscordProfile(map[lastId]);
+            }
+          }
+        } catch (e) {}
+      }
+
+      document.getElementById('team-filter').addEventListener('change', renderAlbum);
+      document.getElementById('rarity-filter').addEventListener('change', renderAlbum);
+      document.getElementById('leaderboard-sort-select').addEventListener('change', renderLeaderboard);
+
+      document.getElementById('viewer-team-filter').addEventListener('change', () => {
+        if (currentlyViewedUserId) renderUserCollectionModalContent(currentlyViewedUserId);
+      });
+      document.getElementById('viewer-rarity-filter').addEventListener('change', () => {
+        if (currentlyViewedUserId) renderUserCollectionModalContent(currentlyViewedUserId);
+      });
+      document.getElementById('viewer-copies-filter').addEventListener('change', () => {
+        if (currentlyViewedUserId) renderUserCollectionModalContent(currentlyViewedUserId);
+      });
+
+      document.addEventListener('change', (e) => {
+        const target = e.target;
+        if (target && target.id === 'admin-photo-file-input') {
+          const cardId = document.getElementById('admin-photo-card-select').value;
+          if (!cardId) {
+            showToast('Seleziona prima una figurina dal menu a tendina!', 'error');
+            return;
+          }
+          if (target.files && target.files[0]) {
+            handleAdminPhotoUploadFile(target.files[0], cardId);
+          }
+        } else if (target && target.dataset && target.dataset.adminModalPhotoCard) {
+          const cardId = target.dataset.adminModalPhotoCard;
+          if (target.files && target.files[0]) {
+            handleAdminPhotoUploadFile(target.files[0], cardId);
           }
         }
-      } catch (e) {}
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+          e.preventDefault();
+          openAdminSecretModal();
+        }
+        if (e.key === 'Enter' && document.activeElement && document.activeElement.id === 'admin-password-input') {
+          e.preventDefault();
+          verifyAdminPassword();
+        }
+        if (e.key === 'Enter' && document.activeElement && document.activeElement.id === 'quick-username-input') {
+          e.preventDefault();
+          const nick = document.getElementById('quick-username-input').value.trim() || `Coach_${Math.floor(100 + Math.random() * 899)}`;
+          loginWithDiscordProfile({
+            id: `guest_${nick.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+            username: nick,
+            favTeamId: 'fortitudo',
+            favTeamShort: 'Serie A2 Fan',
+            avatarUrl: generateDiscordAvatarUrl(nick, 'ff6b00')
+          });
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        const actionEl = e.target.closest('[data-action]');
+        if (!actionEl) return;
+
+        const action = actionEl.dataset.action;
+
+        if (action === 'discord-bot-oauth') {
+          handleDiscordBotOAuth();
+        } else if (action === 'quick-guest-login') {
+          const nick = document.getElementById('quick-username-input').value.trim() || `Coach_${Math.floor(100 + Math.random() * 899)}`;
+          loginWithDiscordProfile({
+            id: `guest_${nick.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+            username: nick,
+            favTeamId: 'fortitudo',
+            favTeamShort: 'Serie A2 Fan',
+            avatarUrl: generateDiscordAvatarUrl(nick, 'ff6b00')
+          });
+        } else if (action === 'login-saved-account') {
+          try {
+            const map = JSON.parse(localStorage.getItem(ACCOUNTS_INDEX_KEY) || '{}');
+            const prof = map[actionEl.dataset.accountId];
+            if (prof) loginWithDiscordProfile(prof);
+          } catch (err) {}
+        } else if (action === 'switch-discord-user') {
+          renderSavedAccountsList();
+          document.getElementById('discord-auth-screen').classList.remove('hidden');
+        } else if (action === 'switch-tab') {
+          switchTab(actionEl.dataset.tab);
+        } else if (action === 'toggle-audio') {
+          toggleAudio();
+        } else if (action === 'buy-pack') {
+          buyAndOpenPack(actionEl.dataset.pack);
+        } else if (action === 'tear-pack') {
+          tearPackAction();
+        } else if (action === 'flip-card') {
+          flipSinglePackCard(Number(actionEl.dataset.index));
+        } else if (action === 'flip-all') {
+          flipAllPackCards();
+        } else if (action === 'close-stage') {
+          closePackStage();
+        } else if (action === 'claim-daily-pass') {
+          claimDailyPassReward();
+        } else if (action === 'claim-mission') {
+          claimMissionReward(actionEl.dataset.missionId);
+        } else if (action === 'album-status') {
+          setAlbumStatusFilter(actionEl.dataset.status);
+        } else if (action === 'toggle-wishlist') {
+          e.stopPropagation();
+          toggleWishlistCard(actionEl.dataset.cardId);
+        } else if (action === 'toggle-wishlist-modal') {
+          toggleWishlistCard(actionEl.dataset.cardId);
+          openInspectModal(actionEl.dataset.cardId);
+        } else if (action === 'create-trade-offer') {
+          createTradeOffer();
+        } else if (action === 'cancel-trade') {
+          cancelTradeOffer(actionEl.dataset.tradeId);
+        } else if (action === 'accept-trade') {
+          acceptTradeOffer(actionEl.dataset.tradeId);
+        } else if (action === 'refresh-trades') {
+          renderTradesTab();
+          showToast('Bacheca scambi aggiornata!', 'info');
+        } else if (action === 'discard-one-dup') {
+          discardSingleDuplicate(actionEl.dataset.cardId);
+        } else if (action === 'discard-all-dups') {
+          discardAllDuplicates();
+        } else if (action === 'auto-lineup') {
+          autoBestLineup();
+        } else if (action === 'clear-lineup') {
+          clearLineup();
+        } else if (action === 'select-lineup-slot') {
+          selectLineupSlot(actionEl.dataset.slot);
+        } else if (action === 'remove-lineup-slot') {
+          removeLineupSlot(actionEl.dataset.slot);
+        } else if (action === 'assign-player-slot') {
+          assignPlayerToLineup(actionEl.dataset.cardId);
+        } else if (action === 'select-tactic') {
+          setMatchTactic(actionEl.dataset.tactic);
+        } else if (action === 'play-match') {
+          startTacticalMatch();
+        } else if (action === 'resolve-halftime') {
+          resolveHalftimeChoice(actionEl.dataset.choice);
+        } else if (action === 'refresh-leaderboard') {
+          renderLeaderboard();
+          showToast('Classifica live aggiornata!', 'info');
+        } else if (action === 'view-user-collection') {
+          openUserCollectionModal(actionEl.dataset.userId);
+        } else if (action === 'close-user-collection') {
+          if (e.target === document.getElementById('user-collection-modal') || e.target.closest('button[data-action="close-user-collection"]')) {
+            closeUserCollectionModal();
+          }
+        } else if (action === 'propose-trade-for-card') {
+          const targetCardId = actionEl.dataset.cardId;
+          closeUserCollectionModal();
+          switchTab('trades');
+          const reqSelect = document.getElementById('trade-request-select');
+          if (reqSelect) reqSelect.value = targetCardId;
+          showToast('Scegli la carta che vuoi offrire in cambio e clicca "Pubblica Offerta"!', 'info');
+        } else if (action === 'inspect-card') {
+          openInspectModal(actionEl.dataset.cardId);
+        } else if (action === 'close-inspect') {
+          if (e.target === document.getElementById('card-inspect-modal') || e.target.closest('button[data-action="close-inspect"]')) {
+            closeInspectModal();
+          }
+        } else if (action === 'close-admin') {
+          if (e.target === document.getElementById('admin-secret-modal') || e.target.closest('button[data-action="close-admin"]')) {
+            closeAdminSecretModal();
+          }
+        } else if (action === 'verify-admin-password') {
+          verifyAdminPassword();
+        } else if (action === 'toggle-infinite-credits') {
+          toggleInfiniteCredits();
+        } else if (action === 'admin-sim-next-day') {
+          dayOffsetForTesting += 1;
+          renderWeeklyPass();
+          renderMissionsTab();
+          showToast(`Simulato avanzamento di +1 Giorno (Giorno #${getCurrentDayNumber()}).`, 'info');
+        } else if (action === 'admin-sim-skip-day') {
+          dayOffsetForTesting += 2;
+          evaluatePassStreakIntegrity(true);
+          renderWeeklyPass();
+          renderMissionsTab();
+        } else if (action === 'admin-save-photo-url') {
+          const cardId = document.getElementById('admin-photo-card-select').value;
+          const urlVal = document.getElementById('admin-photo-url-input').value.trim();
+          if (!cardId || !urlVal) {
+            showToast('Seleziona un giocatore e incolla un URL immagine valido!', 'error');
+            return;
+          }
+          saveCustomCardPhoto(cardId, urlVal);
+          renderAlbum();
+          renderLineupSection();
+          showToast('URL foto salvato per il giocatore!', 'success');
+        } else if (action === 'admin-remove-photo') {
+          const cardId = document.getElementById('admin-photo-card-select').value;
+          if (!cardId) {
+            showToast('Seleziona un giocatore per rimuovere la foto!', 'error');
+            return;
+          }
+          saveCustomCardPhoto(cardId, null);
+          renderAlbum();
+          renderLineupSection();
+          showToast('Foto personalizzata rimossa.', 'info');
+        } else if (action === 'admin-global-reset') {
+          forceGlobalResetFromAdmin();
+        }
+      });
     }
 
-    bootstrapApp();
+    initApp();
   </script>
 </body>
 </html>
