@@ -169,7 +169,7 @@
     }
 
 /* =========================================================
-       7. LIMITED EDITION FULL-ART (DEFINITIVO)
+       7. LIMITED EDITION FULL-ART (SOLO ILLUSTRAZIONE + STATS)
        ========================================================= */
     .rarity-limited {
       background: linear-gradient(135deg, #fef08a 0%, #d97706 30%, #fef3c7 50%, #b45309 75%, #fde047 100%) !important;
@@ -185,10 +185,10 @@
       padding: 10px !important;
       display: flex !important;
       flex-direction: column !important;
-      justify-content: space-between !important;
+      justify-content: flex-end !important; /* Spinge le stats in basso */
     }
 
-    /* Sblocca SOLO i contenitori dell'immagine, lasciando intatte le stats */
+    /* Sblocca i contenitori interni per l'immagine full-art */
     .rarity-limited .card-inner > div:not(:last-child),
     .rarity-limited .card-inner > div:not(:last-child) div {
       position: static !important;
@@ -210,61 +210,55 @@
       z-index: 1 !important;
     }
 
-    /* Sfumatura scura in alto e in basso per far leggere bene 99, Nome e Stats */
+    /* Leggera sfumatura nera solo in basso dietro le stats */
     .rarity-limited .card-inner::before {
       content: "";
       position: absolute;
       inset: 0;
       background: linear-gradient(
         180deg,
-        rgba(0, 0, 0, 0.78) 0%,
-        rgba(0, 0, 0, 0.15) 24%,
-        rgba(0, 0, 0, 0.05) 46%,
-        rgba(9, 9, 11, 0.92) 66%,
-        rgba(9, 9, 11, 0.99) 100%
+        rgba(0, 0, 0, 0) 60%,
+        rgba(9, 9, 11, 0.75) 85%,
+        rgba(9, 9, 11, 0.95) 100%
       );
       z-index: 2;
       pointer-events: none;
     }
 
-    /* Porta tutti i blocchi di testo sopra l'immagine e la sfumatura */
-    .rarity-limited .card-inner > * {
-      position: relative !important;
-      z-index: 3 !important;
-    }
-
-    /* Badge "LIMITED 99" in alto a destra ben visibile */
-    .rarity-limited .card-inner > div:first-child span:last-child,
-    .rarity-limited .card-inner > div:first-child div:last-child {
-      background: linear-gradient(90deg, #f59e0b 0%, #fef08a 50%, #f59e0b 100%) !important;
-      color: #09090b !important;
-      font-weight: 900 !important;
-      padding: 2px 7px !important;
-      border-radius: 5px !important;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
-    }
-
-    /* Ombra netta sui testi per non farli confondere con la maglia */
+    /* NASCONDE intestazione in alto, nome, squadra, ruolo e numero carta */
+    .rarity-limited .card-inner > div:first-child,
     .rarity-limited .card-inner h3,
     .rarity-limited .card-inner p,
-    .rarity-limited .card-inner span {
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 1) !important;
+    .rarity-limited .card-inner > div:last-child > div:not(.grid),
+    .rarity-limited .card-inner span:not(.grid span) {
+      display: none !important;
     }
 
-    /* Box Statistiche pulito senza doppio bordo su REG */
+    /* Mantiene visibile SOLO il contenitore delle stats in basso */
+    .rarity-limited .card-inner > div:last-child {
+      position: relative !important;
+      z-index: 3 !important;
+      width: 100% !important;
+    }
+
+    /* Box Statistiche ATT / DIF / TIR / REG */
     .rarity-limited .card-inner .grid {
-      background: rgba(12, 12, 16, 0.88) !important;
+      display: grid !important;
+      background: rgba(12, 12, 16, 0.85) !important;
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
-      border: 1px solid rgba(250, 204, 21, 0.5) !important;
+      border: 1px solid rgba(250, 204, 21, 0.55) !important;
       border-radius: 10px !important;
       padding: 6px 4px !important;
-      margin-top: 6px !important;
     }
     .rarity-limited .card-inner .grid > div {
       background: transparent !important;
       border: none !important;
       box-shadow: none !important;
+    }
+    .rarity-limited .card-inner .grid span {
+      display: block !important;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 1) !important;
     }
 
     /* Disattiva etichette extra e barra argento */
