@@ -1224,109 +1224,32 @@
     </div>
   </div>
 
-  <!-- =========================================================
-       MODAL SEGRETO ADMIN (CTRL + SHIFT + A -> "bananabella")
-       ========================================================= -->
-  <div id="admin-secret-modal" data-action="close-admin" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-[#15203b] border-2 border-amber-400/70 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl my-auto">
-      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-400/40">
-            <i class="fa-solid fa-terminal"></i>
-          </div>
-          <div>
-            <h3 class="font-display text-2xl font-bold uppercase text-white leading-none">Console Admin LNP v7</h3>
-            <span class="text-[10px] text-slate-400">Accesso riservato (Ctrl + Shift + A)</span>
-          </div>
+ <!-- =========================================================
+     MODAL ADMIN (Sbloccato automaticamente per account autorizzati)
+     ========================================================= -->
+<div id="admin-secret-modal" data-action="close-admin" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-[#15203b] border-2 border-amber-400/70 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl my-auto">
+    <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-400/40">
+          <i class="fa-solid fa-terminal"></i>
         </div>
-        <button type="button" data-action="close-admin" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
-          <i class="fa-solid fa-xmark pointer-events-none"></i>
-        </button>
-      </div>
-
-      <!-- Step 1: Inserimento Password -->
-      <div id="admin-login-box" class="space-y-3">
-        <label for="admin-password-input" class="block text-xs font-bold text-slate-300">
-          Inserisci la password segreta per sbloccare i controlli:
-        </label>
-        <input id="admin-password-input" type="password" placeholder="Password..."
-               class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none" />
-        <button type="button" data-action="verify-admin-password" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm transition active:scale-95">
-          Sblocca Pannello Admin
-        </button>
-      </div>
-
-      <!-- Step 2: Controlli Sbloccati -->
-      <div id="admin-controls-box" class="hidden space-y-4">
-        <div class="bg-slate-900/90 border border-slate-700 rounded-xl p-3.5 flex items-center justify-between">
-          <div>
-            <span class="block text-xs font-extrabold text-white">Crediti Infiniti Temporanei (∞)</span>
-            <span class="text-[11px] text-slate-400">Attivi solo in questa sessione senza toccare il saldo salvato</span>
-          </div>
-          <button type="button" id="btn-toggle-inf-credits" data-action="toggle-infinite-credits" class="px-3.5 py-2 rounded-xl font-extrabold text-xs transition active:scale-95 bg-emerald-600 text-white">
-            ATTIVA ∞
-          </button>
-        </div>
-
-        <!-- Strumenti Test Serie Consecutiva Pass Settimanale -->
-        <div class="bg-slate-900/90 border border-slate-700 rounded-xl p-3.5 space-y-2.5">
-          <span class="block text-xs font-extrabold text-amber-300">
-            <i class="fa-solid fa-calendar-days mr-1"></i> Test Serie Consecutiva Pass Settimanale
-          </span>
-          <div class="grid grid-cols-2 gap-2">
-            <button type="button" data-action="admin-sim-next-day" class="py-2 px-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] transition active:scale-95">
-              +1 Giorno Consecutivo
-            </button>
-            <button type="button" data-action="admin-sim-skip-day" class="py-2 px-2.5 rounded-lg bg-rose-700 hover:bg-rose-600 text-white font-bold text-[11px] transition active:scale-95">
-              Salta 1 Giorno (Reset)
-            </button>
-          </div>
-        </div>
-
-        <!-- Gestione Foto Reali Giocatori (Solo Admin) -->
-        <div class="bg-slate-900/90 border border-cyan-500/40 rounded-xl p-3.5 space-y-2.5">
-          <span class="block text-xs font-extrabold text-cyan-300">
-            <i class="fa-solid fa-camera mr-1"></i> Gestione Foto Ufficiali Giocatori
-          </span>
-          <p class="text-[11px] text-slate-400">
-            Seleziona una figurina (oppure cliccaci sopra direttamente nell'Album) e inserisci l'URL o un file:
-          </p>
-          <select id="admin-photo-card-select" class="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-lg px-2.5 py-2 focus:outline-none focus:border-cyan-400">
-            <option value="">Seleziona giocatore/figurina...</option>
-          </select>
-          <div class="flex gap-2">
-            <input id="admin-photo-url-input" type="url" placeholder="Incolla URL foto (https://...)" class="flex-1 bg-slate-950 border border-slate-700 text-white text-xs rounded-lg px-2.5 py-2 focus:outline-none focus:border-cyan-400" />
-            <button type="button" data-action="admin-save-photo-url" class="px-3 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition active:scale-95">
-              Salva URL
-            </button>
-          </div>
-          <div class="flex items-center justify-between gap-2 pt-1">
-            <label class="flex-1 cursor-pointer py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-center text-[11px] font-bold text-slate-200 transition">
-              <i class="fa-solid fa-upload mr-1 text-cyan-400"></i> Carica File Foto Locale
-              <input id="admin-photo-file-input" type="file" accept="image/*" class="hidden" />
-            </label>
-            <button type="button" data-action="admin-remove-photo" class="py-2 px-2.5 rounded-lg bg-rose-900/70 hover:bg-rose-800 text-rose-200 font-bold text-[11px] border border-rose-700/60 transition active:scale-95">
-              Rimuovi
-            </button>
-          </div>
-        </div>
-
-        <!-- Reset Globale di Tutte le Carte e Tutti gli Account -->
-        <div class="bg-rose-950/50 border border-rose-500/50 rounded-xl p-3.5 space-y-2">
-          <span class="block text-xs font-extrabold text-rose-300">
-            <i class="fa-solid fa-radiation mr-1"></i> Reset Completo Carte & Account
-          </span>
-          <p class="text-[11px] text-slate-300">
-            Azzera tutte le collezioni, gli scambi aperti, i profili Discord e la classifica live.
-          </p>
-          <button type="button" data-action="admin-global-reset" class="w-full py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs transition active:scale-95">
-            Resetta Tutte le Carte e Tutti gli Account
-          </button>
+        <div>
+          <h3 class="font-display text-2xl font-bold uppercase text-white leading-none">Console Admin LNP v7</h3>
+          <span class="text-[10px] text-slate-400">Account Admin Verificato</span>
         </div>
       </div>
+      <button type="button" data-action="close-admin" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+        <i class="fa-solid fa-xmark pointer-events-none"></i>
+      </button>
+    </div>
+
+    <!-- Controlli Admin -->
+    <div id="admin-controls-box" class="space-y-4">
+      <!-- ... lascia qui tutti i tuoi bottoni (Crediti ∞, Foto Giocatori, Reset, ecc.) ... -->
     </div>
   </div>
-
+</div>
   <!-- FOOTER -->
   <footer class="border-t border-slate-800/80 bg-[#080e21] py-4 px-4 text-center text-xs text-slate-500 mt-10">
     LNP Serie A2 2026/27 - Album & Pack Opener v7 • Multi-Utente Discord • Sync Live • 20 Squadre Ufficiali (372 Figurine • 18 Limited 99).
